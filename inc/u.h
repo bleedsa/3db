@@ -1,0 +1,41 @@
+#ifndef __3DB_U_H__
+#define __3DB_U_H__
+
+#include <cctype>
+#include <cstdint>
+#include <string>
+#include <format>
+#include <iostream>
+
+#define Z(x) (sizeof(x))
+#define inl __attribute__((always_inline)) inline
+#define CASE(h,b) case h: { b; break; }
+
+#define LOCK(x) (std::lock_guard<std::mutex>(x))
+
+#define println(f...) {auto _x=std::format(f);std::cout<<_x<<std::endl;}
+#define fatal(f...) {auto _x=std::format(f);std::cerr<<_x<<std::endl;exit(-1);}
+
+using u8 = uint8_t;
+using u16 = uint16_t;
+using u32 = uint32_t;
+using u64 = uint64_t;
+
+using i8 = int8_t;
+using i16 = int16_t;
+using i32 = int32_t;
+using i64 = int64_t;
+using I = i32;
+
+using f32 = float;
+using f64 = double;
+using F = double;
+
+using S = size_t;
+
+namespace Three {
+	void init();
+	void deinit();
+}
+
+#endif
