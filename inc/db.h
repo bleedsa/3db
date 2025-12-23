@@ -21,22 +21,24 @@ namespace Db {
 		char *name;
 		EntTy ty;
 		union {
-			i32 i;
-			S z;
-			f32 f;
-			f64 d;
+			i32 i; /* Int */
+			S z;   /* Sz */
+			f32 f; /* Flt */
+			f64 d; /* Dbl */
 		};
 
 		~Ent();
 		Ent(const Ent &x);
 		const Ent &operator=(const Ent &x);
 
+		/* basic Ent constructors */
 		#define EntBasic(T) Ent(const char *name, EntTy ty, T x)
 		EntBasic(i32);
 		EntBasic(S);
 		EntBasic(f32);
 		EntBasic(f64);
 
+		/* entry constructors with no EntTy parameter */
 		#define EntNoTyp(T) Ent(const char *name, T x)
 		EntNoTyp(i32);
 		EntNoTyp(S);
@@ -47,9 +49,16 @@ namespace Db {
 	extern std::vector<Ent> ents;
 	extern std::mutex mut;
 
-	void push_ent(Ent x);
+	/* push a raw entry to the database */
+	inl auto push_ent(Ent x) -> void {
+		auto G = LOCK(mut);
+		ents.push_back(x);
+	}
 
-	template<typename X> inl void push_ent(const char *name, X x) {
+	/* push an entry onto the db and figure out the type based on the
+	 * value type */
+	template<typename X>
+	inl void push_ent(const char *name, X x) {
 		auto G = LOCK(mut);
 		ents.push_back(Ent(name, x));
 	}

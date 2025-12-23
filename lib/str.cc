@@ -21,12 +21,14 @@ namespace Str::Interns {
 		delete[] ptr;
 	}
 
+	/* resize table height */
 	void reZ() {
 		if (len >= cap) {
 			auto G = LOCK(mut);
 			cap *= 2;
 			auto N = new u8*[cap];
-			memmove(N, ptr, Z(u8*)*cap);
+			memcpy(N, ptr, Z(u8*)*(cap/2));
+			delete[] ptr;
 			ptr = N;
 		}
 	}
@@ -45,14 +47,18 @@ namespace Str::Interns {
 		heap[L] = 0;
 
 		auto G = LOCK(mut);
-		ptr[len++] = heap;
-		return len-1;
+		L = len++;
+		ptr[L] = heap;
+		return L;
 	}
 
 	/* find the index of a string in the interned db */
 	inl auto fnd(u8 *str) -> std::optional<S> {
 		for (S i = 0; i < len; i++) {
-			if (strcmp((char*)str, (char*)ptr[i])==0) return i;
+			if (strcmp((char*)str, (char*)ptr[i])==0) {
+				putc('0' + i, stdout);
+				return i;
+			}
 		}
 
 		return {};

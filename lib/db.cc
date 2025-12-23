@@ -37,7 +37,8 @@ EntBasicImpl(f64,d);
 
 #define EntNoTypImpl(X,T,f) \
 	Db::Ent::Ent(const char *name, X x) : ty{T}, f{x} { \
-		auto p = Str::Interns::ptr[Str::Interns::add((u8*)name)]; \
+		auto i = Str::Interns::add((u8*)name); \
+		auto p = Str::Interns::ptr[i]; \
 		this->name = (char*)p; \
 	}
 EntNoTypImpl(i32,Int,i);
@@ -47,9 +48,5 @@ EntNoTypImpl(f64,Dbl,d);
 
 namespace Db {
 	std::mutex mut;
-	auto ents = std::vector<Ent>();
-
-	void push_ent(Ent x) {
-		ents.push_back(x);
-	}
+	std::vector<Ent> ents;
 }

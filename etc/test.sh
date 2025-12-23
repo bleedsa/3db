@@ -5,8 +5,8 @@ for f in o/run/*.com; do
 	R="`$f`"
 	E="`cat run/"$b.txt"`"
 	if [[ "$R" == "$E" ]]; then
-		printf "%s: \e[0;32msuccess\e[0;0m\n\e[0;36m%s\e[0;0m\n" \
-			"$f" "$R"
+		printf "%s: \e[0;32msuccess\e[0;0m\n" \
+			"$f"
 	else
 		printf "$f:\n\e[0;31m$R\e[0;0m\n"
 	fi
