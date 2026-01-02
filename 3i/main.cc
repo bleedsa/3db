@@ -13,14 +13,22 @@
 struct addrinfo hints, *res;
 int sock;
 
-inl auto bind_host(char *port) -> void {
+inl auto connect_host(char *addr_port) -> void {
 	int ret;
+	const char *addr, *port;
+	auto r = Net::parse_addr_port(addr_port);
+	if (!r) fatal("failed to parse address: {}", r.error());
+	auto [addr_str, port_str] = *r;
+
+	addr = addr_str.c_str();
+	port = port_str.c_str();
 
 	/* get address info */
 	memset(&hints, 0, Z(hints));
 	hints.ai_family = AF_UNSPEC; /* v4 or v6 */
 	hints.ai_socktype = SOCK_STREAM;
-	if ((ret = getaddrinfo("0.0.0.0", port, &hints, &res)) != 0) {
+	println("getaddrinfo({}, {})", addr, port);
+	if ((ret = getaddrinfo(addr, port, &hints, &res)) != 0) {
 		fatal("getaddrinfo(): {}", gai_strerror(ret));
 	}
 
@@ -28,27 +36,16 @@ inl auto bind_host(char *port) -> void {
 	sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 	if (sock == -1) fatal("socket(): {}", strerror(errno));
 
-	/* bind to port */
-	ret = bind(sock, res->ai_addr, res->ai_addrlen);
-	if (ret == -1) fatal("bind(): {}", strerror(errno));
+	/* make connection */
+	ret = connect(sock, res->ai_addr, res->ai_addrlen);
+	if (ret < 0) fatal("connect(): {}", strerror(errno));
 }
 
 int main(int argc, char **argv) {
-	int ret, fd;
-	struct sockaddr_storage them;
-	socklen_t addrZ = Z(them);
+	if (argc < 2) fatal("usage: {} [addr]", argv[0]);
 
-	if (argc < 2) fatal("usage: {} [port]", argv[0]);
-
-	bind_host(argv[1]);
+	connect_host(argv[1]);
 	Three::init();
-
-	ret = listen(sock, 10);
-	if (ret == -1) fatal("listen(): {}", strerror(errno));
-
-	while (true) {
-		fd = accept(sock, (struct sockaddr*)&them, &addrZ);
-	}
 
 	Three::deinit();
 }

@@ -4,12 +4,11 @@
 
 int main() {
 	char *n;
-	int r;
 
 	Three::init();
 
 	for (S i = 0; i < 22222; i++) {
-		r = asprintf(&n, ".%zu", i);
+		asprintf(&n, ".%zu", i);
 		Db::push_ent(n, i);
 		free(n);
 	}

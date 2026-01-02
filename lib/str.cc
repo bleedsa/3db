@@ -24,12 +24,13 @@ namespace Str::Interns {
 	/* resize table height */
 	void reZ() {
 		if (len >= cap) {
+			auto N = new u8*[cap*2];
+			memmove(N, ptr, Z(u8*)*cap);
+
 			auto G = LOCK(mut);
-			cap *= 2;
-			auto N = new u8*[cap];
-			memcpy(N, ptr, Z(u8*)*(cap/2));
 			delete[] ptr;
 			ptr = N;
+			cap *= 2;
 		}
 	}
 

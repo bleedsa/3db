@@ -6,13 +6,15 @@
 #include <string>
 #include <format>
 #include <iostream>
+#include <expected>
 
 #define Z(x) (sizeof(x))
 #define inl __attribute__((always_inline)) inline
-#define CASE(h,b) case h: { b; break; }
+#define CASE(h,b...) case h: { b; break; }
 
 #define LOCK(x) (std::lock_guard<std::mutex>(x))
 
+#define err_fmt(f...) (std::unexpected(std::format(f)))
 #define println(f...) {auto _x=std::format(f);std::cout<<_x<<std::endl;}
 #define fatal(f...) {auto _x=std::format(f);std::cerr<<_x<<std::endl;exit(-1);}
 
@@ -32,6 +34,9 @@ using f64 = double;
 using F = double;
 
 using S = size_t;
+
+template<typename X>
+using R = std::expected<X, std::string>;
 
 namespace Three {
 	void init();

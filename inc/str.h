@@ -7,9 +7,15 @@
 
 namespace Str {
 	namespace Interns {
-		extern u8 **ptr;
-		extern S cap, len;
 		extern std::mutex mut;
+		/* the matrix of strings */
+		extern u8 **ptr;
+		/* static allocation tracking */
+		extern S cap, len;
+		/* refcounting */
+		extern S *refs;
+		/* allocs */
+		extern S refs_cap, refs_len;
 
 		void init();
 		void deinit();
