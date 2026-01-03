@@ -3,19 +3,9 @@
 
 /* empty with caps of 16 */
 Asm::Asm::Asm()
-	: inL{0}, in_cap{16}, bodL{0}, bod_cap{16}
+	: start{0}, inL{0}, in_cap{16}, bodL{0}, bod_cap{16}
 	, ins{mk<Bc::In>(in_cap)}, bods{mk<VM::Bod>(bod_cap)}
 {}
-
-/* construct from a raw buffer */
-Asm::Asm::Asm(u8 *buf) {
-	u32 *u32s;
-
-	/* deconstruct the header */
-	u32s = (u32*)buf;
-	inL = u32s[0],  in_cap = u32s[1];
-	bodL = u32s[2], bod_cap = u32s[2];
-}
 
 /* copy Asm y into x */
 inl auto Asm_cpy(Asm::Asm *x, Asm::Asm *y) -> void {

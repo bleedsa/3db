@@ -31,14 +31,14 @@ auto Net::send_Asm(int sock, Asm::Asm *x) -> char* {
 	int sent;
 
 	/* calc the buffer size */
-	headZ = Z(u32)*2 /* header values */;
+	headZ = Z(u32)*3; /* header values */
 	bodyZ = (Z(Bc::In)*x->inL)+ (Z(VM::Bod)*x->bodL);
 	/* alloc */
 	buf = (u8*)malloc(headZ + bodyZ);
 
 	/* copy header */
 	u32s = (u32*)buf;
-	u32s[0] = x->inL, u32s[1] = x->bodL;
+	u32s[0] = x->start, u32s[1] = x->inL, u32s[2] = x->bodL;
 
 	/* send the header */
 	std::cout << "sending header...";
@@ -81,8 +81,9 @@ auto Net::recv_Asm(int sock, Asm::Asm *x) -> char* {
 	}
 
 	/* copy the values */
-	x->inL = head[0],    x->bodL = head[1];
-	x->in_cap = head[0], x->bod_cap = head[1];
+	x->start = head[0];
+	x->inL = head[1],    x->bodL = head[2];
+	x->in_cap = head[1], x->bod_cap = head[2];
 
 	/* alloc the body */
 	bytes = (Z(Bc::In)*x->inL) + (Z(VM::Bod)*x->bodL);

@@ -82,6 +82,8 @@ int main(int argc, char **argv) {
 			auto b = &x.bods[i];
 			std::cout << b->vars << ' ' << b->start << std::endl;
 		}
+
+		x.exe_body(x.start);
 		
 		close(fd);
 	}

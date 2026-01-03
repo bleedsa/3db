@@ -4,6 +4,7 @@
 #include <db.h>
 #include <bc.h>
 #include <vm.h>
+#include <Asm.h>
 
 struct Z_t {
 	const char *name;
@@ -17,7 +18,7 @@ struct Z_t {
 int main() {
 	auto zs = {
 		Zof(Db::EntTy), Zof(Db::Ent), Zof(Q::Q), Zof(Bc::In),
-		Zof(VM::Bod),
+		Zof(VM::Bod), Zof(Asm::Asm),
 	};
 	for (auto &z : zs) {
 		std::cout << z.name << " " << z.size << std::endl;

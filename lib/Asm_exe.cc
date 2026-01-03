@@ -1,29 +1,28 @@
 #include <Asm.h>
 
-inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> bool {
+inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	switch (in->ty) {
 	CASE(Bc::LITf32, s->push_back(Q::Q(in->f));)
-	default: return false;
+	default: return (char*)"unknown instruction";
 	}
-	return true;
+	return nullptr;
 }
 
 auto Asm::Asm::exe_body(S body) -> R<Q::Q> {
-	S i;
+	i64 i;
 	Bc::In *in;
 	VM::Bod *b;
 	std::vector<Q::Q> stk;
-	bool res;
+	char *err;
 	
 	b = &bods[body];
 
 	for (i = b->start, in = ins+i; i < inL && !in->is(Bc::RET); i++, in = ins+i) {
-		std::cout << (S)in->ty << std::endl;
-		if (!(res = exe_in(&stk, in))) {
-			return std::unexpected("failed to execute instruction");
+		if ((err = exe_in(&stk, in))) {
+			return err_fmt("'exe: {}", err);
 		}
 	}
 
-	auto r = stk[stk.size() - 1];
-	return r;
+	i = stk.size() - 1;
+	return i >= 0 ? stk[i] : Q::Q();
 }

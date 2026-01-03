@@ -8,7 +8,7 @@ int main() {
 	a.push_bod(VM::Bod(0, 0));
 
 	/* exe */
-	auto r = a.exe_body(0);
+	auto r = a.exe();
 	if (!r) {
 		std::cerr << r.error() << std::endl;
 		return -1;

@@ -14,6 +14,7 @@ namespace Asm {
 	 * work code.
 	 */
 	struct Asm {
+		u32 start; /* body to start execution on */
 		u32 inL, in_cap;   /* instr bounds */
 		u32 bodL, bod_cap; /* body bounds */
 		/* buffer of instructions */
@@ -22,7 +23,6 @@ namespace Asm {
 		VM::Bod *bods;
 
 		Asm();    /* empty with cap 16 */
-		Asm(u8*); /* construct out of a raw buffer */
 		~Asm();
 
 		Asm(const Asm &x);
@@ -35,6 +35,10 @@ namespace Asm {
 
 		/* execute instructions */
 		R<Q::Q> exe_body(S body);
+
+		inl auto exe() -> R<Q::Q> {
+			return exe_body(start);
+		}
 	};
 }
 

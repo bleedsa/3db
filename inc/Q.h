@@ -7,6 +7,7 @@
 
 namespace Q {
 	enum QTy {
+		QNil,
 		QInt,
 		QSz,
 		QFlt,
@@ -22,6 +23,7 @@ namespace Q {
 			f64 d;
 		};
 
+		inl Q()      : ty{QNil} {}
 		inl Q(i32 x) : ty{QInt}, i{x} {}
 		inl Q(S x)   : ty{QSz},  z{x} {}
 		inl Q(f32 x) : ty{QFlt}, f{x} {}

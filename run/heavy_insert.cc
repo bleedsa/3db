@@ -7,7 +7,7 @@ int main() {
 
 	Three::init();
 
-	for (S i = 0; i < 22222; i++) {
+	for (S i = 0; i < 2222; i++) {
 		asprintf(&n, ".%zu", i);
 		Db::push_ent(n, i);
 		free(n);
