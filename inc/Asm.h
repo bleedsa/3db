@@ -7,13 +7,15 @@
 
 namespace Asm {
 	/*
-	 * A structure containing bytecode asm. This has a flat repr that can be sent
-	 * over the network (see inc/net/Asm.h). 
-	 * NOTE: if you update any values within this struct, it will break network
-	 * code.
+	 * A structure containing bytecode asm. This has a flat repr that can be
+	 * sent over the network (see inc/net/Asm.h). 
+	 *
+	 * NOTE: if you update any values within this struct, it will break net-
+	 * work code.
 	 */
 	struct Asm {
-		u32 inL, in_cap, /* instr bounds */ bodL, bod_cap /* body bounds */;
+		u32 inL, in_cap;   /* instr bounds */
+		u32 bodL, bod_cap; /* body bounds */
 		/* buffer of instructions */
 		Bc::In *ins;
 		/* buffer of bodies */
@@ -30,6 +32,9 @@ namespace Asm {
 		void reZ();
 		void push_in(Bc::In x);
 		void push_bod(VM::Bod x);
+
+		/* execute instructions */
+		R<Q::Q> exe_body(S body);
 	};
 }
 

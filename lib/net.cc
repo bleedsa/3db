@@ -68,6 +68,8 @@ auto Net::send_Asm(int sock, Asm::Asm *x) -> char* {
 }
 
 auto Net::recv_Asm(int sock, Asm::Asm *x) -> char* {
+	x->~Asm();
+
 	int got;
 	u32 *head = mk<u32>(2);
 	S bytes;

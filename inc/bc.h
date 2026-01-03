@@ -6,7 +6,7 @@
 
 namespace Bc {
 	enum InTy {
-		NOP,
+		RET,
 		/* push literal objs */
 		LITi32, /* (i)     -- Q                 | create literal i32 */
 		LITSz,  /* (z)     -- Q                 | create literal S */
@@ -35,6 +35,8 @@ namespace Bc {
 			f64 d;
 		};
 
+		inl In() : ty{RET} {}
+
 		In(InTy ty, I x);
 		In(InTy ty, S x);
 		In(InTy ty, f32 x);
@@ -47,6 +49,10 @@ namespace Bc {
 
 		In(const In &x);
 		const In &operator=(const In &x);
+
+		inl bool is(InTy t) {
+			return ty == t;
+		}
 	};
 }
 

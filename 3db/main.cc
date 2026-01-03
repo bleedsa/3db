@@ -3,7 +3,8 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <errno.h>
+#include <cerrno>
+#include <mutex>
 
 #include <u.h>
 #include <str.h>
@@ -14,6 +15,7 @@
 
 struct addrinfo hints, *res;
 int sock;
+std::mutex sock_mut;
 
 inl auto bind_host(char *port) -> void {
 	int ret;
@@ -51,6 +53,7 @@ int main(int argc, char **argv) {
 
 	while (true) {
 		auto x = Asm::Asm();
+		auto G = LOCK(sock_mut);
 
 		fd = accept(sock, (struct sockaddr*)&them, &addrZ);
 		if (fd == -1) {
@@ -64,12 +67,14 @@ int main(int argc, char **argv) {
 			continue;
 		}
 
-		std::cout << "inL: " << x.inL << std::endl;
-		std::cout << "bodL: " << x.bodL << std::endl;
+		std::cout << "instructions: " << x.inL << '(' << x.in_cap << ')'
+		       	<< std::endl;
+		std::cout << "bodies: " << x.bodL << '(' << x.bod_cap << ')'
+			<< std::endl;
 
 		for (S i = 0; i < x.inL; i++) {
 			auto in = &x.ins[i];
-			std::cout << (S)in->ty;
+			std::cout << (S)in->ty << ' ';
 		}
 		std::cout << std::endl;
 
