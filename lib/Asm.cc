@@ -7,6 +7,16 @@ Asm::Asm::Asm()
 	, ins{mk<Bc::In>(in_cap)}, bods{mk<VM::Bod>(bod_cap)}
 {}
 
+/* construct from a raw buffer */
+Asm::Asm::Asm(u8 *buf) {
+	u32 *u32s;
+
+	/* deconstruct the header */
+	u32s = (u32*)buf;
+	inL = u32s[0],  in_cap = u32s[1];
+	bodL = u32s[2], bod_cap = u32s[2];
+}
+
 /* copy Asm y into x */
 inl auto Asm_cpy(Asm::Asm *x, Asm::Asm *y) -> void {
 	/* copy counters */
@@ -33,6 +43,7 @@ Asm::Asm::~Asm() {
 	free(bods);
 }
 
+/* resize buffers if the len exceeds the cap */
 auto Asm::Asm::reZ() -> void {
 	if (inL >= in_cap) {
 		in_cap *= 2;
@@ -46,5 +57,11 @@ auto Asm::Asm::reZ() -> void {
 
 auto Asm::Asm::push_in(Bc::In x) -> void {
 	reZ();
+	/* memmove for simd */
 	memmove(ins+inL++, (void*)&x, Z(Bc::In));
+}
+
+auto Asm::Asm::push_bod(VM::Bod x) -> void {
+	reZ();
+	memmove(bods+bodL++, (void*)&x, Z(VM::Bod));
 }

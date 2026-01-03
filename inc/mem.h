@@ -3,6 +3,7 @@
 
 #include <u.h>
 
+/* make a buffer of X with length L */
 template<typename X>
 inl auto mk(S L) -> X* {
 	auto ptr = malloc(Z(X)*L);
@@ -14,6 +15,7 @@ inl auto mk(S L) -> X* {
 	return (X*)ptr;
 }
 
+/* realloc buffer P with length L */
 template<typename X>
 inl auto remk(X *P, S L) -> X* {
 	P = (X*)realloc((void*)P, Z(X)*L);

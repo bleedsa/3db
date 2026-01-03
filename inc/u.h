@@ -18,6 +18,12 @@
 #define println(f...) {auto _x=std::format(f);std::cout<<_x<<std::endl;}
 #define fatal(f...) {auto _x=std::format(f);std::cerr<<_x<<std::endl;exit(-1);}
 
+/* fuck you */
+#define A_err(f...) ({ \
+	auto _x=std::format(f); \
+	(char*)Str::Interns::ptr[Str::Interns::add((u8*)_x.c_str())]; \
+})
+
 using u8 = uint8_t;
 using u16 = uint16_t;
 using u32 = uint32_t;

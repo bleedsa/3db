@@ -10,13 +10,6 @@ Bc::In::In(S x)   : ty{Bc::LITSz},  z{x} {}
 Bc::In::In(f32 x) : ty{Bc::LITf32}, f{x} {}
 Bc::In::In(f64 x) : ty{Bc::LITf64}, d{x} {}
 
-Bc::In::~In() {
-	switch (ty) {
-	default:
-		break;
-	}
-}
-
 #define IN_CLN() { \
 	ty=x.ty; \
 	switch (ty) { \

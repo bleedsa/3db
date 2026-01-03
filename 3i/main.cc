@@ -9,6 +9,8 @@
 #include <str.h>
 #include <db.h>
 #include <net.h>
+#include <Asm.h>
+#include <net/Asm.h>
 
 struct addrinfo hints, *res;
 int sock;
@@ -27,7 +29,6 @@ inl auto connect_host(char *addr_port) -> void {
 	memset(&hints, 0, Z(hints));
 	hints.ai_family = AF_UNSPEC; /* v4 or v6 */
 	hints.ai_socktype = SOCK_STREAM;
-	println("getaddrinfo({}, {})", addr, port);
 	if ((ret = getaddrinfo(addr, port, &hints, &res)) != 0) {
 		fatal("getaddrinfo(): {}", gai_strerror(ret));
 	}
@@ -47,5 +48,13 @@ int main(int argc, char **argv) {
 	connect_host(argv[1]);
 	Three::init();
 
+	auto a = Asm::Asm();
+	for (f32 i = 0.0f; i < 64.0f; i++) a.push_in(Bc::In(i));
+	a.push_bod(VM::Bod(0, 0));
+
+	auto err = Net::send_Asm(sock, &a);
+	if (err) std::cerr << err << std::endl;
+
+	close(sock);
 	Three::deinit();
 }

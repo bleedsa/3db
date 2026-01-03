@@ -9,6 +9,8 @@
 #include <str.h>
 #include <db.h>
 #include <net.h>
+#include <Asm.h>
+#include <net/Asm.h>
 
 struct addrinfo hints, *res;
 int sock;
@@ -37,6 +39,7 @@ int main(int argc, char **argv) {
 	int ret, fd;
 	struct sockaddr_storage them;
 	socklen_t addrZ = Z(them);
+	char *err;
 
 	if (argc < 2) fatal("usage: {} [port]", argv[0]);
 
@@ -47,8 +50,26 @@ int main(int argc, char **argv) {
 	if (ret == -1) fatal("listen(): {}", strerror(errno));
 
 	while (true) {
+		auto x = Asm::Asm();
+
 		fd = accept(sock, (struct sockaddr*)&them, &addrZ);
+		if (fd == -1) {
+			std::cerr << strerror(errno) << std::endl;
+			continue;
+		}	
+
+		err = Net::recv_Asm(fd, &x);
+		if (err) {
+			std::cerr << err << std::endl;
+			continue;
+		}
+
+		std::cout << "inL: " << x.inL << std::endl;
+		std::cout << "bodL: " << x.bodL << std::endl;
+		
+		close(fd);
 	}
 
+	close(sock);
 	Three::deinit();
 }

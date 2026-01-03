@@ -43,7 +43,7 @@ namespace Bc {
 		In(S x);
 		In(f32 x);
 		In(f64 x);
-		~In();
+		inl ~In() {}
 
 		In(const In &x);
 		const In &operator=(const In &x);
