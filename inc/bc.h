@@ -33,6 +33,7 @@ namespace Bc {
 			S z;
 			f32 f;
 			f64 d;
+			char var[16];
 		};
 
 		inl In() : ty{RET} {}
@@ -54,6 +55,11 @@ namespace Bc {
 			return ty == t;
 		}
 	};
+
+	/* make a STORE instr */
+	inl auto mkSTORE(const char *str) -> In {
+		return In(STORE, Str::Interns::add((u8*)str));
+	}
 }
 
 #endif

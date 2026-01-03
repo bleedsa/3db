@@ -48,8 +48,7 @@ namespace Str::Interns {
 		heap[L] = 0;
 
 		auto G = LOCK(mut);
-		L = len++;
-		ptr[L] = heap;
+		ptr[len++] = heap;
 		return L;
 	}
 

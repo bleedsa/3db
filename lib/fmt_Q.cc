@@ -6,7 +6,7 @@ auto Fmt::Q(Q::Q *x) -> std::string {
 	std::stringstream ss;
 
 	switch (x->ty) {
-//	CASE(Q::QNil, ss<<"nil")
+	CASE(Q::QNil, ss<<"nil")
 	CASE(Q::QInt, ss<<x->i)
 	CASE(Q::QSz,  ss<<x->z)
 	CASE(Q::QFlt, ss<<x->f)

@@ -5,9 +5,9 @@ CXXFLAGS := -std=c++23 -fshort-enums \
 	    -Iinc
 
 ifndef REL
-	CXXFLAGS += -g -mdbg
+	CXXFLAGS += -g -mdbg -DDBG
 else
-	CXXFLAGS += -O3 -mtiny
+	CXXFLAGS += -O3
 endif
 
 ifdef NAT

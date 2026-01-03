@@ -24,6 +24,12 @@
 	(char*)Str::Interns::ptr[Str::Interns::add((u8*)_x.c_str())]; \
 })
 
+#ifdef DBG 
+#define dbg(x...) {x;}
+#else
+#define dbg(x...) {}
+#endif
+
 using u8 = uint8_t;
 using u16 = uint16_t;
 using u32 = uint32_t;
