@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 	Three::init();
 
 	auto a = Asm::Asm();
-	for (f32 i = 0.0f; i < 64.0f; i++) a.push_in(Bc::In(i));
+	for (f32 i = 0.0f; i < 128.0f; i++) a.push_in(Bc::In(i));
 	a.push_bod(VM::Bod(0, 0));
 
 	auto err = Net::send_Asm(sock, &a);

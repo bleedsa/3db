@@ -66,6 +66,17 @@ int main(int argc, char **argv) {
 
 		std::cout << "inL: " << x.inL << std::endl;
 		std::cout << "bodL: " << x.bodL << std::endl;
+
+		for (S i = 0; i < x.inL; i++) {
+			auto in = &x.ins[i];
+			std::cout << (S)in->ty;
+		}
+		std::cout << std::endl;
+
+		for (S i = 0; i < x.bodL; i++) {
+			auto b = &x.bods[i];
+			std::cout << b->vars << ' ' << b->start << std::endl;
+		}
 		
 		close(fd);
 	}

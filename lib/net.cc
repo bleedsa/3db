@@ -26,6 +26,8 @@ auto Net::send_Asm(int sock, Asm::Asm *x) -> char* {
 	S headZ, bodyZ;
 	u8 *buf;
 	u32 *u32s;
+	Bc::In *ins;
+	VM::Bod *bods;
 	int sent;
 
 	/* calc the buffer size */
@@ -46,19 +48,56 @@ auto Net::send_Asm(int sock, Asm::Asm *x) -> char* {
 	}
 	std::cout << "ok " << sent << std::endl;
 
+	/* copy the instructions */
+	ins = (Bc::In*)(buf+headZ);
+	for (S i = 0; i < x->inL; i++) ins[i] = x->ins[i];
+
+	/* copy the bodies */
+	bods = (VM::Bod*)(ins+x->inL);
+	for (S i = 0; i < x->bodL; i++) bods[i] = x->bods[i];
+
+	/* send the body */
+	std::cout << "sending body...";
+	sent = send(sock, (const void*)ins, bodyZ, 0);
+	if (sent == -1) {
+		return A_err("failed to send body: {}", strerror(errno));
+	}
+	std::cout << "ok " << sent << std::endl;
+
 	return nullptr;
 }
 
 auto Net::recv_Asm(int sock, Asm::Asm *x) -> char* {
 	int got;
 	u32 *head = mk<u32>(2);
+	S bytes;
+	u8 *body;
 
+	/* recv the head */
 	if ((got = recv(sock, (void*)head, Z(u32)*2, 0)) == -1) {
 		return A_err("failed to recv header: {}", strerror(errno));
 	}
 
+	/* copy the values */
 	x->inL = head[0],    x->bodL = head[1];
 	x->in_cap = head[0], x->bod_cap = head[1];
+
+	/* alloc the body */
+	bytes = (Z(Bc::In)*x->inL) + (Z(VM::Bod)*x->bodL);
+	body = mk<u8>(bytes);
+
+	/* recv the body */
+	if ((got = recv(sock, (void*)body, bytes, 0)) == -1) {
+		return A_err("failed to recv body: {}", strerror(errno));
+	}
+
+	/* copy the instructions */
+	x->ins = mk<Bc::In>(x->inL);
+	memcpy(x->ins, body, Z(Bc::In)*x->inL);
+
+	/* copy the bodies */
+	x->bods = mk<VM::Bod>(x->bodL);
+	memcpy(x->bods, (void*)(((Bc::In*)body)+x->inL), Z(VM::Bod)*x->bodL);
 
 	return nullptr;
 }
