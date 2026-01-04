@@ -3,6 +3,7 @@
 
 #include <str.h>
 #include <Q.h>
+#include <var.h>
 
 namespace Bc {
 	enum InTy {
@@ -33,7 +34,7 @@ namespace Bc {
 			S z;
 			f32 f;
 			f64 d;
-			char var[16];
+			var_t var;
 		};
 
 		inl In() : ty{RET} {}
@@ -42,6 +43,7 @@ namespace Bc {
 		In(InTy ty, S x);
 		In(InTy ty, f32 x);
 		In(InTy ty, f64 x);
+		In(InTy ty, const char *x);
 		In(I x);
 		In(S x);
 		In(f32 x);
@@ -55,11 +57,6 @@ namespace Bc {
 			return ty == t;
 		}
 	};
-
-	/* make a STORE instr */
-	inl auto mkSTORE(const char *str) -> In {
-		return In(STORE, Str::Interns::add((u8*)str));
-	}
 }
 
 #endif

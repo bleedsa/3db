@@ -5,6 +5,7 @@
 #include <string>
 
 #include <str.h>
+#include <bc.h>
 
 namespace Db {
 	enum EntTy {
@@ -17,8 +18,7 @@ namespace Db {
 	extern const char *EntTy_names[4];
 
 	struct Ent {
-		/* the name's index in Str::Interns */
-		char *name;
+		var_t name; 
 		EntTy ty;
 		union {
 			i32 i; /* Int */
@@ -32,14 +32,14 @@ namespace Db {
 		const Ent &operator=(const Ent &x);
 
 		/* basic Ent constructors */
-		#define EntBasic(T) Ent(const char *name, EntTy ty, T x)
+		#define EntBasic(T) Ent(var_t name, EntTy ty, T x)
 		EntBasic(i32);
 		EntBasic(S);
 		EntBasic(f32);
 		EntBasic(f64);
 
 		/* entry constructors with no EntTy parameter */
-		#define EntNoTyp(T) Ent(const char *name, T x)
+		#define EntNoTyp(T) Ent(var_t name, T x)
 		EntNoTyp(i32);
 		EntNoTyp(S);
 		EntNoTyp(f32);
@@ -58,10 +58,19 @@ namespace Db {
 	/* push an entry onto the db and figure out the type based on the
 	 * value type */
 	template<typename X>
-	inl void push_ent(const char *name, X x) {
+	inl void push_ent(var_t name, X x) {
 		auto G = LOCK(mut);
 		ents.push_back(Ent(name, x));
 	}
+
+	template<typename X>
+	inl void push_ent(const char *name, X x) {
+		auto G = LOCK(mut);
+		auto v = str_to_var(name);
+		ents.push_back(Ent(v, x));
+	}
+
+	std::optional<Ent*> get(var_t name);
 }	
 
 namespace Fmt {
