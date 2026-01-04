@@ -11,6 +11,7 @@ inl auto str_to_var(const char *y) -> var_t {
 	auto L = std::min(VARZ, strlen(y)+1);
 	memcpy(ptr, y, L);
 	memset(ptr+L, 0, VARZ-L);
+	ptr[L] = 0;
 	return *(var_t*)ptr;
 }
 

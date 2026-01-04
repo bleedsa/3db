@@ -6,6 +6,7 @@ Bc::In::In(InTy ty, f32 x) : ty{ty}, f{x} {}
 Bc::In::In(InTy ty, f64 x) : ty{ty}, d{x} {}
 
 Bc::In::In(InTy ty, const char *x) : ty{ty}, var{str_to_var(x)} {}
+Bc::In::In(InTy ty, var_t x) : ty{ty}, var{x} {}
 
 Bc::In::In(I x)   : ty{Bc::LITi32}, i{x} {}
 Bc::In::In(S x)   : ty{Bc::LITSz},  z{x} {}
@@ -32,6 +33,6 @@ Bc::In::In(const In &x) {
 }
 
 auto Bc::In::operator=(const In &x) -> const In& {
-	IN_CLN();
+	memcpy(this, &x, Z(Bc::In));
 	return *this;
 }

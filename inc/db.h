@@ -71,6 +71,11 @@ namespace Db {
 	}
 
 	std::optional<Ent*> get(var_t name);
+
+	inl auto get(const char *name) -> std::optional<Ent*> {
+		auto v = str_to_var(name);
+		return get(v);
+	}
 }	
 
 namespace Fmt {

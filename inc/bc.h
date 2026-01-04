@@ -44,6 +44,7 @@ namespace Bc {
 		In(InTy ty, f32 x);
 		In(InTy ty, f64 x);
 		In(InTy ty, const char *x);
+		In(InTy ty, var_t x);
 		In(I x);
 		In(S x);
 		In(f32 x);

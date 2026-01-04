@@ -83,7 +83,13 @@ int main(int argc, char **argv) {
 			std::cout << b->vars << ' ' << b->start << std::endl;
 		}
 
-		x.exe_body(x.start);
+		auto res = x.exe();
+		if (res) {
+			auto q = *res;
+			std::cout << Fmt::Q(&q) << std::endl;
+		} else {
+			std::cerr << res.error() << std::endl;
+		}
 		
 		close(fd);
 	}

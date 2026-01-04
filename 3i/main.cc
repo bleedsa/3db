@@ -49,8 +49,12 @@ int main(int argc, char **argv) {
 	Three::init();
 
 	auto a = Asm::Asm();
-	for (f32 i = 0.0f; i < 128.0f; i++) a.push_in(Bc::In(i));
+	auto v = str_to_var("float1");
 	a.push_bod(VM::Bod(0, 0));
+	a.push_in(Bc::In(1234.45f));
+	a.push_in(Bc::In(Bc::STORE, v));
+	a.push_in(Bc::In(Bc::LOAD, v));
+	a.push_in(Bc::In());
 
 	auto err = Net::send_Asm(sock, &a);
 	if (err) std::cerr << err << std::endl;
