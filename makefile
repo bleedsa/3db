@@ -1,17 +1,17 @@
 O := o
 CXX := ape/bin/cosmoc++
-CXXFLAGS := -std=c++23 -fshort-enums \
+CXXFLAGS := -std=gnu++23 -fshort-enums \
 	    -Wall -Wextra -Wno-unused-parameter \
 	    -Iinc
 
 ifndef REL
 	CXXFLAGS += -g -mdbg -DDBG
 else
-	CXXFLAGS += -O3
+	CXXFLAGS += -O3 -g -fsanitize=undefined
 endif
 
 ifdef NAT
-	CXX = clang++
+	CXX = g++
 else
 	CXXFLAGS += -mcosmo -mclang
 endif

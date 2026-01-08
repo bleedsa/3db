@@ -16,7 +16,7 @@ inl auto store_Q(std::vector<Q::Q> *s, Bc::In *in) -> void {
 	CASE(Q::QSz,  Db::push_ent(in->var, x.z))
 	CASE(Q::QFlt, Db::push_ent(in->var, x.f))
 	CASE(Q::QDbl, Db::push_ent(in->var, x.d))
-	default:
+	default: {}
 	}
 }
 

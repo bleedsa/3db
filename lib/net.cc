@@ -24,7 +24,7 @@ auto Net::parse_addr_port(char *x) -> R<std::tuple<std::string, std::string>> {
 
 auto Net::send_Asm(int sock, Asm::Asm *x) -> char* {
 	S headZ, bodyZ;
-	u8 *buf;
+	u8 *head, *body;
 	u32 *u32s;
 	Bc::In *ins;
 	VM::Bod *bods;
@@ -32,29 +32,30 @@ auto Net::send_Asm(int sock, Asm::Asm *x) -> char* {
 
 	/* calc the buffer size */
 	headZ = Z(u32)*3; /* header values */
-	bodyZ = (Z(Bc::In)*x->inL)+ (Z(VM::Bod)*x->bodL);
+	bodyZ = (Z(Bc::In)*x->inL) + (Z(VM::Bod)*x->bodL);
 	/* alloc */
-	buf = (u8*)malloc(headZ + bodyZ);
+	head = mk<u8>(headZ);
+	body = mk<u8>(bodyZ);
 
 	/* copy header */
-	u32s = (u32*)buf;
+	u32s = (u32*)head;
 	u32s[0] = x->start, u32s[1] = x->inL, u32s[2] = x->bodL;
 
 	/* send the header */
 	std::cout << "sending header...";
-	sent = send(sock, (const void*)buf, headZ, 0);
+	sent = send(sock, (const void*)head, headZ, 0);
 	if (sent == -1) {
 		return A_err("failed to send header: {}", strerror(errno));
 	}
 	std::cout << "ok " << sent << std::endl;
 
 	/* copy the instructions */
-	ins = (Bc::In*)(buf+headZ);
-	for (S i = 0; i < x->inL; i++) ins[i] = x->ins[i];
+	ins = (Bc::In*)body;
+	memcpy(ins, x->ins, Z(Bc::In)*x->inL);
 
 	/* copy the bodies */
 	bods = (VM::Bod*)(ins+x->inL);
-	for (S i = 0; i < x->bodL; i++) bods[i] = x->bods[i];
+	memcpy(bods, x->bods, Z(VM::Bod)*x->bodL);
 
 	/* send the body */
 	std::cout << "sending body " << '(' << bodyZ << ")...";
@@ -83,11 +84,9 @@ auto Net::recv_Asm(int sock, Asm::Asm *x) -> char* {
 	dbg(std::cout << "ok " << got << std::endl);
 
 	/* copy the values */
-	dbg(std::cout << "copy header values...");
 	x->start = head[0];
 	x->inL = head[1],    x->bodL = head[2];
 	x->in_cap = head[1], x->bod_cap = head[2];
-	dbg(std::cout << "ok" << std::endl);
 
 	/* alloc the body */
 	bytes = (Z(Bc::In)*x->inL) + (Z(VM::Bod)*x->bodL);
@@ -101,16 +100,12 @@ auto Net::recv_Asm(int sock, Asm::Asm *x) -> char* {
 	dbg(std::cout << "ok " << got << std::endl);
 
 	/* copy the instructions */
-	dbg(std::cout << "copy instructions...");
 	x->ins = mk<Bc::In>(x->inL);
 	memcpy(x->ins, body, Z(Bc::In)*x->inL);
-	dbg(std::cout << "ok" << std::endl);
 
 	/* copy the bodies */
-	dbg(std::cout << "copy bodies...");
 	x->bods = mk<VM::Bod>(x->bodL);
 	memcpy(x->bods, (void*)(((Bc::In*)body)+x->inL), Z(VM::Bod)*x->bodL);
-	dbg(std::cout << "ok" << std::endl);
 
 	return nullptr;
 }

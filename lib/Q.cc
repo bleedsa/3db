@@ -6,7 +6,7 @@ inl auto Q_cpy_val(Q::Q *x, Q::Q *y) -> void {
 	CASE(Q::QSz,  x->z=y->z)
 	CASE(Q::QFlt, x->f=y->f)
 	CASE(Q::QDbl, x->d=y->d)
-	default:
+	default: {}
 	}
 }
 

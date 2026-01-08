@@ -1,6 +1,8 @@
 #ifndef __3DB_VAR_H__
 #define __3DB_VAR_H__
 
+#include <cstring>
+
 #include <mem.h>
 
 typedef char var_t __attribute__((vector_size(16))); 

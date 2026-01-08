@@ -12,6 +12,8 @@
 #include <Asm.h>
 #include <net/Asm.h>
 
+__static_yoink("__die");
+
 struct addrinfo hints, *res;
 int sock;
 

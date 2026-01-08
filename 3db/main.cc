@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <cerrno>
 #include <mutex>
+#include <unistd.h>
 
 #include <u.h>
 #include <str.h>
