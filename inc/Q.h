@@ -14,6 +14,8 @@ namespace Q {
 		QDbl,
 	};
 
+	extern const char *QTy_short[5];
+
 	struct Q {
 		QTy ty;
 		union {
@@ -34,6 +36,11 @@ namespace Q {
 		Q(const Q &x);
 		const Q &operator=(const Q &x);
 	};
+
+	/* make a "dyad" identifier (two (u8)Qty mashed together) */
+	constexpr auto mkQTy_dyad(QTy x, QTy y) -> u16 {
+		return (x << 8) | y;
+	}
 }
 
 namespace Fmt {

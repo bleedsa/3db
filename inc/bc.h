@@ -21,10 +21,7 @@ namespace Bc {
 		MKTAB,  /* (x)     -- vars[x]:empty tab | new table at x */
 		GETCOL, /* (x) y   -- col of vars[x]@y  | get col y of x */
 		/* arithmetic */
-		ADDi32, /* ( ) x y -- x+y               | add 2 i32 */
-		ADDSz,  /* ( ) x y -- x+y               | add 2 S */
-		ADDf32, /* ( ) x y -- x+y               | add 2 f32 */
-		ADDf64, /* ( ) x y -- x+y               | add 2 f64 */
+		ADD,    /* ( ) x y -- x+y               | add 2 numbers */
 	};
 
 	struct In {
@@ -38,6 +35,7 @@ namespace Bc {
 		};
 
 		inl In() : ty{RET} {}
+		inl In(InTy ty) : ty{ty} {}
 
 		In(InTy ty, I x);
 		In(InTy ty, S x);

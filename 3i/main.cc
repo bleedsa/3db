@@ -53,7 +53,9 @@ int main(int argc, char **argv) {
 	auto a = Asm::Asm();
 	auto v = str_to_var("float1");
 	a.push_bod(VM::Bod(0, 0));
-	a.push_in(Bc::In(1234.45f));
+	a.push_in(Bc::In((S)1234));
+	a.push_in(Bc::In(1234.3));
+	a.push_in(Bc::In(Bc::POP));
 	a.push_in(Bc::In(Bc::STORE, v));
 	a.push_in(Bc::In(Bc::LOAD, v));
 	a.push_in(Bc::In());

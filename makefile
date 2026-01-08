@@ -7,7 +7,7 @@ CXXFLAGS := -std=gnu++23 -fshort-enums \
 ifndef REL
 	CXXFLAGS += -g -mdbg -DDBG
 else
-	CXXFLAGS += -O3 -g -fsanitize=undefined
+	CXXFLAGS += -O3
 endif
 
 ifdef NAT

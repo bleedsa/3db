@@ -1,5 +1,12 @@
 #include <Q.h>
 
+const char *Q::QTy_short[] = {
+	"i",
+	"z",
+	"f",
+	"d",
+};
+
 inl auto Q_cpy_val(Q::Q *x, Q::Q *y) -> void {
 	switch (y->ty) {
 	CASE(Q::QInt, x->i=y->i)
