@@ -13,6 +13,7 @@
 #include <net.h>
 #include <Asm.h>
 #include <net/Asm.h>
+#include <net/Q.h>
 
 struct addrinfo hints, *res;
 int sock;
@@ -43,6 +44,8 @@ int main(int argc, char **argv) {
 	struct sockaddr_storage them;
 	socklen_t addrZ = Z(them);
 	char *err;
+	Q::Q q;
+	R<Q::Q> res;
 
 	if (argc < 2) fatal("usage: {} [port]", argv[0]);
 
@@ -52,20 +55,20 @@ int main(int argc, char **argv) {
 	ret = listen(sock, 10);
 	if (ret == -1) fatal("listen(): {}", strerror(errno));
 
-	while (true) {
+	for (;;) {
 		auto x = Asm::Asm();
 		auto G = LOCK(sock_mut);
 
 		fd = accept(sock, (struct sockaddr*)&them, &addrZ);
 		if (fd == -1) {
 			std::cerr << strerror(errno) << std::endl;
-			continue;
+			goto end;
 		}	
 
 		err = Net::recv_Asm(fd, &x);
 		if (err) {
 			std::cerr << err << std::endl;
-			continue;
+			goto end;
 		}
 
 		std::cout << "instructions: " << x.inL << '(' << x.in_cap << ')'
@@ -84,14 +87,24 @@ int main(int argc, char **argv) {
 			std::cout << b->vars << ' ' << b->start << std::endl;
 		}
 
-		auto res = x.exe();
-		if (res) {
-			auto q = *res;
-			std::cout << Fmt::Q(&q) << std::endl;
-		} else {
+		res = x.exe();
+		if (!res) {
 			std::cerr << res.error() << std::endl;
+			goto end;
 		}
-		
+
+		q = *res;
+		std::cout << Fmt::Q(&q) << std::endl;
+
+		/*
+		err = Net::send_Q(fd, &q);
+		if (err) {
+			std::cerr << err << std::endl;
+			goto end;
+		}
+		*/
+
+end:
 		close(fd);
 	}
 

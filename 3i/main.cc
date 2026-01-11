@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 	a.push_bod(VM::Bod(0, 0));
 	a.push_in(Bc::In((S)1234));
 	a.push_in(Bc::In(1234.3));
-	a.push_in(Bc::In(Bc::POP));
+	a.push_in(Bc::In(Bc::ADD));
 	a.push_in(Bc::In(Bc::STORE, v));
 	a.push_in(Bc::In(Bc::LOAD, v));
 	a.push_in(Bc::In());

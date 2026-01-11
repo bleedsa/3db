@@ -21,7 +21,10 @@ namespace Bc {
 		MKTAB,  /* (x)     -- vars[x]:empty tab | new table at x */
 		GETCOL, /* (x) y   -- col of vars[x]@y  | get col y of x */
 		/* arithmetic */
-		ADD,    /* ( ) x y -- x+y               | add 2 numbers */
+		ADD,    /* ( ) x y -- x+y               | addition */
+		SUB,    /* ( ) x y -- x-y               | subtraction*/
+		MUL,    /* ( ) x y -- x*y               | multiplication */
+		DIV,    /* ( ) x y -- x/y               | division */
 	};
 
 	struct In {
