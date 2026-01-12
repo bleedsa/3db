@@ -62,11 +62,7 @@ inl auto add(std::vector<Q::Q> *s) -> char* {
 	CASE(Q::mkQTy_dyad(Q::QFlt, Q::QFlt), r = Q::Q(x.f + y.f))
 	CASE(Q::mkQTy_dyad(Q::QDbl, Q::QDbl), r = Q::Q(x.d + y.d))
 
-	default:
-		return A_err(
-			"'nyi: {}+{}",
-			Q::QTy_short[x.ty], Q::QTy_short[y.ty]
-		);
+	default: return A_err("'nyi: {}+{}", x.short_name(), y.short_name());
 	}
 
 	s->push_back(r);
@@ -85,9 +81,7 @@ inl auto mkAf64(std::vector<Q::Q> *s) -> char* {
 		a[i] = *x;
 	}
 
-	auto q = Q::Q(a);
-	std::cout << Fmt::Fmt(&q) << std::endl;
-	s->push_back(q);
+	s->push_back(Q::Q(a));
 
 	return nullptr;
 }

@@ -19,7 +19,7 @@ else
 endif
 
 ifdef NAT
-	CXX = g++
+	CXX = g++ -DNAT
 else
 	CXXFLAGS += -mcosmo -mclang -mdbg
 endif

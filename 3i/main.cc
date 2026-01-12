@@ -76,6 +76,8 @@ int main(int argc, char **argv) {
 		goto end;
 	}
 
+	std::cout << Fmt::Fmt(&q) << std::endl;
+
 end:
 	close(sock);
 	Three::deinit();

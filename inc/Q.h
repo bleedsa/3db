@@ -79,6 +79,10 @@ namespace Q {
 			return QTy_Z[ty];
 		}
 
+		inl auto short_name() -> const char* {
+			return QTy_short[ty];
+		}
+
 		inl auto to_S() -> R<S> {
 			switch (ty) {
 			CASE(QInt, return (S)i)

@@ -54,7 +54,7 @@ auto Net::recv_Q(int sock, Q::Q *x) -> char* {
 	x->ty = (Q::QTy)head[0];
 	memcpy(&L, head+1, Z(S));
 
-	std::cout << "header of " << Q::QTy_short[(S)x->ty];
+	std::cout << "header of " << x->short_name();
 	std::cout << " with len " << L << std::endl;
 
 	/* make a buffer to hold the body */
@@ -64,13 +64,14 @@ auto Net::recv_Q(int sock, Q::Q *x) -> char* {
 	/* recv body */
 	dbg(std::cout << "recv'ing Q body...");
 	if ((got = recv(sock, (void*)body, z, 0)) == -1) {
+		free(body);
 		return A_err("failed to recv Q body: {}", strerror(errno));
 	}
 	dbg(std::cout << "ok " << got << std::endl);
 
 	/* decode */
 	*x = Q::Q(x->ty, body, L);
-	dbg(std::cout << "decoded " << Fmt::Fmt(x) << std::endl);
 
+	free(body);
 	return nullptr;
 }

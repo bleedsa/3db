@@ -15,7 +15,9 @@
 #include <net/Asm.h>
 #include <net/Q.h>
 
+#ifndef NAT
 __static_yoink("__die");
+#endif
 
 struct addrinfo hints, *res;
 int sock;

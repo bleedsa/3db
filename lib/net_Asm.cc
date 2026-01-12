@@ -7,7 +7,7 @@
 
 auto Net::send_Asm(int sock, Asm::Asm *x) -> char* {
 	S headZ, bodyZ;
-	u8 *head, *body;
+	u8 head[Z(u32)*3], *body;
 	u32 *u32s;
 	Bc::In *ins;
 	VM::Bod *bods;
@@ -17,7 +17,6 @@ auto Net::send_Asm(int sock, Asm::Asm *x) -> char* {
 	headZ = Z(u32)*3; /* header values */
 	bodyZ = (Z(Bc::In)*x->inL) + (Z(VM::Bod)*x->bodL);
 	/* alloc */
-	head = mk<u8>(headZ);
 	body = mk<u8>(bodyZ);
 
 	/* copy header */
@@ -48,14 +47,16 @@ auto Net::send_Asm(int sock, Asm::Asm *x) -> char* {
 	}
 	std::cout << "ok " << sent << std::endl;
 
+	free(body);
+
 	return nullptr;
 }
 
 auto Net::recv_Asm(int sock, Asm::Asm *x) -> char* {
 	x->~Asm();
 
+	u32 head[3];
 	int got;
-	u32 *head = mk<u32>(2);
 	S bytes;
 	u8 *body;
 
@@ -89,6 +90,8 @@ auto Net::recv_Asm(int sock, Asm::Asm *x) -> char* {
 	/* copy the bodies */
 	x->bods = mk<VM::Bod>(x->bodL);
 	memcpy(x->bods, (void*)(((Bc::In*)body)+x->inL), Z(VM::Bod)*x->bodL);
+
+	free(body);
 
 	return nullptr;
 }
