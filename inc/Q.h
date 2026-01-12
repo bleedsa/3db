@@ -19,7 +19,7 @@ namespace Q {
 		QDBL,
 	};
 
-	extern const char *QTy_short[5];
+	extern const char *QTy_short[9];
 
 	struct Q {
 		QTy ty;
