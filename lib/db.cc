@@ -3,18 +3,35 @@
 namespace Db {
 	std::mutex mut;
 	std::vector<Ent> ents;
-	const char *EntTy_names[] = {"int", "usize", "f32", "f64"};
+	const char *EntTy_names[] = {
+		"i32", "usize", "f32", "f64",
+		"I32", "USIZE", "F32", "F64",
+	};
 }
 
-Db::Ent::~Ent() {}
+Db::Ent::~Ent() {
+	switch (ty) {
+	CASE(INT, this->iA.~A())
+	CASE(SZ,  this->zA.~A())
+	CASE(FLT, this->fA.~A())
+	CASE(DBL, this->dA.~A())
+	default: {}
+	}
+}
 
 inl auto ent_cpy_value(Db::Ent *x, Db::Ent *y) -> void {
 	x->name = y->name;
 	switch (y->ty) {
+	/* atoms */
 	CASE(Db::Int,x->i=y->i)
 	CASE(Db::Sz, x->z=y->z)
 	CASE(Db::Flt,x->f=y->f)
 	CASE(Db::Dbl,x->d=y->d)
+	/* vectors */
+	CASE(Db::INT,x->iA=y->iA)
+	CASE(Db::SZ, x->zA=y->zA)
+	CASE(Db::FLT,x->fA=y->fA)
+	CASE(Db::DBL,x->dA=y->dA)
 	}
 }
 
@@ -37,12 +54,22 @@ EntBasicImpl(S,  z);
 EntBasicImpl(f32,f);
 EntBasicImpl(f64,d);
 
+EntBasicImpl(A::A<i32>, iA);
+EntBasicImpl(A::A<S>,   zA);
+EntBasicImpl(A::A<f32>, fA);
+EntBasicImpl(A::A<f64>, dA);
+
 #define EntNoTypImpl(X,T,f) \
 	Db::Ent::Ent(var_t name, X x) : name{name}, ty{T}, f{x} {}
 EntNoTypImpl(i32,Int,i);
 EntNoTypImpl(S,  Sz, z);
 EntNoTypImpl(f32,Flt,f);
 EntNoTypImpl(f64,Dbl,d);
+
+EntNoTypImpl(A::A<i32>,INT,iA);
+EntNoTypImpl(A::A<S>,  SZ, zA);
+EntNoTypImpl(A::A<f32>,FLT,fA);
+EntNoTypImpl(A::A<f64>,DBL,dA);
 
 auto Db::get(var_t name) -> std::optional<Ent*> {
 	S r;

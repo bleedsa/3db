@@ -15,6 +15,8 @@
 #include <net/Asm.h>
 #include <net/Q.h>
 
+__static_yoink("__die");
+
 struct addrinfo hints, *res;
 int sock;
 std::mutex sock_mut;

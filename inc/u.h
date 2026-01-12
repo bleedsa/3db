@@ -16,7 +16,11 @@
 
 #define err_fmt(f...) (std::unexpected(std::format(f)))
 #define println(f...) {auto _x=std::format(f);std::cout<<_x<<std::endl;}
-#define fatal(f...) {auto _x=std::format(f);std::cerr<<_x<<std::endl;exit(-1);}
+#define fatal(f...) { \
+	auto _x=std::format("FATAL: " f); \
+	std::cerr<<_x<<std::endl; \
+	exit(-1); \
+}
 
 /* fuck you */
 #define A_err(f...) ({ \

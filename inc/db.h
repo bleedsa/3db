@@ -13,9 +13,13 @@ namespace Db {
 		Sz,
 		Flt,
 		Dbl,
+		INT,
+		SZ,
+		FLT,
+		DBL,
 	};
 
-	extern const char *EntTy_names[4];
+	extern const char *EntTy_names[8];
 
 	struct Ent {
 		var_t name; 
@@ -25,6 +29,10 @@ namespace Db {
 			S z;   /* Sz */
 			f32 f; /* Flt */
 			f64 d; /* Dbl */
+			A::A<i32> iA;
+			A::A<S> zA;
+			A::A<f32> fA;
+			A::A<f64> dA;
 		};
 
 		~Ent();
@@ -37,6 +45,10 @@ namespace Db {
 		EntBasic(S);
 		EntBasic(f32);
 		EntBasic(f64);
+		EntBasic(A::A<i32>);
+		EntBasic(A::A<S>);
+		EntBasic(A::A<f32>);
+		EntBasic(A::A<f64>);
 
 		/* entry constructors with no EntTy parameter */
 		#define EntNoTyp(T) Ent(var_t name, T x)
@@ -44,6 +56,10 @@ namespace Db {
 		EntNoTyp(S);
 		EntNoTyp(f32);
 		EntNoTyp(f64);
+		EntNoTyp(A::A<i32>);
+		EntNoTyp(A::A<S>);
+		EntNoTyp(A::A<f32>);
+		EntNoTyp(A::A<f64>);
 	};
 
 	extern std::vector<Ent> ents;

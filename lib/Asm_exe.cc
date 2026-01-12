@@ -16,7 +16,11 @@ inl auto store_Q(std::vector<Q::Q> *s, Bc::In *in) -> void {
 	CASE(Q::QSz,  Db::push_ent(in->var, x.z))
 	CASE(Q::QFlt, Db::push_ent(in->var, x.f))
 	CASE(Q::QDbl, Db::push_ent(in->var, x.d))
-	default: {}
+	CASE(Q::QINT, Db::push_ent(in->var, x.iA))
+	CASE(Q::QSZ,  Db::push_ent(in->var, x.zA))
+	CASE(Q::QFLT, Db::push_ent(in->var, x.fA))
+	CASE(Q::QDBL, Db::push_ent(in->var, x.dA))
+	default: fatal("cannot store Q of type {}", (S)x.ty);
 	}
 }
 
@@ -34,6 +38,11 @@ inl auto load_Q(std::vector<Q::Q> *s, Bc::In *in) -> Q::Q {
 	CASE(Db::Sz,  r = Q::Q(ent->z))
 	CASE(Db::Flt, r = Q::Q(ent->f))
 	CASE(Db::Dbl, r = Q::Q(ent->d))
+	CASE(Db::INT, r = Q::Q(ent->iA))
+	CASE(Db::SZ,  r = Q::Q(ent->zA))
+	CASE(Db::FLT, r = Q::Q(ent->fA))
+	CASE(Db::DBL, r = Q::Q(ent->dA))
+	default: fatal("cannot load Db::Ent of type {}", (S)ent->ty);
 	}
 
 	return r;
@@ -64,6 +73,25 @@ inl auto add(std::vector<Q::Q> *s) -> char* {
 	return nullptr;
 }
 
+inl auto mkAf64(std::vector<Q::Q> *s) -> char* {
+	auto r = stk_pop(s).to_S();
+	if (!r) return A_err("mkAf64(): {}", r.error());
+	auto L = *r;
+	auto a = A::A<f64>(L);
+
+	for (S i = 0; i < L; i++) {
+		auto x = stk_pop(s).to_f64();
+		if (!r) return A_err("mkAf64(): {}", r.error());
+		a[i] = *x;
+	}
+
+	auto q = Q::Q(a);
+	std::cout << Fmt::Fmt(&q) << std::endl;
+	s->push_back(q);
+
+	return nullptr;
+}
+
 inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	char *err;
 
@@ -79,8 +107,12 @@ inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	CASE(Bc::STORE,  store_Q(s, in))
 	CASE(Bc::LOAD,   s->push_back(load_Q(s, in)))
 
+	/* vector ops */
+	CASE(Bc::MKAf64, if ((err = mkAf64(s))) return err)
+
 	/* arithmetic */
-	CASE(Bc::ADD, if ((err = add(s))) return err;)
+	CASE(Bc::ADD, if ((err = add(s))) return err)
+
 	default: return A_err("unknown instruction of type {}", (S)in->ty);
 	}
 	return nullptr;

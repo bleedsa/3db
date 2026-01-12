@@ -23,6 +23,10 @@ namespace A {
 			}
 		}
 
+		A(X *buf, S len) : len{len}, ptr{mk<X>(len)} {
+			memcpy(ptr, buf, Z(X)*len);
+		}
+
 		inl A(const A &x) : len{x.len}, ptr{mk<X>(len)} {
 			memcpy(ptr, x.ptr, Z(X)*len);
 		}
