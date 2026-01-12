@@ -22,11 +22,11 @@ int main() {
 
 	/* fmt */
 	auto q = *r;
-	std::cout << Fmt::Q(&q) << std::endl;
+	std::cout << Fmt::Fmt(&q) << std::endl;
 
 	/* grab the entry */
 	auto ent = Db::get(long_name);
-	std::cout << Fmt::Ent(*ent) << std::endl;
+	std::cout << Fmt::Fmt(*ent) << std::endl;
 
 	Three::deinit();
 	return 0;

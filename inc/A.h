@@ -2,19 +2,28 @@
 #define __3DB_A_H__
 
 #include <sstream>
+#include <cstring>
 
 #include <mem.h>
 
 namespace A {
+	/* a static width, memcpy'd vector */
 	template<typename X>
 	struct A {
-		X *ptr;
 		S len;
+		X *ptr;
 
-		inl A(S len) : ptr{mk<X>(len)}, len{len} {}
+		inl A(S len) : len{len}, ptr{mk<X>(len)} {}
 		inl ~A() {free(ptr);}
 
-		inl A(const A &x) : ptr{mk<X>(x.len)}, len{x.len} {
+		A(std::initializer_list<X> x) : len{x.size()}, ptr{mk<X>(len)} {
+			S i = 0;
+			for (auto e : x) {
+				ptr[i++] = e;
+			}
+		}
+
+		inl A(const A &x) : len{x.len}, ptr{mk<X>(len)} {
 			memcpy(ptr, x.ptr, Z(X)*len);
 		}
 
@@ -32,7 +41,7 @@ namespace A {
 
 namespace Fmt {
 	template<typename X>
-	static auto A(A::A<X> *x) -> std::string {
+	static auto Fmt(A::A<X> *x) -> std::string {
 		std::stringstream ss;
 		S L = x->len - 1;
 

@@ -17,6 +17,16 @@ inl auto Q_cpy_val(Q::Q *x, Q::Q *y) -> void {
 	}
 }
 
+Q::Q::~Q() {
+	switch (ty) {
+	CASE(QINT, iA.~A())
+	CASE(QSZ,  zA.~A())
+	CASE(QFLT, fA.~A())
+	CASE(QDBL, dA.~A())
+	default: {}
+	}
+}
+
 Q::Q::Q(const Q &x) : ty{x.ty} {
 	Q_cpy_val((Q*)this, (Q*)&x);
 }

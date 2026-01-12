@@ -94,15 +94,13 @@ int main(int argc, char **argv) {
 		}
 
 		q = *res;
-		std::cout << Fmt::Q(&q) << std::endl;
+		std::cout << Fmt::Fmt(&q) << std::endl;
 
-		/*
 		err = Net::send_Q(fd, &q);
 		if (err) {
 			std::cerr << err << std::endl;
 			goto end;
 		}
-		*/
 
 end:
 		close(fd);

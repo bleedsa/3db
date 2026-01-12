@@ -14,6 +14,6 @@ int main() {
 		return -1;
 	}
 	auto q = *r;
-	std::cout << Fmt::Q(&q) << std::endl;
+	std::cout << Fmt::Fmt(&q) << std::endl;
 	return 0;
 }

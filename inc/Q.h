@@ -4,6 +4,7 @@
 #include <string>
 
 #include <u.h>
+#include <A.h>
 
 namespace Q {
 	enum QTy {
@@ -12,6 +13,10 @@ namespace Q {
 		QSz,
 		QFlt,
 		QDbl,
+		QINT,
+		QSZ,
+		QFLT,
+		QDBL,
 	};
 
 	extern const char *QTy_short[5];
@@ -23,6 +28,10 @@ namespace Q {
 			S z;
 			f32 f;
 			f64 d;
+			A::A<i32> iA;
+			A::A<S> zA;
+			A::A<f32> fA;
+			A::A<f64> dA;
 		};
 
 		inl Q()      : ty{QNil} {}
@@ -31,7 +40,12 @@ namespace Q {
 		inl Q(f32 x) : ty{QFlt}, f{x} {}
 		inl Q(f64 x) : ty{QDbl}, d{x} {}
 
-		inl ~Q() {}
+		inl Q(A::A<i32> x) : ty{QINT}, iA{x} {}
+		inl Q(A::A<S> x)   : ty{QSZ},  zA{x} {}
+		inl Q(A::A<f32> x) : ty{QFLT}, fA{x} {}
+		inl Q(A::A<f64> x) : ty{QDBL}, dA{x} {}
+
+		~Q();
 
 		Q(const Q &x);
 		const Q &operator=(const Q &x);
@@ -44,7 +58,7 @@ namespace Q {
 }
 
 namespace Fmt {
-	std::string Q(Q::Q *x);
+	std::string Fmt(Q::Q *x);
 }
 
 #endif

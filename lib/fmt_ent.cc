@@ -3,7 +3,7 @@
 #include <db.h>
 #include <var.h>
 
-auto Fmt::Ent(Db::Ent *x) -> std::string {
+auto Fmt::Fmt(Db::Ent *x) -> std::string {
 	std::stringstream ss;
 	auto name = var_to_str(x->name);
 

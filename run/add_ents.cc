@@ -11,7 +11,7 @@ int main() {
 	Db::push_ent("3", 1234.56);
 
 	for (auto &e : Db::ents) {
-		std::cout << Fmt::Ent(&e) << std::endl;
+		std::cout << Fmt::Fmt(&e) << std::endl;
 	}
 
 	Three::deinit();

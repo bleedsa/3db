@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <u.h>
 #include <str.h>
@@ -11,8 +12,7 @@
 #include <net.h>
 #include <Asm.h>
 #include <net/Asm.h>
-
-__static_yoink("__die");
+#include <net/Q.h>
 
 struct addrinfo hints, *res;
 int sock;
@@ -45,6 +45,7 @@ inl auto connect_host(char *addr_port) -> void {
 }
 
 int main(int argc, char **argv) {
+	Q::Q q;
 	if (argc < 2) fatal("usage: {} [addr]", argv[0]);
 
 	connect_host(argv[1]);
@@ -53,16 +54,24 @@ int main(int argc, char **argv) {
 	auto a = Asm::Asm();
 	auto v = str_to_var("float1");
 	a.push_bod(VM::Bod(0, 0));
-	a.push_in(Bc::In((S)1234));
 	a.push_in(Bc::In(1234.3));
-	a.push_in(Bc::In(Bc::ADD));
 	a.push_in(Bc::In(Bc::STORE, v));
 	a.push_in(Bc::In(Bc::LOAD, v));
 	a.push_in(Bc::In());
 
 	auto err = Net::send_Asm(sock, &a);
-	if (err) std::cerr << err << std::endl;
+	if (err) {
+		std::cerr << err << std::endl;
+		goto end;
+	}
 
+	// err = Net::recv_Q(sock, &q);
+	if (err) {
+		std::cerr << err << std::endl;
+		goto end;
+	}
+
+end:
 	close(sock);
 	Three::deinit();
 }

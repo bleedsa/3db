@@ -11,7 +11,7 @@ int main() {
 	Q::Q vec[] = {x1, x2, x3, x4};
 
 	for (auto &x : vec) {
-		std::cout << Fmt::Q(&x) << ' ';
+		std::cout << Fmt::Fmt(&x) << ' ';
 	}
 
 	std::cout << std::endl;

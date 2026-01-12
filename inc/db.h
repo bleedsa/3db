@@ -79,7 +79,7 @@ namespace Db {
 }	
 
 namespace Fmt {
-	std::string Ent(Db::Ent *x);
+	std::string Fmt(Db::Ent *x);
 }
 
 #endif

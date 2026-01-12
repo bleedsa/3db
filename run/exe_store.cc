@@ -20,7 +20,7 @@ int main() {
 
 	/* fmt */
 	auto q = *r;
-	std::cout << Fmt::Q(&q) << std::endl;
+	std::cout << Fmt::Fmt(&q) << std::endl;
 	return 0;
 
 	Three::deinit();

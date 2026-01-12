@@ -4,8 +4,16 @@ CXXFLAGS := -std=gnu++23 -fshort-enums \
 	    -Wall -Wextra -Wno-unused-parameter \
 	    -Iinc
 
+ifdef UBSAN
+	CXXFLAGS += -fsanitize=undefined
+endif
+
+ifdef ASAN
+	CXXFLAGS += -fsanitize=address
+endif
+
 ifndef REL
-	CXXFLAGS += -g -mdbg -DDBG
+	CXXFLAGS += -g -DDBG
 else
 	CXXFLAGS += -O3
 endif
@@ -13,11 +21,7 @@ endif
 ifdef NAT
 	CXX = g++
 else
-	CXXFLAGS += -mcosmo -mclang
-endif
-
-ifdef ASAN
-	CXXFLAGS += -fsanitize=address
+	CXXFLAGS += -mcosmo -mclang -mdbg
 endif
 
 # make object files from cc files
@@ -38,9 +42,11 @@ $(LIBO): $(O)/%.o: lib/%.cc
 	$(CXX) -c $(CXXFLAGS) -o $@ $^
 
 $(TDBO): $(O)/3db/%.o: 3db/%.cc
+	mkdir -p $(O)/3db
 	$(CXX) -c $(CXXFLAGS) -o $@ $^
 
 $(TIO): $(O)/3i/%.o: 3i/%.cc
+	mkdir -p $(O)/3i
 	$(CXX) -c $(CXXFLAGS) -o $@ $^
 
 $(BINCOM): $(O)/bin/%.com: bin/%.cc $(LIBO)

@@ -16,7 +16,7 @@ inl auto run_add(X x, Y y) -> void {
 	}
 
 	auto q = *r;
-	std::cout << Fmt::Q(&q) << std::endl;
+	std::cout << Fmt::Fmt(&q) << std::endl;
 }
 
 int main() {

@@ -4,12 +4,13 @@
 int main() {
 	Three::init();
 
-	auto x = A::A<int>(3);
-	x[0] = 1;
-	x[1] = 2;
-	x[2] = 3;
+	auto x = A::A<int>{1, 2, 3};
+	auto y = x;
 
-	std::cout << Fmt::A(&x) << std::endl;
+	std::cout << Fmt::Fmt(&y) << std::endl;
+
+	auto z = A::A<f32>{1.0f, 2.0f, 3.0f};
+	std::cout << Fmt::Fmt(&z) << std::endl;
 
 	Three::deinit();
 }
