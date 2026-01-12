@@ -14,7 +14,9 @@ int main() {
 	}
 
 	for (auto &e : Db::ents) {
-		std::cout << var_to_str(e.name) << ' ' << e.z;
+		auto str = var_to_str(e.name);
+		std::cout << str << ' ' << e.z;
+		free(str);
 	}
 
 	std::cout << std::endl;
