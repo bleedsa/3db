@@ -13,6 +13,10 @@ auto Fmt::Fmt(Db::Ent *x) -> std::string {
 	CASE(Db::Sz,  ss<<x->z)
 	CASE(Db::Flt, ss<<x->f)
 	CASE(Db::Dbl, ss<<x->d)
+	CASE(Db::INT, ss<<Fmt::Fmt(&x->iA))
+	CASE(Db::SZ,  ss<<Fmt::Fmt(&x->zA))
+	CASE(Db::FLT, ss<<Fmt::Fmt(&x->fA))
+	CASE(Db::DBL, ss<<Fmt::Fmt(&x->dA))
 	}
 
 	free(name);

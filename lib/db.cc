@@ -3,9 +3,15 @@
 namespace Db {
 	std::mutex mut;
 	std::vector<Ent> ents;
+
 	const char *EntTy_names[] = {
 		"i32", "usize", "f32", "f64",
 		"I32", "USIZE", "F32", "F64",
+	};
+
+	const S EntTy_Z[] = {
+		Z(i32), Z(S), Z(f32), Z(f64),
+		Z(i32), Z(S), Z(f32), Z(f64),
 	};
 }
 

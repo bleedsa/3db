@@ -1,0 +1,3 @@
+wrote entry x I32 (1;2;3)
+4847444444444444441644444
+deserialized entry x I32 (1;2;3)

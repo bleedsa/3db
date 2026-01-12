@@ -20,6 +20,7 @@ namespace Db {
 	};
 
 	extern const char *EntTy_names[8];
+	extern const S EntTy_Z[8];
 
 	struct Ent {
 		var_t name; 
@@ -60,6 +61,28 @@ namespace Db {
 		EntNoTyp(A::A<S>);
 		EntNoTyp(A::A<f32>);
 		EntNoTyp(A::A<f64>);
+
+		inl auto atom_size() -> S {
+			return EntTy_Z[ty];
+		}
+
+		inl auto len() -> S {
+			switch (ty) {
+			case Int:
+			case Sz:
+			case Flt:
+			case Dbl:
+				return 1;
+			CASE(INT, return iA.len)
+			CASE(SZ,  return zA.len)
+			CASE(FLT, return fA.len)
+			CASE(DBL, return dA.len)
+			default: fatal("len() on entry of type {}", (S)ty);
+			}
+		}
+
+		Ent(u8 *ptr);
+		std::tuple<u8*, S> to_bytes();
 	};
 
 	extern std::vector<Ent> ents;
