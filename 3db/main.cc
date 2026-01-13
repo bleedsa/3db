@@ -10,6 +10,7 @@
 #include <u.h>
 #include <str.h>
 #include <db.h>
+#include <fs.h>
 #include <net.h>
 #include <Asm.h>
 #include <net/Asm.h>
@@ -47,15 +48,16 @@ int main(int argc, char **argv) {
 	int ret, fd;
 	struct sockaddr_storage them;
 	socklen_t addrZ = Z(them);
-	char *err;
+	char *err, *path;
 	Q::Q q;
 	R<Q::Q> res;
 
-	if (argc < 2) fatal("usage: {} [port]", argv[0]);
+	if (argc < 3) fatal("usage: {} [file] [port]", argv[0]);
+	path = argv[1];
 
-	Db::load("3.db");
+	if (Fs::F_exists(path)) Db::load(path);
 
-	bind_host(argv[1]);
+	bind_host(argv[2]);
 	Three::init();
 
 	ret = listen(sock, 10);
@@ -104,7 +106,7 @@ int main(int argc, char **argv) {
 		std::cout << Fmt::Fmt(&q) << std::endl;
 
 		/* write the data to disk */
-		Db::write("3.db");
+		Db::write(path);
 
 		/* send the result back */
 		err = Net::send_Q(fd, &q);

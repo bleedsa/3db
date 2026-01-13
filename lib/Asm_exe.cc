@@ -69,6 +69,22 @@ inl auto add(std::vector<Q::Q> *s) -> char* {
 	return nullptr;
 }
 
+inl auto mkAi32(std::vector<Q::Q> *s) -> char* {
+	auto r = stk_pop(s).to_S();
+	if (!r) return A_err("mkAi32(): {}", r.error());
+	auto L = *r;
+	auto a = A::A<i32>(L);
+
+	for (S i = 0; i < L; i++) {
+		auto x = stk_pop(s).to_i32();
+		if (!x) return A_err("mkAi32(): {}", r.error());
+		a[i] = *x;
+	}
+
+	s->push_back(Q::Q(a));
+	return nullptr;
+}
+
 inl auto mkAf64(std::vector<Q::Q> *s) -> char* {
 	auto r = stk_pop(s).to_S();
 	if (!r) return A_err("mkAf64(): {}", r.error());
@@ -77,12 +93,11 @@ inl auto mkAf64(std::vector<Q::Q> *s) -> char* {
 
 	for (S i = 0; i < L; i++) {
 		auto x = stk_pop(s).to_f64();
-		if (!r) return A_err("mkAf64(): {}", r.error());
+		if (!x) return A_err("mkAf64(): {}", r.error());
 		a[i] = *x;
 	}
 
 	s->push_back(Q::Q(a));
-
 	return nullptr;
 }
 
@@ -102,6 +117,7 @@ inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	CASE(Bc::LOAD,   s->push_back(load_Q(s, in)))
 
 	/* vector ops */
+	CASE(Bc::MKAi32, if ((err = mkAi32(s))) return err)
 	CASE(Bc::MKAf64, if ((err = mkAf64(s))) return err)
 
 	/* arithmetic */

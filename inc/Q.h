@@ -83,6 +83,18 @@ namespace Q {
 			return QTy_short[ty];
 		}
 
+		inl auto to_i32() -> R<i32> {
+			switch (ty) {
+			CASE(QInt, return i)
+			CASE(QSz,  return (i32)z)
+			CASE(QFlt, return (f32)f)
+			CASE(QDbl, return (f64)d)
+			default: return err_fmt(
+				"cannot convert Q of type {} to i32", (S)ty
+			);
+			}
+		}
+
 		inl auto to_S() -> R<S> {
 			switch (ty) {
 			CASE(QInt, return (S)i)

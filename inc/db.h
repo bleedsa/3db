@@ -88,32 +88,33 @@ namespace Db {
 	extern std::vector<Ent> ents;
 	extern std::mutex mut;
 
+	std::optional<Ent*> get(var_t name);
+
+	inl auto get(const char *name) -> std::optional<Ent*> {
+		auto v = str_to_var(name);
+		return get(v);
+	}
+
 	/* push a raw entry to the database */
 	inl auto push_ent(Ent x) -> void {
-		auto G = LOCK(mut);
-		ents.push_back(x);
+		auto o = get(x.name);
+		if (!o) {
+			auto G = LOCK(mut);
+			ents.push_back(x);
+		}
 	}
 
 	/* push an entry onto the db and figure out the type based on the
 	 * value type */
 	template<typename X>
 	inl void push_ent(var_t name, X x) {
-		auto G = LOCK(mut);
-		ents.push_back(Ent(name, x));
+		push_ent(Ent(name, x));
 	}
 
 	template<typename X>
 	inl void push_ent(const char *name, X x) {
-		auto G = LOCK(mut);
 		auto v = str_to_var(name);
-		ents.push_back(Ent(v, x));
-	}
-
-	std::optional<Ent*> get(var_t name);
-
-	inl auto get(const char *name) -> std::optional<Ent*> {
-		auto v = str_to_var(name);
-		return get(v);
+		push_ent(v, x);
 	}
 
 	/* write the database to a path on disk */

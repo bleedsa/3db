@@ -30,8 +30,14 @@ namespace Asm {
 
 		/* modify the internal buffers */
 		void reZ();
-		void push_in(Bc::In x);
 		void push_bod(VM::Bod x);
+
+		void push_in(Bc::In x);
+
+		template<typename X>
+		inl auto push_in(X x) -> void {
+			push_in(Bc::In(x));
+		}
 
 		/* execute instructions */
 		R<Q::Q> exe_body(S body);

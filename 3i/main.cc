@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 	Three::init();
 
 	auto a = Asm::Asm();
-	auto v = str_to_var("float1");
+	auto v = str_to_var("x");
 	a.push_bod(VM::Bod(0, 0));
 	a.push_in(Bc::In(Bc::LOAD, v));
 	a.push_in(Bc::In());
