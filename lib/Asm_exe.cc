@@ -16,10 +16,12 @@ inl auto store_Q(std::vector<Q::Q> *s, Bc::In *in) -> void {
 	CASE(Q::QSz,  Db::push_ent(in->var, x.z))
 	CASE(Q::QFlt, Db::push_ent(in->var, x.f))
 	CASE(Q::QDbl, Db::push_ent(in->var, x.d))
+	CASE(Q::QChr, Db::push_ent(in->var, x.c))
 	CASE(Q::QINT, Db::push_ent(in->var, x.iA))
 	CASE(Q::QSZ,  Db::push_ent(in->var, x.zA))
 	CASE(Q::QFLT, Db::push_ent(in->var, x.fA))
 	CASE(Q::QDBL, Db::push_ent(in->var, x.dA))
+	CASE(Q::QCHR, Db::push_ent(in->var, x.cA))
 	default: fatal("cannot store Q of type {}", x.short_name());
 	}
 }
@@ -42,10 +44,12 @@ inl auto load_Q(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	CASE(Db::Sz,  r = Q::Q(ent->z))
 	CASE(Db::Flt, r = Q::Q(ent->f))
 	CASE(Db::Dbl, r = Q::Q(ent->d))
+	CASE(Db::Ch,  r = Q::Q(ent->c))
 	CASE(Db::INT, r = Q::Q(ent->iA))
 	CASE(Db::SZ,  r = Q::Q(ent->zA))
 	CASE(Db::FLT, r = Q::Q(ent->fA))
 	CASE(Db::DBL, r = Q::Q(ent->dA))
+	CASE(Db::CHR, r = Q::Q(ent->cA))
 	default: return A_err("cannot load entry of type {}", ent->type());
 	}
 
