@@ -63,22 +63,22 @@ int main(int argc, char **argv) {
 		auto x = Asm::Asm();
 		auto G = LOCK(sock_mut);
 
+		/* get the connection */
+		std::cout << "waiting for mail...";
+		fflush(stdout);
 		fd = accept(sock, (struct sockaddr*)&them, &addrZ);
 		if (fd == -1) {
 			std::cerr << strerror(errno) << std::endl;
 			goto end;
-		}	
+		}
+		std::cout << "ok " << fd << std::endl;
 
+		/* read the assembly */
 		err = Net::recv_Asm(fd, &x);
 		if (err) {
 			std::cerr << err << std::endl;
 			goto end;
 		}
-
-		std::cout << "instructions: " << x.inL << '(' << x.in_cap << ')'
-		       	<< std::endl;
-		std::cout << "bodies: " << x.bodL << '(' << x.bod_cap << ')'
-			<< std::endl;
 
 		for (S i = 0; i < x.inL; i++) {
 			auto in = &x.ins[i];
@@ -91,6 +91,7 @@ int main(int argc, char **argv) {
 			std::cout << b->vars << ' ' << b->start << std::endl;
 		}
 
+		/* execute the assembly */
 		res = x.exe();
 		if (!res) {
 			std::cerr << res.error() << std::endl;
@@ -100,6 +101,10 @@ int main(int argc, char **argv) {
 		q = *res;
 		std::cout << Fmt::Fmt(&q) << std::endl;
 
+		/* write the data to disk */
+		Db::write("3.db");
+
+		/* send the result back */
 		err = Net::send_Q(fd, &q);
 		if (err) {
 			std::cerr << err << std::endl;

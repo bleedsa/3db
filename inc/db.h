@@ -82,7 +82,7 @@ namespace Db {
 		}
 
 		Ent(u8 *ptr);
-		std::tuple<u8*, S> to_bytes();
+		std::tuple<u8*, u64> to_bytes();
 	};
 
 	extern std::vector<Ent> ents;
@@ -114,6 +114,20 @@ namespace Db {
 	inl auto get(const char *name) -> std::optional<Ent*> {
 		auto v = str_to_var(name);
 		return get(v);
+	}
+
+	/* write the database to a path on disk */
+	void write(const char *path);
+
+	inl auto write(std::string path) -> void {
+		write(path.c_str());
+	}
+
+	/* read the database from a path on disk */
+	void load(const char *path);
+
+	inl auto load(std::string path) -> void {
+		load(path.c_str());
 	}
 }	
 
