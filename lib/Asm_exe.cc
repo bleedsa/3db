@@ -24,13 +24,19 @@ inl auto store_Q(std::vector<Q::Q> *s, Bc::In *in) -> void {
 	}
 }
 
-inl auto load_Q(std::vector<Q::Q> *s, Bc::In *in) -> Q::Q {
+inl auto load_Q(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	Q::Q r;
 	std::optional<Db::Ent*> res;
 	Db::Ent *ent;
 
 	res = Db::get(in->var);
-	if (!res) return r;
+	if (!res) {
+		std::stringstream ss;
+		auto v = var_to_str(in->var);
+		ss << "entry " << v << " not found";
+		free(v);
+		return (char*)ss.str().c_str();
+	}
 
 	ent = *res;
 	switch (ent->ty) {
@@ -45,7 +51,14 @@ inl auto load_Q(std::vector<Q::Q> *s, Bc::In *in) -> Q::Q {
 	default: fatal("cannot load Db::Ent of type {}", (S)ent->ty);
 	}
 
-	return r;
+	s->push_back(r);
+	return nullptr;
+}
+
+inl auto del(std::vector<Q::Q> *s, Bc::In *in) -> char* {
+	char *err;
+	if ((err = Db::del(in->var))) return err;
+	return nullptr;
 }
 
 inl auto add(std::vector<Q::Q> *s) -> char* {
@@ -113,8 +126,11 @@ inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 
 	/* stack ops */
 	CASE(Bc::POP,    s->pop_back());
+
+	/* db ops */
 	CASE(Bc::STORE,  store_Q(s, in))
-	CASE(Bc::LOAD,   s->push_back(load_Q(s, in)))
+	CASE(Bc::LOAD,   if ((err = load_Q(s, in))) return err)
+	CASE(Bc::DEL,    del(s, in))
 
 	/* vector ops */
 	CASE(Bc::MKAi32, if ((err = mkAi32(s))) return err)

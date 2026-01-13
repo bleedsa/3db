@@ -77,10 +77,37 @@ EntNoTypImpl(A::A<S>,  SZ, zA);
 EntNoTypImpl(A::A<f32>,FLT,fA);
 EntNoTypImpl(A::A<f64>,DBL,dA);
 
+inl auto Db_get_idx(var_t name) -> std::optional<S> {
+	S r, i = 0;
+	for (auto &e : Db::ents) {
+		if ((r = std::memcmp(&name, &e.name, Z(var_t))) == 0) {
+			return i;
+		}
+		i++;
+	}
+	return {};
+}
+
 auto Db::get(var_t name) -> std::optional<Ent*> {
 	S r;
 	for (auto &e : ents) {
-		if ((r = std::memcmp(&name, &e.name, Z(var_t))) == 0) return &e;
+		if ((r = std::memcmp(&name, &e.name, Z(var_t))) == 0) {
+			return &e;
+		}
 	}
 	return {};
+}
+
+auto Db::del(var_t name) -> char* {
+	auto o = Db_get_idx(name);
+	if (!o) {
+		auto s = var_to_str(name);
+		auto e = A_err("entry {} not found", s);
+		free(s);
+		return e;
+	}
+	auto i = *o;
+	auto G = LOCK(mut);
+	ents.erase(ents.begin() + i);
+	return nullptr;
 }

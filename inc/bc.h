@@ -17,6 +17,7 @@ namespace Bc {
 		POP,    /* ( ) x     --                   | pop off the stack */
 		LOAD,   /* (x)       -- vars[x]           | load var at x */
 		STORE,  /* (x) y     -- vars[x]:y         | store y at var x */
+		DEL,    /* (x)       -- drop vars[x]      | delete var x */
 		/* vector ops */
 		MKAi32, /* ( ) i xs  -- vec i long        | make a vector */
 		MKASz,  /* ( ) i xs  -- vec i long        | make a vector */

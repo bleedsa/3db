@@ -95,6 +95,13 @@ namespace Db {
 		return get(v);
 	}
 
+	char *del(var_t name);
+
+	inl auto del(const char *name) -> char* {
+		auto v = str_to_var(name);
+		return del(v);
+	}
+
 	/* push a raw entry to the database */
 	inl auto push_ent(Ent x) -> void {
 		auto o = get(x.name);

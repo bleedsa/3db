@@ -13,6 +13,10 @@ int main() {
 	a.push_in(Bc::In(Bc::LOAD, long_name));
 	a.push_in(Bc::In());
 
+	/* display the name */
+	auto s = var_to_str(str_to_var(long_name));
+	std::cout << s << std::endl;
+
 	/* exe */
 	auto r = a.exe();
 	if (!r) {
