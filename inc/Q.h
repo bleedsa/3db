@@ -107,6 +107,18 @@ namespace Q {
 			}
 		}
 
+		inl auto to_f32() -> R<f32> {
+			switch (ty) {
+			CASE(QInt, return (f32)i)
+			CASE(QSz,  return (f32)z)
+			CASE(QFlt, return f)
+			CASE(QDbl, return (f32)d)
+			default: return err_fmt(
+				"cannot convert Q of type {} to f32", (S)ty
+			);
+			}
+		}
+
 		inl auto to_f64() -> R<f64> {
 			switch (ty) {
 			CASE(QInt, return (f64)i)

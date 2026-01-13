@@ -98,6 +98,38 @@ inl auto mkAi32(std::vector<Q::Q> *s) -> char* {
 	return nullptr;
 }
 
+inl auto mkAsz(std::vector<Q::Q> *s) -> char* {
+	auto r = stk_pop(s).to_S();
+	if (!r) return A_err("mkAsz(): {}", r.error());
+	auto L = *r;
+	auto a = A::A<S>(L);
+
+	for (S i = 0; i < L; i++) {
+		auto x = stk_pop(s).to_S();
+		if (!x) return A_err("mkAsz(): {}", r.error());
+		a[i] = *x;
+	}
+
+	s->push_back(Q::Q(a));
+	return nullptr;
+}
+
+inl auto mkAf32(std::vector<Q::Q> *s) -> char* {
+	auto r = stk_pop(s).to_S();
+	if (!r) return A_err("mkAf32(): {}", r.error());
+	auto L = *r;
+	auto a = A::A<f32>(L);
+
+	for (S i = 0; i < L; i++) {
+		auto x = stk_pop(s).to_f32();
+		if (!x) return A_err("mkAf32(): {}", r.error());
+		a[i] = *x;
+	}
+
+	s->push_back(Q::Q(a));
+	return nullptr;
+}
+
 inl auto mkAf64(std::vector<Q::Q> *s) -> char* {
 	auto r = stk_pop(s).to_S();
 	if (!r) return A_err("mkAf64(): {}", r.error());
@@ -134,6 +166,8 @@ inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 
 	/* vector ops */
 	CASE(Bc::MKAi32, if ((err = mkAi32(s))) return err)
+	CASE(Bc::MKASz,  if ((err = mkAsz(s)))  return err)
+	CASE(Bc::MKAf32, if ((err = mkAf32(s))) return err)
 	CASE(Bc::MKAf64, if ((err = mkAf64(s))) return err)
 
 	/* arithmetic */
