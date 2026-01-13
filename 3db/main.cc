@@ -53,6 +53,8 @@ int main(int argc, char **argv) {
 
 	if (argc < 2) fatal("usage: {} [port]", argv[0]);
 
+	Db::load("3.db");
+
 	bind_host(argv[1]);
 	Three::init();
 
