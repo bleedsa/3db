@@ -40,6 +40,13 @@ namespace A {
 		inl auto operator[](int i) -> X& {
 			return ptr[i];
 		}
+
+		template<typename Y, typename F>
+		inl auto each(F f) -> A<Y> {
+			auto a = A<Y>(len);
+			for (S i = 0; i < len; i++) a[i] = f(&ptr[i]);
+			return a;
+		}
 	};
 }
 

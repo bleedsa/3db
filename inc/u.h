@@ -59,4 +59,13 @@ namespace Three {
 	void deinit();
 }
 
+namespace U {
+	template<typename X>
+	inl auto sum_vec(X *v, S n) -> X {
+		X sum = 0;
+		for (S i = 0; i < n; i++) sum += v[i];
+		return sum;
+	}
+}
+
 #endif
