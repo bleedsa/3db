@@ -43,13 +43,13 @@ using i8 = int8_t;
 using i16 = int16_t;
 using i32 = int32_t;
 using i64 = int64_t;
-using I = i32;
 
 using f32 = float;
 using f64 = double;
-using F = double;
 
+using I = i32;
 using S = size_t;
+using Chr = unsigned char;
 
 template<typename X>
 using R = std::expected<X, std::string>;

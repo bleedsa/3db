@@ -13,14 +13,16 @@ namespace Q {
 		QSz,
 		QFlt,
 		QDbl,
+		QChr,
 		QINT,
 		QSZ,
 		QFLT,
 		QDBL,
+		QCHR,
 	};
 
-	extern const char *QTy_short[9];
-	extern const S QTy_Z[9];
+	extern const char *QTy_short[11];
+	extern const S QTy_Z[11];
 
 	struct Q {
 		QTy ty;
@@ -29,22 +31,26 @@ namespace Q {
 			S z;
 			f32 f;
 			f64 d;
+			Chr c;
 			A::A<i32> iA;
 			A::A<S> zA;
 			A::A<f32> fA;
 			A::A<f64> dA;
+			A::A<Chr> cA;
 		};
 
-		inl Q()      : ty{QNil} {}
-		inl Q(i32 x) : ty{QInt}, i{x} {}
-		inl Q(S x)   : ty{QSz},  z{x} {}
-		inl Q(f32 x) : ty{QFlt}, f{x} {}
-		inl Q(f64 x) : ty{QDbl}, d{x} {}
+		inl Q()       : ty{QNil} {}
+		inl Q(i32 x)  : ty{QInt}, i{x} {}
+		inl Q(S x)    : ty{QSz},  z{x} {}
+		inl Q(f32 x)  : ty{QFlt}, f{x} {}
+		inl Q(f64 x)  : ty{QDbl}, d{x} {}
+		inl Q(Chr x) : ty{QChr}, c{x} {}
 
-		inl Q(A::A<i32> x) : ty{QINT}, iA{x} {}
-		inl Q(A::A<S> x)   : ty{QSZ},  zA{x} {}
-		inl Q(A::A<f32> x) : ty{QFLT}, fA{x} {}
-		inl Q(A::A<f64> x) : ty{QDBL}, dA{x} {}
+		inl Q(A::A<i32> x)  : ty{QINT}, iA{x} {}
+		inl Q(A::A<S> x)    : ty{QSZ},  zA{x} {}
+		inl Q(A::A<f32> x)  : ty{QFLT}, fA{x} {}
+		inl Q(A::A<f64> x)  : ty{QDBL}, dA{x} {}
+		inl Q(A::A<Chr> x) : ty{QCHR}, cA{x} {}
 
 		Q(QTy ty, u8 *ptr, S L);
 
@@ -63,6 +69,7 @@ namespace Q {
 			case QSz:
 			case QFlt:
 			case QDbl:
+			case QChr:
 				return 1;
 
 			/* get vector sizes */
@@ -70,6 +77,7 @@ namespace Q {
 			CASE(QSZ,  return zA.len)
 			CASE(QFLT, return fA.len)
 			CASE(QDBL, return dA.len)
+			CASE(QCHR, return cA.len)
 
 			default: fatal("Q::len() on Q with type {}", (S)ty);
 			}
@@ -89,6 +97,7 @@ namespace Q {
 			CASE(QSz,  return (i32)z)
 			CASE(QFlt, return (f32)f)
 			CASE(QDbl, return (f64)d)
+			CASE(QChr, return (char)c)
 			default: return err_fmt(
 				"cannot convert Q of type {} to i32", (S)ty
 			);
@@ -101,6 +110,7 @@ namespace Q {
 			CASE(QSz,  return z)
 			CASE(QFlt, return (S)f)
 			CASE(QDbl, return (S)d)
+			CASE(QChr, return (S)c)
 			default: return err_fmt(
 				"cannot convert Q of type {} to size", (S)ty
 			);
@@ -113,6 +123,7 @@ namespace Q {
 			CASE(QSz,  return (f32)z)
 			CASE(QFlt, return f)
 			CASE(QDbl, return (f32)d)
+			CASE(QChr, return (f32)c)
 			default: return err_fmt(
 				"cannot convert Q of type {} to f32", (S)ty
 			);
@@ -125,8 +136,22 @@ namespace Q {
 			CASE(QSz,  return (f64)z)
 			CASE(QFlt, return (f64)f)
 			CASE(QDbl, return d)
+			CASE(QChr, return (f64)c)
 			default: return err_fmt(
 				"cannot convert Q of type {} to f64", (S)ty
+			);
+			}
+		}
+
+		inl auto to_chr() -> R<Chr> {
+			switch (ty) {
+			CASE(QInt, return (Chr)i)
+			CASE(QSz,  return (Chr)z)
+			CASE(QFlt, return (Chr)f)
+			CASE(QDbl, return (Chr)d)
+			CASE(QChr, return c)
+			default: return err_fmt(
+				"cannot convert Q of type {} to char", (S)ty
 			);
 			}
 		}

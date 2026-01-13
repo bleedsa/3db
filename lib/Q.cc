@@ -6,10 +6,12 @@ const char *Q::QTy_short[] = {
 	"z",
 	"f",
 	"d",
+	"c",
 	"I",
 	"Z",
 	"F",
 	"D",
+	"C",
 };
 
 const S Q::QTy_Z[] = {
@@ -18,10 +20,12 @@ const S Q::QTy_Z[] = {
 	Z(S),
 	Z(f32),
 	Z(f64),
+	Z(Chr),
 	Z(i32),
 	Z(S),
 	Z(f32),
 	Z(f64),
+	Z(Chr),
 };
 
 Q::Q::Q(QTy ty, u8 *ptr, S L) : ty{ty} {
@@ -33,12 +37,14 @@ Q::Q::Q(QTy ty, u8 *ptr, S L) : ty{ty} {
 	CASE(QSz,  z=*(S*)ptr)
 	CASE(QFlt, f=*(f32*)ptr)
 	CASE(QDbl, d=*(f64*)ptr)
+	CASE(QChr, c=*(Chr*)ptr)
 
 	/* memcpy vecs */
 	CASE(QINT, iA=A::A((i32*)ptr, L))
 	CASE(QSZ,  zA=A::A((S*)ptr, L))
 	CASE(QFLT, fA=A::A((f32*)ptr, L))
 	CASE(QDBL, dA=A::A((f64*)ptr, L))
+	CASE(QCHR, cA=A::A((Chr*)ptr, L))
 
 	default: fatal("raw Q::Q::Q with type {}", (S)ty);
 	}
@@ -51,6 +57,7 @@ Q::Q::~Q() {
 	CASE(QSZ,  zA.~A())
 	CASE(QFLT, fA.~A())
 	CASE(QDBL, dA.~A())
+	CASE(QCHR, cA.~A())
 	default: {}
 	}
 }
@@ -62,11 +69,13 @@ inl auto Q_cpy_val(Q::Q *x, Q::Q *y) -> void {
 	CASE(Q::QSz,  x->z=y->z)
 	CASE(Q::QFlt, x->f=y->f)
 	CASE(Q::QDbl, x->d=y->d)
+	CASE(Q::QChr, x->c=y->c)
 	/* vecs */
 	CASE(Q::QINT, x->iA=y->iA)
 	CASE(Q::QSZ,  x->zA=y->zA)
 	CASE(Q::QFLT, x->fA=y->fA)
 	CASE(Q::QDBL, x->dA=y->dA)
+	CASE(Q::QCHR, x->cA=y->cA)
 	default: {}
 	}
 }
@@ -83,19 +92,21 @@ auto Q::Q::operator=(const Q &x) -> const Q& {
 
 auto Q::Q::fill_buf_with_elems(u8 *buf) -> void {
 	switch (ty) {
-	CASE(QNil, fatal("attempting to fill buffer with nil"))
+	CASE(QNil, {})
 
 	/* atoms are a simple cast */
 	CASE(QInt, memcpy(buf, &i, Z(i32)))
 	CASE(QSz,  memcpy(buf, &z, Z(S)))
 	CASE(QFlt, memcpy(buf, &f, Z(f32)))
 	CASE(QDbl, memcpy(buf, &d, Z(f64)))
+	CASE(QChr, memcpy(buf, &c, Z(Chr)))
 
 	/* vectors are memcpy */
 	CASE(QINT, memcpy(buf, iA.ptr, Z(i32)*iA.len))
 	CASE(QSZ,  memcpy(buf, zA.ptr, Z(S)*zA.len))
 	CASE(QFLT, memcpy(buf, fA.ptr, Z(f32)*fA.len))
 	CASE(QDBL, memcpy(buf, dA.ptr, Z(f64)*dA.len))
+	CASE(QCHR, memcpy(buf, cA.ptr, Z(Chr)*cA.len))
 
 	/* vectors are memcpy */
 	default: fatal("Q::Q::fill_buf_with_elems() on Q of type {}", (S)ty);

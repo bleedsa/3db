@@ -31,11 +31,10 @@ inl auto load_Q(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 
 	res = Db::get(in->var);
 	if (!res) {
-		std::stringstream ss;
 		auto v = var_to_str(in->var);
-		ss << "entry " << v << " not found";
+		auto e = A_err("entry {} not found", v);
 		free(v);
-		return (char*)ss.str().c_str();
+		return e;
 	}
 
 	ent = *res;
@@ -48,7 +47,7 @@ inl auto load_Q(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	CASE(Db::SZ,  r = Q::Q(ent->zA))
 	CASE(Db::FLT, r = Q::Q(ent->fA))
 	CASE(Db::DBL, r = Q::Q(ent->dA))
-	default: fatal("cannot load Db::Ent of type {}", (S)ent->ty);
+	default: return A_err("cannot load Db::Ent of type {}", (S)ent->ty);
 	}
 
 	s->push_back(r);
@@ -146,6 +145,22 @@ inl auto mkAf64(std::vector<Q::Q> *s) -> char* {
 	return nullptr;
 }
 
+inl auto mkAchr(std::vector<Q::Q> *s) -> char* {
+	auto r = stk_pop(s).to_S();
+	if (!r) return A_err("mkAchr(): {}", r.error());
+	auto L = *r;
+	auto a = A::A<Chr>(L);
+
+	for (S i = 0; i < L; i++) {
+		auto x = stk_pop(s).to_chr();
+		if (!x) return A_err("mkAchr(): {}", r.error());
+		a[i] = *x;
+	}
+
+	s->push_back(Q::Q(a));
+	return nullptr;
+}
+
 inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	char *err;
 
@@ -155,6 +170,7 @@ inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	CASE(Bc::LITSz,  s->push_back(Q::Q(in->z)))
 	CASE(Bc::LITf32, s->push_back(Q::Q(in->f)))
 	CASE(Bc::LITf64, s->push_back(Q::Q(in->d)))
+	CASE(Bc::LITChr, s->push_back(Q::Q(in->c)))
 
 	/* stack ops */
 	CASE(Bc::POP,    s->pop_back());
@@ -169,6 +185,7 @@ inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	CASE(Bc::MKASz,  if ((err = mkAsz(s)))  return err)
 	CASE(Bc::MKAf32, if ((err = mkAf32(s))) return err)
 	CASE(Bc::MKAf64, if ((err = mkAf64(s))) return err)
+	CASE(Bc::MKAChr, if ((err = mkAchr(s))) return err)
 
 	/* arithmetic */
 	CASE(Bc::ADD, if ((err = add(s))) return err)

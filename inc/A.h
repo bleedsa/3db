@@ -44,6 +44,8 @@ namespace A {
 }
 
 namespace Fmt {
+	std::string Fmt(A::A<Chr> *x);
+
 	template<typename X>
 	static auto Fmt(A::A<X> *x) -> std::string {
 		std::stringstream ss;

@@ -52,8 +52,14 @@ int main(int argc, char **argv) {
 	Three::init();
 
 	auto a = Asm::Asm();
-	auto v = str_to_var("x");
+	auto v = str_to_var("char vec");
 	a.push_bod(VM::Bod(0, 0));
+	a.push_in('a');
+	a.push_in('b');
+	a.push_in('c');
+	a.push_in(3);
+	a.push_in(Bc::MKAChr);
+	a.push_in(Bc::In(Bc::STORE, v));
 	a.push_in(Bc::In(Bc::LOAD, v));
 	a.push_in(Bc::In());
 

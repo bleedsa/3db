@@ -13,11 +13,6 @@ Db::Ent::Ent(u8 *ptr) : ty{(EntTy)(ptr++)[0]} {
 	memcpy(&L,    ptr, Z(u64));   ptr += Z(u64);
 	memcpy(&name, ptr, Z(var_t)); ptr += Z(var_t);
 
-	dbg({
-		auto n = var_to_str(name);
-		std::cout << n << ' ';
-		free(n);
-	});
 	switch (ty) {
 	/* atoms */
 	CASE(Int, memcpy(&i, ptr, Z(i32)))
@@ -121,7 +116,13 @@ auto Db::load(const char *path) -> void {
 			dbg(std::cout << (char)('0'+b) << ' ');
 		}
 
-		push_ent(Ent(ptr));
+		auto e = Ent(ptr);
+		dbg({
+			auto n = var_to_str(e.name);
+			std::cout << n << ' ';
+			free(n);
+		});
+		push_ent(e);
 		delete[] ptr;
 	}
 
