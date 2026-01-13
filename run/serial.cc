@@ -26,6 +26,8 @@ int main() {
 	f("x", A::A<i32>{1, 2, 3});
 	f("y", A::A<f64>{1.2, 3.4});
 	f("z", (S)1234567890);
+	f("chr", (Chr)'X');
+	f("str", A::A<Chr>{'a', 'b', 'c'});
 
 	Three::deinit();
 }

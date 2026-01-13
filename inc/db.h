@@ -13,14 +13,16 @@ namespace Db {
 		Sz,
 		Flt,
 		Dbl,
+		Ch,
 		INT,
 		SZ,
 		FLT,
 		DBL,
+		CHR,
 	};
 
-	extern const char *EntTy_names[8];
-	extern const S EntTy_Z[8];
+	extern const char *EntTy_names[10];
+	extern const S EntTy_Z[10];
 
 	struct Ent {
 		var_t name; 
@@ -30,10 +32,12 @@ namespace Db {
 			S z;   /* Sz */
 			f32 f; /* Flt */
 			f64 d; /* Dbl */
+			Chr c; /* Chr */
 			A::A<i32> iA;
 			A::A<S> zA;
 			A::A<f32> fA;
 			A::A<f64> dA;
+			A::A<Chr> cA;
 		};
 
 		~Ent();
@@ -46,10 +50,12 @@ namespace Db {
 		EntBasic(S);
 		EntBasic(f32);
 		EntBasic(f64);
+		EntBasic(Chr);
 		EntBasic(A::A<i32>);
 		EntBasic(A::A<S>);
 		EntBasic(A::A<f32>);
 		EntBasic(A::A<f64>);
+		EntBasic(A::A<Chr>);
 
 		/* entry constructors with no EntTy parameter */
 		#define EntNoTyp(T) Ent(var_t name, T x)
@@ -57,10 +63,16 @@ namespace Db {
 		EntNoTyp(S);
 		EntNoTyp(f32);
 		EntNoTyp(f64);
+		EntNoTyp(Chr);
 		EntNoTyp(A::A<i32>);
 		EntNoTyp(A::A<S>);
 		EntNoTyp(A::A<f32>);
 		EntNoTyp(A::A<f64>);
+		EntNoTyp(A::A<Chr>);
+
+		inl auto type() -> const char* {
+			return EntTy_names[(S)ty];
+		}
 
 		inl auto atom_size() -> S {
 			return EntTy_Z[ty];
@@ -72,11 +84,13 @@ namespace Db {
 			case Sz:
 			case Flt:
 			case Dbl:
+			case Ch:
 				return 1;
 			CASE(INT, return iA.len)
 			CASE(SZ,  return zA.len)
 			CASE(FLT, return fA.len)
 			CASE(DBL, return dA.len)
+			CASE(CHR, return cA.len)
 			default: fatal("len() on entry of type {}", (S)ty);
 			}
 		}

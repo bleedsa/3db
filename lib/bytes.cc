@@ -19,11 +19,13 @@ Db::Ent::Ent(u8 *ptr) : ty{(EntTy)(ptr++)[0]} {
 	CASE(Sz,  memcpy(&z, ptr, Z(S)))
 	CASE(Flt, memcpy(&f, ptr, Z(f32)))
 	CASE(Dbl, memcpy(&d, ptr, Z(f64)))
+	CASE(Ch,  memcpy(&c, ptr, Z(Chr)))
 	/* vecs */
 	CASE(INT, iA=A::A<i32>((i32*)ptr, L))
 	CASE(SZ,  zA=A::A<S>((S*)ptr, L))
 	CASE(FLT, fA=A::A<f32>((f32*)ptr, L))
 	CASE(DBL, dA=A::A<f64>((f64*)ptr, L))
+	CASE(CHR, cA=A::A<Chr>((Chr*)ptr, L))
 	default: fatal("cannot construct entry of type {} from bytes", (S)ty);
 	}
 
@@ -50,11 +52,13 @@ auto Db::Ent::to_bytes() -> std::tuple<u8*, u64> {
 	CASE(Sz,  memcpy(ptr, &z, Z(S)))
 	CASE(Flt, memcpy(ptr, &f, Z(f32)))
 	CASE(Dbl, memcpy(ptr, &d, Z(f64)))
+	CASE(Ch,  memcpy(ptr, &c, Z(Chr)))
 	/* vecs */
 	CASE(INT, memcpy(ptr, iA.ptr, z))
 	CASE(SZ,  memcpy(ptr, zA.ptr, z))
 	CASE(FLT, memcpy(ptr, fA.ptr, z))
 	CASE(DBL, memcpy(ptr, dA.ptr, z))
+	CASE(CHR, memcpy(ptr, cA.ptr, z))
 	default: fatal("to_bytes() called on entry of type {}", (S)ty);
 	}
 

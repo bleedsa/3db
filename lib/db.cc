@@ -5,13 +5,13 @@ namespace Db {
 	std::vector<Ent> ents;
 
 	const char *EntTy_names[] = {
-		"i32", "usize", "f32", "f64",
-		"I32", "USIZE", "F32", "F64",
+		"i32", "usize", "f32", "f64", "chr",
+		"I32", "USIZE", "F32", "F64", "CHR",
 	};
 
 	const S EntTy_Z[] = {
-		Z(i32), Z(S), Z(f32), Z(f64),
-		Z(i32), Z(S), Z(f32), Z(f64),
+		Z(i32), Z(S), Z(f32), Z(f64), Z(Chr),
+		Z(i32), Z(S), Z(f32), Z(f64), Z(Chr),
 	};
 }
 
@@ -21,6 +21,7 @@ Db::Ent::~Ent() {
 	CASE(SZ,  this->zA.~A())
 	CASE(FLT, this->fA.~A())
 	CASE(DBL, this->dA.~A())
+	CASE(CHR, this->cA.~A())
 	default: {}
 	}
 }
@@ -33,11 +34,13 @@ inl auto ent_cpy_value(Db::Ent *x, Db::Ent *y) -> void {
 	CASE(Db::Sz, x->z=y->z)
 	CASE(Db::Flt,x->f=y->f)
 	CASE(Db::Dbl,x->d=y->d)
+	CASE(Db::Ch, x->c=y->c)
 	/* vectors */
 	CASE(Db::INT,x->iA=y->iA)
 	CASE(Db::SZ, x->zA=y->zA)
 	CASE(Db::FLT,x->fA=y->fA)
 	CASE(Db::DBL,x->dA=y->dA)
+	CASE(Db::CHR,x->cA=y->cA)
 	}
 }
 
@@ -59,11 +62,13 @@ EntBasicImpl(i32,i);
 EntBasicImpl(S,  z);
 EntBasicImpl(f32,f);
 EntBasicImpl(f64,d);
+EntBasicImpl(Chr,c);
 
 EntBasicImpl(A::A<i32>, iA);
 EntBasicImpl(A::A<S>,   zA);
 EntBasicImpl(A::A<f32>, fA);
 EntBasicImpl(A::A<f64>, dA);
+EntBasicImpl(A::A<Chr>, cA);
 
 #define EntNoTypImpl(X,T,f) \
 	Db::Ent::Ent(var_t name, X x) : name{name}, ty{T}, f{x} {}
@@ -71,11 +76,13 @@ EntNoTypImpl(i32,Int,i);
 EntNoTypImpl(S,  Sz, z);
 EntNoTypImpl(f32,Flt,f);
 EntNoTypImpl(f64,Dbl,d);
+EntNoTypImpl(Chr,Ch, c);
 
 EntNoTypImpl(A::A<i32>,INT,iA);
 EntNoTypImpl(A::A<S>,  SZ, zA);
 EntNoTypImpl(A::A<f32>,FLT,fA);
 EntNoTypImpl(A::A<f64>,DBL,dA);
+EntNoTypImpl(A::A<Chr>,CHR,cA);
 
 inl auto Db_get_idx(var_t name) -> std::optional<S> {
 	S r, i = 0;
