@@ -3,6 +3,12 @@
 
 #include <T.h>
 
+template<typename Y>
+inl auto fmt_vector(std::stringstream &ss, Y *ptr, S len) -> void {
+	auto a = A::A<Y>(ptr, len);
+	ss << Fmt::Fmt(&a);
+}
+
 auto Fmt::Fmt(T::T *t) -> std::string {
 	S x, y, i, rown;
 	std::string *row;
@@ -28,10 +34,19 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 			for (x = 0; x < coln; x++) {
 				std::stringstream ss;
 				switch (t->col_tys[x]) {
-				#define col_xy(Y, x, y) ss << (((Y*)t->cols[x])[y])
-				CASE(T::TInt, col_xy(i32, x, y))
-				CASE(T::TDbl, col_xy(f64, x, y))
-				CASE(T::TChr, col_xy(Chr, x, y))
+				#define fmt_col(Y) ss << ((Y*)t->cols[x])[y]
+				CASE(T::TInt, fmt_col(i32))
+				CASE(T::TDbl, fmt_col(f64))
+				CASE(T::TChr, fmt_col(Chr))
+				#define fmt_vec(Y) { \
+					auto ptr = ((S**)t->cols[x])[y]; \
+					auto buf = (Y*)(ptr+1); \
+					auto len = *ptr; \
+					fmt_vector<Y>(ss, buf, len); \
+				}
+				CASE(T::TINT, fmt_vec(i32))
+				CASE(T::TDBL, fmt_vec(f64))
+				CASE(T::TCHR, fmt_vec(Chr))
 				default:
 					ss << '{' << t->col_type(x);
 					ss << "???}";
@@ -49,19 +64,31 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 	 * make the final string
 	 */
 	std::stringstream ss;
+	auto L_sum = U::sum_vec<S>(Ls, coln);
 
-	/* a line */
-	for (S i = 0; i < U::sum_vec<S>(Ls, coln) + coln + 1; i++) ss << '=';
-	ss << std::endl;
+	/* pad L chars with c */
+	auto pad = [&](S L, char c) {
+		for (S i = 0; i < L; i++) ss << c;
+	};
+	/* make a line */
+	auto ln = [&]() {
+		pad(L_sum + coln + 1, '=');
+		ss << std::endl;
+	};
+
+	ln();
 
 	/* header */
 	ss << '|';
-	for (S i = 0; i < coln; i++) ss << head[i] << '|';
+	for (i = 0; i < coln; i++) {
+		auto c = head[i];
+		ss << c;
+		pad(Ls[i] - c.size(), ' ');
+		ss << '|';
+	}
 	ss << std::endl;
 
-	/* a line */
-	for (S i = 0; i < U::sum_vec<S>(Ls, coln) + coln + 1; i++) ss << '=';
-	ss << std::endl;
+	ln();
 
 	/* cells */
 	y = 0;
@@ -69,9 +96,8 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 		ss << '|';
 		for (x = 0; x < coln; x++) {
 			auto c = r[x];
-			S L = Ls[x] - c.size();
 			ss << c;
-			for (i = 0; i < L; i++) ss << ' ';
+			pad(Ls[x] - c.size(), ' ');
 			ss << '|';
 		}
 		ss << std::endl;

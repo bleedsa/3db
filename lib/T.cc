@@ -64,8 +64,10 @@ auto T::T::operator=(const T &x) -> const T& {
 
 auto T::T::reZ(S row) -> void {
 	if (row >= row_cap) {
+		S prev_cap = row_cap;
 		row_cap = row + 1;
 		init = remk<bool>(init, row_cap);
+		memset(init+prev_cap, false, Z(bool)*(row_cap - prev_cap));
 
 		for (S i = 0; i < coln; i++) {
 			switch (col_tys[i]) {
@@ -73,6 +75,9 @@ auto T::T::reZ(S row) -> void {
 			CASE(TInt, REMK(i32))
 			CASE(TDbl, REMK(f64))
 			CASE(TChr, REMK(Chr))
+			CASE(TINT, REMK(i32*))
+			CASE(TDBL, REMK(f64*))
+			CASE(TCHR, REMK(Chr*))
 			default: fatal("reZ on T of type {}", TColTy_short[i]);
 			}
 		}
@@ -88,13 +93,27 @@ auto T::T::insert(S id, ...) -> char* {
 	init[id] = true;
 	for (S i = 0; i < coln; i++) {
 		switch (col_tys[i]) {
-#define set_xy(Y) { \
+/* basic setter for atomic types */
+#define set_col(Y) { \
 	auto arg = va_arg(args, Y); \
 	((Y*)cols[i])[id] = arg; \
 }
-		CASE(TInt, set_xy(i32))
-		CASE(TDbl, set_xy(f64))
-		CASE(TChr, set_xy(Chr))
+/* setters for vecs expect a ptr and a length */
+#define set_vec(Y) { \
+	auto arg = va_arg(args, Y*); \
+	auto len = va_arg(args, S); \
+	auto ptr = mk<u8>(Z(S) + (Z(Y) * len)); \
+	auto buf = (u8*)(((S*)ptr)+1); \
+	*(S*)ptr = len; \
+	memcpy(buf, arg, Z(Y)*len); \
+	((u8**)cols[i])[id] = ptr; \
+}
+		CASE(TInt, set_col(i32))
+		CASE(TDbl, set_col(f64))
+		CASE(TChr, set_col(Chr))
+		CASE(TINT, set_vec(i32))
+		CASE(TDBL, set_vec(f64))
+		CASE(TCHR, set_vec(Chr))
 		default: return A_err(
 			"cannot insert col of type {}", TColTy_short[col_tys[i]]
 		);
