@@ -4,18 +4,18 @@
 #include <T.h>
 
 S T::TColTy_Z[] = {
-	Z(i32), Z(S), Z(f32), Z(f64), Z(Chr),
-	Z(i32), Z(S), Z(f32), Z(f64), Z(Chr),
+	Z(i32), Z(f64), Z(Chr),
+	Z(A::A<i32>), Z(A::A<f64>), Z(A::A<Chr>),
 };
 
 const char *T::TColTy_short[] = {
-	"i", "z", "f", "d", "c",
-	"I", "Z", "F", "D", "C",
+	"i", "d", "c",
+	"I", "D", "C",
 };
 
 const char *T::TColTy_names[] = {
-	"i32", "usize", "f32", "f64", "chr",
-	"I32", "USIZE", "F32", "F64", "CHR",
+	"i32", "f64", "chr",
+	"I32", "F64", "CHR",
 };
 
 T::T::T(A::A<var_t> n, A::A<TColTy> a)
@@ -71,9 +71,8 @@ auto T::T::reZ(S row) -> void {
 			switch (col_tys[i]) {
 #define REMK(X) cols[i] = (u8*)remk<X>((X*)cols[i], row_cap)
 			CASE(TInt, REMK(i32))
-			CASE(TSz,  REMK(S))
-			CASE(TFlt, REMK(f32))
 			CASE(TDbl, REMK(f64))
+			CASE(TChr, REMK(Chr))
 			default: fatal("reZ on T of type {}", TColTy_short[i]);
 			}
 		}
@@ -89,10 +88,11 @@ auto T::T::insert(S id, ...) -> char* {
 	init[id] = true;
 	for (S i = 0; i < coln; i++) {
 		switch (col_tys[i]) {
-		#define set_xy(Y) ((Y*)cols[i])[id] = va_arg(args, Y)
+#define set_xy(Y) { \
+	auto arg = va_arg(args, Y); \
+	((Y*)cols[i])[id] = arg; \
+}
 		CASE(TInt, set_xy(i32))
-		CASE(TSz,  set_xy(S))
-		CASE(TFlt, set_xy(f32))
 		CASE(TDbl, set_xy(f64))
 		CASE(TChr, set_xy(Chr))
 		default: return A_err(

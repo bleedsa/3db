@@ -8,20 +8,16 @@
 namespace T {
 	enum TColTy {
 		TInt,
-		TSz,
-		TFlt,
 		TDbl,
 		TChr,
 		TINT,
-		TSZ,
-		TFLT,
 		TDBL,
 		TCHR,
 	};
 
-	extern S TColTy_Z[10];
-	extern const char *TColTy_short[10];
-	extern const char *TColTy_names[10];
+	extern S TColTy_Z[6];
+	extern const char *TColTy_short[6];
+	extern const char *TColTy_names[6];
 
 	struct T {
 		S coln, row_cap;

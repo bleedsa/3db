@@ -30,8 +30,6 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 				switch (t->col_tys[x]) {
 				#define col_xy(Y, x, y) ss << (((Y*)t->cols[x])[y])
 				CASE(T::TInt, col_xy(i32, x, y))
-				CASE(T::TSz,  col_xy(S,   x, y))
-				CASE(T::TFlt, col_xy(f32, x, y))
 				CASE(T::TDbl, col_xy(f64, x, y))
 				CASE(T::TChr, col_xy(Chr, x, y))
 				default:
