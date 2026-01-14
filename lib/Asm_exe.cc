@@ -3,10 +3,32 @@
 
 inl auto stk_pop(std::vector<Q::Q> *s) -> Q::Q {
 	i64 i = s->size() - 1;
-	auto r = i >= 0 ? s->at(i) : Q::Q();
-	s->pop_back();
+	if (i >= 0) {
+		auto r = s->at(i);
+		s->pop_back();
+		return r;
+	} else {
+		return Q::Q();
+	}
+}
+
+inl auto stk_pop_head(std::vector<Q::Q> *s) -> Q::Q {
+	auto r = s->at(0);
+	s->erase(s->begin());
 	return r;
 }
+
+inl auto stk_head(std::vector<Q::Q> *s) -> Q::Q* {
+	return &s->at(0);
+}
+
+inl auto stk_show(std::vector<Q::Q> *s) -> void {
+	for (auto &x : *s) {
+		std::cout << x.short_name() << ' ';
+		std::cout << Fmt::Fmt(&x) << std::endl;
+	}
+}
+
 
 inl auto store_Q(std::vector<Q::Q> *s, Bc::In *in) -> void {
 	auto x = stk_pop(s);
@@ -133,12 +155,56 @@ inl auto mkT(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 		tys[i] = (T::TColTy)*r;
 
 		auto v = stk_pop(s).to_var();
-		if (!v) return A_err("mkT(): {}", v.error());
+		if (!v) return (char*)v.error().c_str();
 		names[i] = *v;
 	}
 
-	auto tab = T::T(names, tys);
-	s->push_back(Q::Q(tab));
+	s->push_back(Q::Q(T::T(names, tys)));
+
+	return nullptr;
+}
+
+inl auto Tinsert(std::vector<Q::Q> *s, Bc::In *in) -> char* {
+	S i, id = (S)in->i;
+
+	/* get a ptr to the table */
+	auto r = stk_head(s)->to_T_ptr();
+	if (!r) {
+		std::stringstream ss;
+		ss << "Tinsert(): bottom of the stack is not a table.";
+		ss << std::endl;
+
+		for (auto &x : *s) {
+			ss << x.short_name() << ' ';
+			ss << Fmt::Fmt(&x) << std::endl;
+		}
+
+		u8 *p = Str::Interns::ptr[Str::Interns::add(ss.str().c_str())];
+		return (char*)p;
+
+	}
+
+	auto t = *r;
+	t->reZ(id);
+
+	for (i = 0; i < t->coln; i++) {
+		auto x = stk_pop(s);
+		auto P = x.to_bytes();
+
+		switch (t->col_tys[i]) {
+		#define set_col_ptr(X) memcpy(((X*)t->cols[i])+id, P, Z(X))
+		CASE(T::TInt, set_col_ptr(i32))
+		CASE(T::TDbl, set_col_ptr(f64))
+		CASE(T::TChr, set_col_ptr(Chr))
+		default: return A_err(
+			"cannot insert column of type {}", x.short_name()
+		);
+		}
+
+		delete[] P;
+
+	}
+	t->init[id] = true;
 
 	return nullptr;
 }
@@ -154,6 +220,7 @@ inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	CASE(Bc::LITVar, s->push_back(Q::Q(in->var)))
 
 	/* stack ops */
+	CASE(Bc::SHOW,   stk_show(s))
 	CASE(Bc::POP,    s->pop_back());
 
 	/* db ops */
@@ -168,6 +235,7 @@ inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 
 	/* table ops */
 	CASE(Bc::MKT, if ((err = mkT(s, in))) return err)
+	CASE(Bc::TINSERT, if ((err = Tinsert(s, in))) return err)
 
 	/* arithmetic */
 	CASE(Bc::ADD, if ((err = add(s))) return err)

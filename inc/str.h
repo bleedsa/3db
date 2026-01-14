@@ -23,6 +23,7 @@ namespace Str {
 
 		S push(u8 *str);
 		S add(u8 *str);
+		S add(const char *str);
 	}
 
 	/* static sized, heap allocated string */

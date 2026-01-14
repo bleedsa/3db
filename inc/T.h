@@ -53,8 +53,22 @@ namespace T {
 			return init[i];
 		}
 
+		inl auto alloc_row() -> u8* {
+			/* calculate the buffer size */
+			S *Zs = new S[coln], z;
+			for (S i = 0; i < coln; i++) {
+				Zs[i] = TColTy_Z[col_tys[i]];
+			}
+			z = U::sum_vec<S>(Zs, coln);
+
+			/* alloc */
+			auto ptr = new u8[z];
+			return ptr;
+		}
+
 		void reZ(S row);
 		char *insert(S id, ...);
+		char *insert_col(S id, S col, u8 *ptr, S z);
 	};
 }
 

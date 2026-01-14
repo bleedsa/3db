@@ -25,7 +25,7 @@
 /* fuck you */
 #define A_err(f...) ({ \
 	auto _x=std::format(f); \
-	(char*)Str::Interns::ptr[Str::Interns::add((u8*)_x.c_str())]; \
+	(char*)Str::Interns::ptr[Str::Interns::add(_x.c_str())]; \
 })
 
 #ifdef DBG 

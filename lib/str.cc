@@ -69,6 +69,12 @@ namespace Str::Interns {
 		if (o) return *o;
 		else return push(str);
 	}
+
+	auto add(const char *str) -> S {
+		auto o = fnd((u8*)str);
+		if (o) return *o;
+		else return push((u8*)str);
+	}
 }
 
 

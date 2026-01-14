@@ -56,6 +56,7 @@ Q::Q::~Q() {
 
 inl auto Q_cpy_val(Q::Q *x, Q::Q *y) -> void {
 	switch (y->ty) {
+	CASE(Q::QNil, {})
 	/* atoms */
 	CASE(Q::QInt, x->i=y->i)
 	CASE(Q::QDbl, x->d=y->d)
@@ -98,4 +99,21 @@ auto Q::Q::fill_buf_with_elems(u8 *buf) -> void {
 	/* vectors are memcpy */
 	default: fatal("Q::Q::fill_buf_with_elems() on Q of type {}", (S)ty);
 	}
+}
+
+auto Q::Q::to_bytes() -> u8* {
+	auto buf = new u8[Z(Q) - 8];
+	switch (ty) {
+	/* atoms are memcpy */
+	CASE(QInt, memcpy(buf, &i, Z(i32)))
+	CASE(QDbl, memcpy(buf, &d, Z(f64)))
+	CASE(QChr, memcpy(buf, &c, Z(Chr)))
+	/* vectors are operator= */
+	CASE(QINT, *reinterpret_cast<A::A<i32>*>(buf) = iA)
+	CASE(QDBL, *reinterpret_cast<A::A<f64>*>(buf) = dA)
+	CASE(QCHR, *reinterpret_cast<A::A<Chr>*>(buf) = cA)
+	default: fatal("Q::to_bytes() on {}", short_name())
+	}
+
+	return buf;
 }

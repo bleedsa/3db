@@ -18,6 +18,7 @@ namespace Bc {
 		LITChr, /* (c)       -- Q                 | create lit char */
 		LITVar, /* (v)       -- Q                 | create lit var */
 		/* stack/var ops */
+		SHOW,   /* ( ) x     -- cout<<stk         | show the stack */
 		POP,    /* ( ) x     --                   | pop off the stack */
 		LOAD,   /* (x)       -- vars[x]           | load var at x */
 		STORE,  /* (x) y     -- vars[x]:y         | store y at var x */
@@ -29,7 +30,7 @@ namespace Bc {
 		GETVEC, /* ( ) x i   -- x[i]              | get elem from vec */
 		/* table ops */
 		MKT,    /* (x)   t*x -- tab with cols t   | new table with X */
-		TINS,   /* ( )       --                   | insert into tab */
+		TINSERT,/* ( )       --                   | insert into tab */
 		/* arithmetic */
 		ADD,    /* ( ) x y   -- x+y               | addition */
 		SUB,    /* ( ) x y   -- x-y               | subtraction*/

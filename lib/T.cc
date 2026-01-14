@@ -122,3 +122,5 @@ auto T::T::insert(S id, ...) -> char* {
 
 	return nullptr;
 }
+
+//auto T::T::insert_

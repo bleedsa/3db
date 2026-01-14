@@ -93,7 +93,8 @@ namespace Q {
 			CASE(QDbl, return (f64)d)
 			CASE(QChr, return (char)c)
 			default: return err_fmt(
-				"cannot convert Q of type {} to i32", (S)ty
+				"cannot convert Q of type {} to i32",
+				short_name()
 			);
 			}
 		}
@@ -104,7 +105,8 @@ namespace Q {
 			CASE(QDbl, return (S)d)
 			CASE(QChr, return (S)c)
 			default: return err_fmt(
-				"cannot convert Q of type {} to size", (S)ty
+				"cannot convert Q of type {} to size",
+				short_name()
 			);
 			}
 		}
@@ -115,7 +117,8 @@ namespace Q {
 			CASE(QDbl, return (f32)d)
 			CASE(QChr, return (f32)c)
 			default: return err_fmt(
-				"cannot convert Q of type {} to f32", (S)ty
+				"cannot convert Q of type {} to f32",
+				short_name()
 			);
 			}
 		}
@@ -126,7 +129,8 @@ namespace Q {
 			CASE(QDbl, return d)
 			CASE(QChr, return (f64)c)
 			default: return err_fmt(
-				"cannot convert Q of type {} to f64", (S)ty
+				"cannot convert Q of type {} to f64",
+				short_name()
 			);
 			}
 		}
@@ -137,7 +141,8 @@ namespace Q {
 			CASE(QDbl, return (Chr)d)
 			CASE(QChr, return c)
 			default: return err_fmt(
-				"cannot convert Q of type {} to char", (S)ty
+				"cannot convert Q of type {} to char", 
+				short_name()
 			);
 			}
 		}
@@ -146,12 +151,34 @@ namespace Q {
 			switch (ty) {
 			CASE(QVar, return var)
 			default: return err_fmt(
-				"cannot convert Q of type {} to var", (S)ty
+				"cannot convert Q of type {} to var",
+				short_name()
+			);
+			}
+		}
+
+		inl auto to_T() -> R<T::T> {
+			switch (ty) {
+			CASE(QTab, return t)
+			default: return err_fmt(
+				"cannot convert Q of type {} to table",
+				short_name()
+			);
+			}
+		}
+
+		inl auto to_T_ptr() -> R<T::T*> {
+			switch (ty) {
+			CASE(QTab, return &t)
+			default: return err_fmt(
+				"cannot convert Q of type {} to table",
+				short_name()
 			);
 			}
 		}
 
 		void fill_buf_with_elems(u8 *buf);
+		u8 *to_bytes();
 	};
 
 	/* make a "dyad" identifier (two (u8)Qty mashed together) */
