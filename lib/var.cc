@@ -18,7 +18,7 @@ auto str_to_var(const char *y) -> var_t {
 }
 
 auto var_to_str(var_t y) -> char* {
-	auto x = mk<char>(Z(var_t)+1);
+	auto x = new char[Z(var_t)+1];
 	memcpy(x, &y, Z(var_t));
 	x[16] = 0;
 	return x;

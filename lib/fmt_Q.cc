@@ -9,18 +9,22 @@ auto Fmt::Fmt(Q::Q *x) -> std::string {
 	/* atoms */
 	CASE(Q::QNil, ss<<"nil")
 	CASE(Q::QInt, ss<<x->i)
-	CASE(Q::QSz,  ss<<x->z)
-	CASE(Q::QFlt, ss<<x->f)
 	CASE(Q::QDbl, ss<<x->d)
 	CASE(Q::QChr, ss<<x->c)
 	/* vecs */
 	CASE(Q::QINT, ss<<Fmt::Fmt(&x->iA))
-	CASE(Q::QSZ,  ss<<Fmt::Fmt(&x->zA))
-	CASE(Q::QFLT, ss<<Fmt::Fmt(&x->fA))
 	CASE(Q::QDBL, ss<<Fmt::Fmt(&x->dA))
 	CASE(Q::QCHR, ss<<Fmt::Fmt(&x->cA))
+	/* table */
+	CASE(Q::QTab, ss<<Fmt::Fmt(&x->t))
+	/* vars */
+	CASE(Q::QVar, {
+		auto str = var_to_str(x->var);
+		ss << str;
+		delete[] str;
+	})
 
-	default: ss << '{' << (S)x->ty << "???}";
+	default: ss << '{' << x->short_name() << "???}";
 	}
 
 	return ss.str();

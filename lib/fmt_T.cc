@@ -24,6 +24,7 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 		auto s = std::format("{}:{}", n, Y);
 		head[i] = s;
 		Ls[i] = s.size();
+		delete[] n;
 	}
 
 	/* format each row */

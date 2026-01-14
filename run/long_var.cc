@@ -8,7 +8,7 @@ int main() {
 	/* make a dummy asm */
 	auto a = Asm::Asm();
 	a.push_bod(VM::Bod(0, 0));
-	a.push_in(Bc::In(123.4f));
+	a.push_in(Bc::In(123.456));
 	a.push_in(Bc::In(Bc::STORE, long_name));
 	a.push_in(Bc::In(Bc::LOAD, long_name));
 	a.push_in(Bc::In());
@@ -16,6 +16,7 @@ int main() {
 	/* display the name */
 	auto s = var_to_str(str_to_var(long_name));
 	std::cout << s << std::endl;
+	delete[] s;
 
 	/* exe */
 	auto r = a.exe();

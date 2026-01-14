@@ -23,8 +23,6 @@ int main() {
 	Three::init();
 
 	run_add(1234, 5678);
-	run_add((S)1, (S)2);
-	run_add(1.2f, 3.4f);
 	run_add(1.23, 4.56);
 
 	Three::deinit();

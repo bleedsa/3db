@@ -8,7 +8,7 @@ inl auto f(A::A<X> v, Bc::InTy ty) -> void {
 	for (S i = 0; i < v.len; i++) {
 		a.push_in(v[i]);
 	}
-	a.push_in(v.len);
+	a.push_in((I)v.len);
 	a.push_in(ty);
 
 	auto r = a.exe();
@@ -24,10 +24,8 @@ int main() {
 	Three::init();
 
 	f(A::A<i32>{1, 2, 3}, Bc::MKAi32);
-	f(A::A<S>{1, 2, 3, 4}, Bc::MKASz);
-	f(A::A<f32>{1.23f, 4.56f}, Bc::MKAf32);
 	f(A::A<f64>{1.234, 5.678}, Bc::MKAf64);
-	f(A::A<char>{'a', 'b', 'c'}, Bc::MKAChr);
+	f(A::A<Chr>{'a', 'b', 'c'}, Bc::MKAChr);
 
 	Three::deinit();
 }

@@ -3,29 +3,25 @@
 const char *Q::QTy_short[] = {
 	"0",
 	"i",
-	"z",
-	"f",
 	"d",
 	"c",
 	"I",
-	"Z",
-	"F",
 	"D",
 	"C",
+	"t",
+	"v",
 };
 
 const S Q::QTy_Z[] = {
 	0,
 	Z(i32),
-	Z(S),
-	Z(f32),
 	Z(f64),
 	Z(Chr),
 	Z(i32),
-	Z(S),
-	Z(f32),
 	Z(f64),
 	Z(Chr),
+	Z(T::T),
+	Z(var_t),
 };
 
 Q::Q::Q(QTy ty, u8 *ptr, S L) : ty{ty} {
@@ -34,15 +30,12 @@ Q::Q::Q(QTy ty, u8 *ptr, S L) : ty{ty} {
 
 	/* cast atoms */
 	CASE(QInt, i=*(i32*)ptr)
-	CASE(QSz,  z=*(S*)ptr)
-	CASE(QFlt, f=*(f32*)ptr)
 	CASE(QDbl, d=*(f64*)ptr)
 	CASE(QChr, c=*(Chr*)ptr)
+	CASE(QVar, var=*(var_t*)ptr)
 
 	/* memcpy vecs */
 	CASE(QINT, iA=A::A((i32*)ptr, L))
-	CASE(QSZ,  zA=A::A((S*)ptr, L))
-	CASE(QFLT, fA=A::A((f32*)ptr, L))
 	CASE(QDBL, dA=A::A((f64*)ptr, L))
 	CASE(QCHR, cA=A::A((Chr*)ptr, L))
 
@@ -54,10 +47,9 @@ Q::Q::~Q() {
 	switch (ty) {
 	/* only vecs need to be destroyed */
 	CASE(QINT, iA.~A())
-	CASE(QSZ,  zA.~A())
-	CASE(QFLT, fA.~A())
 	CASE(QDBL, dA.~A())
 	CASE(QCHR, cA.~A())
+	CASE(QTab, t.~T())
 	default: {}
 	}
 }
@@ -66,17 +58,16 @@ inl auto Q_cpy_val(Q::Q *x, Q::Q *y) -> void {
 	switch (y->ty) {
 	/* atoms */
 	CASE(Q::QInt, x->i=y->i)
-	CASE(Q::QSz,  x->z=y->z)
-	CASE(Q::QFlt, x->f=y->f)
 	CASE(Q::QDbl, x->d=y->d)
 	CASE(Q::QChr, x->c=y->c)
 	/* vecs */
 	CASE(Q::QINT, x->iA=y->iA)
-	CASE(Q::QSZ,  x->zA=y->zA)
-	CASE(Q::QFLT, x->fA=y->fA)
 	CASE(Q::QDBL, x->dA=y->dA)
 	CASE(Q::QCHR, x->cA=y->cA)
-	default: {}
+	/* other */
+	CASE(Q::QTab, x->t=y->t)
+	CASE(Q::QVar, x->var=y->var)
+	default: fatal("cannot copy Q of type {}", y->short_name());
 	}
 }
 
@@ -96,15 +87,11 @@ auto Q::Q::fill_buf_with_elems(u8 *buf) -> void {
 
 	/* atoms are a simple cast */
 	CASE(QInt, memcpy(buf, &i, Z(i32)))
-	CASE(QSz,  memcpy(buf, &z, Z(S)))
-	CASE(QFlt, memcpy(buf, &f, Z(f32)))
 	CASE(QDbl, memcpy(buf, &d, Z(f64)))
 	CASE(QChr, memcpy(buf, &c, Z(Chr)))
 
 	/* vectors are memcpy */
 	CASE(QINT, memcpy(buf, iA.ptr, Z(i32)*iA.len))
-	CASE(QSZ,  memcpy(buf, zA.ptr, Z(S)*zA.len))
-	CASE(QFLT, memcpy(buf, fA.ptr, Z(f32)*fA.len))
 	CASE(QDBL, memcpy(buf, dA.ptr, Z(f64)*dA.len))
 	CASE(QCHR, memcpy(buf, cA.ptr, Z(Chr)*cA.len))
 

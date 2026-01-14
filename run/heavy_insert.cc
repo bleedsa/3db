@@ -16,7 +16,7 @@ int main() {
 	for (auto &e : Db::ents) {
 		auto str = var_to_str(e.name);
 		std::cout << str << ' ' << e.z;
-		free(str);
+		delete[] str;
 	}
 
 	std::cout << std::endl;

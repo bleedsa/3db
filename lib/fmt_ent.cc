@@ -19,7 +19,7 @@ auto Fmt::Fmt(Db::Ent *x) -> std::string {
 	CASE(Db::FLT, ss<<Fmt::Fmt(&x->fA))
 	CASE(Db::DBL, ss<<Fmt::Fmt(&x->dA))
 	CASE(Db::CHR, ss<<Fmt::Fmt(&x->cA))
-	default: ss << '{' << (S)x->ty << "???}";
+	default: ss << '{' << x->type() << "???}";
 	}
 
 	free(name);

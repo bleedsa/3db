@@ -13,13 +13,9 @@ inl auto store_Q(std::vector<Q::Q> *s, Bc::In *in) -> void {
 
 	switch (x.ty) {
 	CASE(Q::QInt, Db::push_ent(in->var, x.i))
-	CASE(Q::QSz,  Db::push_ent(in->var, x.z))
-	CASE(Q::QFlt, Db::push_ent(in->var, x.f))
 	CASE(Q::QDbl, Db::push_ent(in->var, x.d))
 	CASE(Q::QChr, Db::push_ent(in->var, x.c))
 	CASE(Q::QINT, Db::push_ent(in->var, x.iA))
-	CASE(Q::QSZ,  Db::push_ent(in->var, x.zA))
-	CASE(Q::QFLT, Db::push_ent(in->var, x.fA))
 	CASE(Q::QDBL, Db::push_ent(in->var, x.dA))
 	CASE(Q::QCHR, Db::push_ent(in->var, x.cA))
 	default: fatal("cannot store Q of type {}", x.short_name());
@@ -41,13 +37,9 @@ inl auto load_Q(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	ent = *res;
 	switch (ent->ty) {
 	CASE(Db::Int, r = Q::Q(ent->i))
-	CASE(Db::Sz,  r = Q::Q(ent->z))
-	CASE(Db::Flt, r = Q::Q(ent->f))
 	CASE(Db::Dbl, r = Q::Q(ent->d))
 	CASE(Db::Ch,  r = Q::Q(ent->c))
 	CASE(Db::INT, r = Q::Q(ent->iA))
-	CASE(Db::SZ,  r = Q::Q(ent->zA))
-	CASE(Db::FLT, r = Q::Q(ent->fA))
 	CASE(Db::DBL, r = Q::Q(ent->dA))
 	CASE(Db::CHR, r = Q::Q(ent->cA))
 	default: return A_err("cannot load entry of type {}", ent->type());
@@ -73,8 +65,6 @@ inl auto add(std::vector<Q::Q> *s) -> char* {
 	switch (T) {
 	/* scalar adds */
 	CASE(Q::mkQTy_dyad(Q::QInt, Q::QInt), r = Q::Q(x.i + y.i))
-	CASE(Q::mkQTy_dyad(Q::QSz,  Q::QSz),  r = Q::Q(x.z + y.z))
-	CASE(Q::mkQTy_dyad(Q::QFlt, Q::QFlt), r = Q::Q(x.f + y.f))
 	CASE(Q::mkQTy_dyad(Q::QDbl, Q::QDbl), r = Q::Q(x.d + y.d))
 
 	default: return A_err("'nyi: {}+{}", x.short_name(), y.short_name());
@@ -93,38 +83,6 @@ inl auto mkAi32(std::vector<Q::Q> *s) -> char* {
 	for (S i = 0; i < L; i++) {
 		auto x = stk_pop(s).to_i32();
 		if (!x) return A_err("mkAi32(): {}", r.error());
-		a[i] = *x;
-	}
-
-	s->push_back(Q::Q(a));
-	return nullptr;
-}
-
-inl auto mkAsz(std::vector<Q::Q> *s) -> char* {
-	auto r = stk_pop(s).to_S();
-	if (!r) return A_err("mkAsz(): {}", r.error());
-	auto L = *r;
-	auto a = A::A<S>(L);
-
-	for (S i = 0; i < L; i++) {
-		auto x = stk_pop(s).to_S();
-		if (!x) return A_err("mkAsz(): {}", r.error());
-		a[i] = *x;
-	}
-
-	s->push_back(Q::Q(a));
-	return nullptr;
-}
-
-inl auto mkAf32(std::vector<Q::Q> *s) -> char* {
-	auto r = stk_pop(s).to_S();
-	if (!r) return A_err("mkAf32(): {}", r.error());
-	auto L = *r;
-	auto a = A::A<f32>(L);
-
-	for (S i = 0; i < L; i++) {
-		auto x = stk_pop(s).to_f32();
-		if (!x) return A_err("mkAf32(): {}", r.error());
 		a[i] = *x;
 	}
 
@@ -164,16 +122,36 @@ inl auto mkAchr(std::vector<Q::Q> *s) -> char* {
 	return nullptr;
 }
 
+inl auto mkT(std::vector<Q::Q> *s, Bc::In *in) -> char* {
+	auto coln = (S)in->i;
+	auto tys = A::A<T::TColTy>(coln);
+	auto names = A::A<var_t>(coln);
+
+	for (S i = 0; i < coln; i++) {
+		auto r = stk_pop(s).to_i32();
+		if (!r) return A_err("mkT(): {}", r.error());
+		tys[i] = (T::TColTy)*r;
+
+		auto v = stk_pop(s).to_var();
+		if (!v) return A_err("mkT(): {}", v.error());
+		names[i] = *v;
+	}
+
+	auto tab = T::T(names, tys);
+	s->push_back(Q::Q(tab));
+
+	return nullptr;
+}
+
 inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	char *err;
 
 	switch (in->ty) {
 	/* literals */
 	CASE(Bc::LITi32, s->push_back(Q::Q(in->i)))
-	CASE(Bc::LITSz,  s->push_back(Q::Q(in->z)))
-	CASE(Bc::LITf32, s->push_back(Q::Q(in->f)))
 	CASE(Bc::LITf64, s->push_back(Q::Q(in->d)))
 	CASE(Bc::LITChr, s->push_back(Q::Q(in->c)))
+	CASE(Bc::LITVar, s->push_back(Q::Q(in->var)))
 
 	/* stack ops */
 	CASE(Bc::POP,    s->pop_back());
@@ -185,10 +163,11 @@ inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 
 	/* vector ops */
 	CASE(Bc::MKAi32, if ((err = mkAi32(s))) return err)
-	CASE(Bc::MKASz,  if ((err = mkAsz(s)))  return err)
-	CASE(Bc::MKAf32, if ((err = mkAf32(s))) return err)
 	CASE(Bc::MKAf64, if ((err = mkAf64(s))) return err)
 	CASE(Bc::MKAChr, if ((err = mkAchr(s))) return err)
+
+	/* table ops */
+	CASE(Bc::MKT, if ((err = mkT(s, in))) return err)
 
 	/* arithmetic */
 	CASE(Bc::ADD, if ((err = add(s))) return err)

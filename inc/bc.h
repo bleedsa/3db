@@ -2,8 +2,11 @@
 #define __3DB_BC_H__
 
 #include <str.h>
+#include <sse.h>
 #include <Q.h>
 #include <var.h>
+#include <A.h>
+#include <T.h>
 
 namespace Bc {
 	enum InTy {
@@ -11,10 +14,9 @@ namespace Bc {
 		RET,
 		/* push literal objs */
 		LITi32, /* (i)       -- Q                 | create lit i32 */
-		LITSz,  /* (z)       -- Q                 | create lit S */
-		LITf32, /* (f)       -- Q                 | create lit f32 */
 		LITf64, /* (d)       -- Q                 | create lit f64 */
 		LITChr, /* (c)       -- Q                 | create lit char */
+		LITVar, /* (v)       -- Q                 | create lit var */
 		/* stack/var ops */
 		POP,    /* ( ) x     --                   | pop off the stack */
 		LOAD,   /* (x)       -- vars[x]           | load var at x */
@@ -22,14 +24,12 @@ namespace Bc {
 		DEL,    /* (x)       -- drop vars[x]      | delete var x */
 		/* vector ops */
 		MKAi32, /* ( ) i xs  -- vec i long        | make a vector */
-		MKASz,  /* ( ) i xs  -- vec i long        | make a vector */
-		MKAf32, /* ( ) i xs  -- vec i long        | make a vector */
 		MKAf64, /* ( ) i xs  -- vec i long        | make a vector */
 		MKAChr, /* ( ) i xs  -- vec i long        | make a vector */
 		GETVEC, /* ( ) x i   -- x[i]              | get elem from vec */
 		/* table ops */
-		MKTAB,  /* (x)       -- vars[x]:empty tab | new table at x */
-		GETCOL, /* (x) y     -- col of vars[x]@y  | get col y of x */
+		MKT,    /* (x)   t*x -- tab with cols t   | new table with X */
+		TINS,   /* ( )       --                   | insert into tab */
 		/* arithmetic */
 		ADD,    /* ( ) x y   -- x+y               | addition */
 		SUB,    /* ( ) x y   -- x-y               | subtraction*/
@@ -41,8 +41,6 @@ namespace Bc {
 		InTy ty;
 		union {
 			I i;
-			S z;
-			f32 f;
 			f64 d;
 			char c;
 			var_t var;
@@ -52,17 +50,18 @@ namespace Bc {
 		inl In(InTy ty) : ty{ty} {}
 
 		In(InTy ty, I x);
-		In(InTy ty, S x);
-		In(InTy ty, f32 x);
 		In(InTy ty, f64 x);
 		In(InTy ty, char x);
 		In(InTy ty, const char *x);
 		In(InTy ty, var_t x);
+		In(InTy ty, T::TColTy x);
+
 		In(I x);
-		In(S x);
-		In(f32 x);
 		In(f64 x);
 		In(char x);
+		In(var_t x);
+		In(const char *x);
+
 		inl ~In() {}
 
 		In(const In &x);
