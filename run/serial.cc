@@ -28,13 +28,13 @@ int main() {
 	f("str", A::A<Chr>{'a', 'b', 'c'});
 
 	auto t = T::T(
-		A::A{"ints",  "dbls"},
-		A::A{T::TInt, T::TDbl}
+		A::A{"ints",  "dbls", "strs"},
+		A::A{T::TInt, T::TDbl, T::TCHR}
 	);
-	auto ptr = (char*)"abcdef";
-	t.insert(00, 1, 2.345);
-	t.insert(01, 2, 6.789);
-	t.insert(33, 3, 22.22);
+	auto a = A::A<Chr>{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
+	t.insert(00,1,2.345,a.ptr,a.len);a=a.each<Chr>([](Chr*c){return*c+4;});
+	t.insert(01,2,6.789,a.ptr,a.len);a=a.each<Chr>([](Chr*c){return*c+4;});
+	t.insert(33,3,22.22,a.ptr,a.len);
 	f("tab", t);
 
 	Three::deinit();

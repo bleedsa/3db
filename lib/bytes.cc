@@ -171,9 +171,6 @@ auto Db::write(const char *path) -> void {
 	/* write the header */
 	f << L;
 
-	dbg(std::cout << "writing " << L << " entries...");
-	dbg(fflush(stdout));
-
 	/* write the entries */
 	for (S i = 0; i < L; i++) {
 		auto e = &Db::ents[i];
@@ -181,16 +178,12 @@ auto Db::write(const char *path) -> void {
 
 		/* every entry starts with the size of the buffer in bytes */
 		f << z;
-		dbg(std::cout << '(' << z << " bytes) ");
 
 		/* write one byte at a time */
 		for (S j = 0; j < z; j++) {
 			f << b[j];
-			dbg(std::cout << (char)('0'+b[j]) << ' ');
 		}
 	}
-
-	dbg(std::cout << "ok" << std::endl);
 }
 
 auto Db::load(const char *path) -> void {
@@ -201,32 +194,20 @@ auto Db::load(const char *path) -> void {
 	/* read the header */
 	f >> L;
 
-	dbg(std::cout << "loading " << L << " entries...");
-	dbg(fflush(stdout));
-
 	for (S i = 0; i < L; i++) {
 		/* each entry starts with the size of the buffer in bytes */
 		f >> z;
 		/* make a buffer to fill */
 		ptr = new u8[z];
-		dbg(std::cout << '(' << z << " bytes) ");
 
 		/* load byte by byte */
 		for (S j = 0; j < z; j++) {
 			f >> b;
 			ptr[j] = b;
-			dbg(std::cout << (char)('0'+b) << ' ');
 		}
 
 		auto e = Ent(ptr);
-		dbg({
-			auto n = var_to_str(e.name);
-			std::cout << n << ' ';
-			delete[] n;
-		});
 		push_ent(e);
 		delete[] ptr;
 	}
-
-	dbg(std::cout << "ok" << std::endl);
 }

@@ -68,6 +68,7 @@ int main(int argc, char **argv) {
 
 	/* store the table */
 	a.push_in(Bc::In(Bc::STORE, v));
+	a.push_in(Bc::In(Bc::LOAD, v));
 
 	/* ret */
 	a.push_in(Bc::In());
