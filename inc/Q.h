@@ -83,6 +83,19 @@ namespace Q {
 			return QTy_Z[ty];
 		}
 
+		inl auto calc_serial_Z() -> S {
+			switch (ty) {
+			CASE(QTab, return t.calc_serial_Z())
+			/* vecs */
+			case QINT:
+			case QDBL:
+			case QCHR:
+				return Z(u64) + (atom_size() * len());
+			default:
+				return atom_size();
+			}
+		}
+
 		inl auto short_name() -> const char* {
 			return QTy_short[ty];
 		}

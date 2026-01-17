@@ -83,20 +83,15 @@ auto Q::Q::fill_buf_with_elems(u8 *buf) -> void {
 }
 
 auto Q::Q::to_bytes() -> u8* {
-	auto buf = new u8[Z(Q) - 8];
-	switch (ty) {
-	/* atoms are memcpy */
-	CASE(QInt, memcpy(buf, &i, Z(i32)))
-	CASE(QDbl, memcpy(buf, &d, Z(f64)))
-	CASE(QChr, memcpy(buf, &c, Z(Chr)))
-	/* vectors are operator= */
-	CASE(QINT, *reinterpret_cast<A::A<i32>*>(buf) = iA)
-	CASE(QDBL, *reinterpret_cast<A::A<f64>*>(buf) = dA)
-	CASE(QCHR, *reinterpret_cast<A::A<Chr>*>(buf) = cA)
-	/* tables have their own impl */
-	CASE(QTab, t.from_buf_full(buf))
-	default: fatal("Q::to_bytes() on {}", short_name())
-	}
+	u64 L = len();
+	u8 *buf = new u8[calc_serial_Z()], *ptr = buf;
+
+	/* copy the type */
+	(ptr++)[0] = ty;
+	/* copy the length */
+	memcpy(ptr, &L, Z(u64));
+	/* fill */
+	fill_buf_with_elems(ptr);
 
 	return buf;
 }

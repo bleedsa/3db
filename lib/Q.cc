@@ -17,9 +17,9 @@ const S Q::QTy_Z[] = {
 	Z(i32),
 	Z(f64),
 	Z(Chr),
-	Z(i32),
-	Z(f64),
-	Z(Chr),
+	Z(u64) + Z(i32*),
+	Z(u64) + Z(f64*),
+	Z(u64) + Z(Chr*),
 	Z(T::T),
 	Z(var_t),
 };
