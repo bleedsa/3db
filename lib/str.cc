@@ -49,7 +49,7 @@ namespace Str::Interns {
 
 		auto G = LOCK(mut);
 		ptr[len++] = heap;
-		return L;
+		return len - 1;
 	}
 
 	/* find the index of a string in the interned db */

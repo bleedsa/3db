@@ -5,7 +5,7 @@
 
 S T::TColTy_Z[] = {
 	Z(i32), Z(f64), Z(Chr),
-	Z(A::A<i32>), Z(A::A<f64>), Z(A::A<Chr>),
+	Z(i32), Z(f64), Z(Chr),
 };
 
 const char *T::TColTy_short[] = {
@@ -19,10 +19,10 @@ const char *T::TColTy_names[] = {
 };
 
 T::T::T(A::A<var_t> n, A::A<TColTy> a)
-	: coln{a.len}, row_cap{8}
-	, col_tys{new TColTy[coln]}
-	, col_names{new var_t[coln]}
-	, cols{new u8*[coln]}
+	: coln{(u32)a.len}, row_cap{8}
+	, col_tys{mk<TColTy>(coln)}
+	, col_names{mk<var_t>(coln)}
+	, cols{mk<u8*>(coln)}
 	, init{mk<bool>(row_cap)}
 	, refs{new S}
 {
@@ -38,9 +38,11 @@ T::T::T(A::A<var_t> n, A::A<TColTy> a)
 T::T::~T() {
 	if (0 == --refs) {
 		for (S i = 0; i < coln; i++) free(cols[i]);
-		delete[] cols;
-		delete[] col_tys;
+		free(cols);
+		free(col_tys);
+		free(col_names);
 		free(init);
+		delete refs;
 	}
 }
 
@@ -122,5 +124,3 @@ auto T::T::insert(S id, ...) -> char* {
 
 	return nullptr;
 }
-
-//auto T::T::insert_

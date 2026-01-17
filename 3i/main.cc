@@ -52,15 +52,24 @@ int main(int argc, char **argv) {
 	Three::init();
 
 	auto a = Asm::Asm();
-	auto v = str_to_var("char vec");
+	auto v = str_to_var("int table");
 	a.push_bod(VM::Bod(0, 0));
-	a.push_in('a');
-	a.push_in('b');
-	a.push_in('c');
-	a.push_in(3);
-	a.push_in(Bc::MKAChr);
+
+	/* make a table */
+	a.push_in("ints");
+	a.push_in(T::TInt);
+	a.push_in(Bc::In(Bc::MKT, 1));
+
+	/* insert some shit */
+	a.push_in(1); a.push_in(Bc::In(Bc::TINSERT, 000));
+	a.push_in(2); a.push_in(Bc::In(Bc::TINSERT, 200));
+	a.push_in(3); a.push_in(Bc::In(Bc::TINSERT, 300));
+
+
+	/* store the table */
 	a.push_in(Bc::In(Bc::STORE, v));
-	a.push_in(Bc::In(Bc::LOAD, v));
+
+	/* ret */
 	a.push_in(Bc::In());
 
 	auto err = Net::send_Asm(sock, &a);

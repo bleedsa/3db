@@ -1,37 +1,130 @@
 #include <fstream>
+#include <cstring>
 
 #include <db.h>
 #include <fs.h>
 
-constexpr S headZ = Z(var_t) + Z(u64) + 1;
+auto T::T::fill_buf(u8 *ptr) -> void {
+	S x, z;
+
+	/* fill with the column types */
+	z = Z(TColTy)*coln; memcpy(ptr, col_tys,   z); ptr += z;
+	/* fill with the column names */
+	z = Z(var_t)*coln;  memcpy(ptr, col_names, z); ptr += z;
+
+	/* fill the buffer with the columns */
+	for (
+		x = 0, z = colZof(x);
+		x < coln;
+	) {
+		z = colZof(x);
+		memcpy(ptr, cols[x], z);
+		ptr += z;
+		x++;
+	}
+
+	/* fill with the init column */
+	memcpy(ptr, init, Z(bool)*row_cap);
+}
+
+auto T::T::from_buf(u8 *ptr) -> void {
+	S x, z;
+
+	/* construct */
+	col_tys = mk<TColTy>(coln);
+	col_names = mk<var_t>(coln);
+	cols = mk<u8*>(coln);
+	init = mk<bool>(row_cap);
+	refs = new S;
+
+	/* copy some column information */
+	z = Z(TColTy)*coln; memmove(col_tys,   ptr, z); ptr += z;
+	z = Z(var_t)*coln;  memmove(col_names, ptr, z); ptr += z;
+
+	/* finish setting up the columns */
+	for (x = 0; x < coln; x++) cols[x] = mk<u8>(colZof(x));
+	*refs = 1;
+
+	/* copy out of the ptr */
+	for (
+		x = 0, z = colZof(x);
+		x < coln;
+	) {
+		z = colZof(x);
+		memmove(cols[x], ptr, z);
+		ptr += z;
+		x++;
+	}
+
+	/* fill the init column */
+	memcpy(init, ptr, Z(bool)*row_cap);
+}
+
+/* the size of the header */
+constexpr S headZ = Z(var_t) /* name */
+	+ Z(u64) /* len */
+	+ 1 /* ty */;
 
 /* Ent from bytes */
 Db::Ent::Ent(u8 *ptr) : ty{(EntTy)(ptr++)[0]} {
-	u64 L = 0;
+	/* special case for tables */
+	if (ty == Tab) {
+		/* unpack the header */
+		memcpy(&t.coln,    ptr, Z(u32));   ptr += Z(u32);
+		memcpy(&t.row_cap, ptr, Z(u32));   ptr += Z(u32);
+		memcpy(&name,      ptr, Z(var_t)); ptr += Z(var_t);
 
-	/* get the length */
-	memcpy(&L,    ptr, Z(u64));   ptr += Z(u64);
-	memcpy(&name, ptr, Z(var_t)); ptr += Z(var_t);
+		t.from_buf(ptr);
+	} else {
+		u64 L = 0;
 
-	switch (ty) {
-	/* atoms */
-	CASE(Int, memcpy(&i, ptr, Z(i32)))
-	CASE(Sz,  memcpy(&z, ptr, Z(S)))
-	CASE(Flt, memcpy(&f, ptr, Z(f32)))
-	CASE(Dbl, memcpy(&d, ptr, Z(f64)))
-	CASE(Ch,  memcpy(&c, ptr, Z(Chr)))
-	/* vecs */
-	CASE(INT, iA=A::A<i32>((i32*)ptr, L))
-	CASE(SZ,  zA=A::A<S>((S*)ptr, L))
-	CASE(FLT, fA=A::A<f32>((f32*)ptr, L))
-	CASE(DBL, dA=A::A<f64>((f64*)ptr, L))
-	CASE(CHR, cA=A::A<Chr>((Chr*)ptr, L))
-	default: fatal("cannot construct entry of type {} from bytes", (S)ty);
+		/* get the length and name */
+		memcpy(&L,    ptr, Z(u64));   ptr += Z(u64);
+		memcpy(&name, ptr, Z(var_t)); ptr += Z(var_t);
+
+		switch (ty) {
+		/* atoms */
+		CASE(Int, memcpy(&i, ptr, Z(i32)))
+		CASE(Sz,  memcpy(&z, ptr, Z(S)))
+		CASE(Flt, memcpy(&f, ptr, Z(f32)))
+		CASE(Dbl, memcpy(&d, ptr, Z(f64)))
+		CASE(Ch,  memcpy(&c, ptr, Z(Chr)))
+		/* vecs */
+		CASE(INT, iA=A::A<i32>((i32*)ptr, L))
+		CASE(SZ,  zA=A::A<S>((S*)ptr, L))
+		CASE(FLT, fA=A::A<f32>((f32*)ptr, L))
+		CASE(DBL, dA=A::A<f64>((f64*)ptr, L))
+		CASE(CHR, cA=A::A<Chr>((Chr*)ptr, L))
+		default: fatal(
+			"cannot construct entry of type {} from bytes", type()
+		);
+		}
 	}
 
 }
 
-auto Db::Ent::to_bytes() -> std::tuple<u8*, u64> {
+auto Db::Ent::to_bytes_table() -> std::tuple<u8*, u64> {
+	u8 *ptr, *init;
+	u64 z;
+
+	/* set up a buffer we can write to */
+	z = t.calc_serial_Z();
+	ptr = mk<u8>(headZ + z), init = ptr;
+	memset(ptr, 0, headZ+z);
+
+	/* copy the header data into the buffer and inc the ptr */
+	(ptr++)[0] = ty;
+	memcpy(ptr, &t.coln,    Z(u32));   ptr += Z(u32);
+	memcpy(ptr, &t.row_cap, Z(u32));   ptr += Z(u32);
+	memcpy(ptr, &name,      Z(var_t)); ptr += Z(var_t);
+
+	/* copy the rest of the data into the ptr */
+	t.fill_buf(ptr);
+
+	return std::tuple<u8*, u64>{init, headZ+z};
+}
+
+auto Db::Ent::to_bytes_simple() -> std::tuple<u8*, u64> {
 	u8 *ptr, *init;
 	u64 L, z;
 
@@ -59,10 +152,15 @@ auto Db::Ent::to_bytes() -> std::tuple<u8*, u64> {
 	CASE(FLT, memcpy(ptr, fA.ptr, z))
 	CASE(DBL, memcpy(ptr, dA.ptr, z))
 	CASE(CHR, memcpy(ptr, cA.ptr, z))
-	default: fatal("to_bytes() called on entry of type {}", (S)ty);
+	default: fatal("to_bytes_simple() called on entry of type {}", type());
 	}
 
 	return std::tuple<u8*, u64>{init, headZ+z};
+}
+
+auto Db::Ent::to_bytes() -> std::tuple<u8*, u64> {
+	if (ty == Tab) return to_bytes_table();
+	else return to_bytes_simple();
 }
 
 auto Db::write(const char *path) -> void {
@@ -124,7 +222,7 @@ auto Db::load(const char *path) -> void {
 		dbg({
 			auto n = var_to_str(e.name);
 			std::cout << n << ' ';
-			free(n);
+			delete[] n;
 		});
 		push_ent(e);
 		delete[] ptr;

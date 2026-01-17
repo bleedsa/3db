@@ -12,7 +12,7 @@ inl auto f(const char *n, X a) -> void {
 	std::cout << "wrote entry " << Fmt::Fmt(e) << std::endl;
 
 	auto [B, L] = e->to_bytes();
-	for (S i = 0; i < L; i++) std::cout << 44 + B[i];
+	for (S i = 0; i < L; i++) std::cout << std::hex << (u16)B[i] << ' ';
 	std::cout << std::endl;
 
 	*e = Db::Ent(B);
@@ -28,6 +28,16 @@ int main() {
 	f("z", (S)1234567890);
 	f("chr", (Chr)'X');
 	f("str", A::A<Chr>{'a', 'b', 'c'});
+
+	auto t = T::T(
+		A::A{"ints",  "dbls"},
+		A::A{T::TInt, T::TDbl}
+	);
+	auto ptr = (char*)"abcdef";
+	t.insert(00, 1, 2.345);
+	t.insert(16, 2, 6.789);
+	t.insert(32, 3, 22.22);
+	f("tab", t);
 
 	Three::deinit();
 }

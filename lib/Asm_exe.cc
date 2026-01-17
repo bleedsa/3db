@@ -30,7 +30,7 @@ inl auto stk_show(std::vector<Q::Q> *s) -> void {
 }
 
 
-inl auto store_Q(std::vector<Q::Q> *s, Bc::In *in) -> void {
+inl auto store_Q(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	auto x = stk_pop(s);
 
 	switch (x.ty) {
@@ -40,8 +40,11 @@ inl auto store_Q(std::vector<Q::Q> *s, Bc::In *in) -> void {
 	CASE(Q::QINT, Db::push_ent(in->var, x.iA))
 	CASE(Q::QDBL, Db::push_ent(in->var, x.dA))
 	CASE(Q::QCHR, Db::push_ent(in->var, x.cA))
-	default: fatal("cannot store Q of type {}", x.short_name());
+	CASE(Q::QTab, Db::push_ent(in->var, x.t))
+	default: return A_err("cannot store Q of type {}", x.short_name());
 	}
+
+	return nullptr;
 }
 
 inl auto load_Q(std::vector<Q::Q> *s, Bc::In *in) -> char* {
@@ -224,7 +227,7 @@ inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	CASE(Bc::POP,    s->pop_back());
 
 	/* db ops */
-	CASE(Bc::STORE,  store_Q(s, in))
+	CASE(Bc::STORE,  if ((err = store_Q(s, in))) return err)
 	CASE(Bc::LOAD,   if ((err = load_Q(s, in))) return err)
 	CASE(Bc::DEL,    del(s, in))
 

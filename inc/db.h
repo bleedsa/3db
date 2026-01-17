@@ -19,10 +19,11 @@ namespace Db {
 		FLT,
 		DBL,
 		CHR,
+		Tab,
 	};
 
-	extern const char *EntTy_names[10];
-	extern const S EntTy_Z[10];
+	extern const char *EntTy_names[11];
+	extern const S EntTy_Z[11];
 
 	struct Ent {
 		var_t name; 
@@ -38,6 +39,7 @@ namespace Db {
 			A::A<f32> fA;
 			A::A<f64> dA;
 			A::A<Chr> cA;
+			T::T t;
 		};
 
 		~Ent();
@@ -56,6 +58,7 @@ namespace Db {
 		EntBasic(A::A<f32>);
 		EntBasic(A::A<f64>);
 		EntBasic(A::A<Chr>);
+		EntBasic(T::T);
 
 		/* entry constructors with no EntTy parameter */
 		#define EntNoTyp(T) Ent(var_t name, T x)
@@ -69,6 +72,7 @@ namespace Db {
 		EntNoTyp(A::A<f32>);
 		EntNoTyp(A::A<f64>);
 		EntNoTyp(A::A<Chr>);
+		EntNoTyp(T::T);
 
 		inl auto type() -> const char* {
 			return EntTy_names[(S)ty];
@@ -91,11 +95,14 @@ namespace Db {
 			CASE(FLT, return fA.len)
 			CASE(DBL, return dA.len)
 			CASE(CHR, return cA.len)
-			default: fatal("len() on entry of type {}", (S)ty);
+			CASE(Tab, return t.row_cap)
+			default: fatal("len() on entry of type {}", type());
 			}
 		}
 
 		Ent(u8 *ptr);
+		std::tuple<u8*, u64> to_bytes_simple();
+		std::tuple<u8*, u64> to_bytes_table();
 		std::tuple<u8*, u64> to_bytes();
 	};
 

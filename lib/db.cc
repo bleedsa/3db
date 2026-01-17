@@ -7,11 +7,13 @@ namespace Db {
 	const char *EntTy_names[] = {
 		"i32", "usize", "f32", "f64", "chr",
 		"I32", "USIZE", "F32", "F64", "CHR",
+		"table"
 	};
 
 	const S EntTy_Z[] = {
 		Z(i32), Z(S), Z(f32), Z(f64), Z(Chr),
 		Z(i32), Z(S), Z(f32), Z(f64), Z(Chr),
+		Z(T::T),
 	};
 }
 
@@ -22,6 +24,7 @@ Db::Ent::~Ent() {
 	CASE(FLT, this->fA.~A())
 	CASE(DBL, this->dA.~A())
 	CASE(CHR, this->cA.~A())
+	CASE(Tab, this->t.~T())
 	default: {}
 	}
 }
@@ -41,6 +44,8 @@ inl auto ent_cpy_value(Db::Ent *x, Db::Ent *y) -> void {
 	CASE(Db::FLT,x->fA=y->fA)
 	CASE(Db::DBL,x->dA=y->dA)
 	CASE(Db::CHR,x->cA=y->cA)
+	/* misc */
+	CASE(Db::Tab,x->t=y->t)
 	}
 }
 
@@ -69,6 +74,7 @@ EntBasicImpl(A::A<S>,   zA);
 EntBasicImpl(A::A<f32>, fA);
 EntBasicImpl(A::A<f64>, dA);
 EntBasicImpl(A::A<Chr>, cA);
+EntBasicImpl(T::T,      t );
 
 #define EntNoTypImpl(X,T,f) \
 	Db::Ent::Ent(var_t name, X x) : name{name}, ty{T}, f{x} {}
@@ -83,6 +89,7 @@ EntNoTypImpl(A::A<S>,  SZ, zA);
 EntNoTypImpl(A::A<f32>,FLT,fA);
 EntNoTypImpl(A::A<f64>,DBL,dA);
 EntNoTypImpl(A::A<Chr>,CHR,cA);
+EntNoTypImpl(T::T,     Tab,t );
 
 inl auto Db_get_idx(var_t name) -> std::optional<S> {
 	S r, i = 0;

@@ -66,6 +66,14 @@ namespace U {
 		for (S i = 0; i < n; i++) sum += v[i];
 		return sum;
 	}
+
+	template<typename R, typename H>
+	inl auto fuse_ints(H x, H y) -> R {
+		R r = 0;
+		memcpy(&r, &y, Z(H));
+		memcpy((H*)(&r)+1, &x, Z(H));
+		return r;
+	}
 }
 
 #endif
