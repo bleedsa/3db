@@ -16,6 +16,8 @@ namespace Fs {
 		}
 	}
 
+	R<std::string> F_read_to_str(const char *path);
+
 	constexpr auto BIN_FLAGS =
 		std::ios::binary
 		| std::ios::in
