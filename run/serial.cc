@@ -12,8 +12,6 @@ inl auto f(const char *n, X a) -> void {
 	std::cout << "wrote entry " << Fmt::Fmt(e) << std::endl;
 
 	auto [B, L] = e->to_bytes();
-	for (S i = 0; i < L; i++) std::cout << std::hex << (u16)B[i] << ' ';
-	std::cout << std::endl;
 
 	*e = Db::Ent(B);
 	std::cout << "deserialized entry " << Fmt::Fmt(e) << std::endl;

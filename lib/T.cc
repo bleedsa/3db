@@ -5,7 +5,7 @@
 
 S T::TColTy_Z[] = {
 	Z(i32), Z(f64), Z(Chr),
-	Z(i32), Z(f64), Z(Chr),
+	Z(i32*), Z(f64*), Z(Chr*),
 };
 
 const char *T::TColTy_short[] = {
@@ -66,22 +66,17 @@ auto T::T::operator=(const T &x) -> const T& {
 
 auto T::T::reZ(S row) -> void {
 	if (row >= row_cap) {
-		S prev_cap = row_cap;
-		row_cap = row + 1;
+		S prev_cap, i;
+
+		prev_cap = row_cap, row_cap = row * 2;
+
+		/* remk and set the init column */
 		init = remk<bool>(init, row_cap);
 		memset(init+prev_cap, false, Z(bool)*(row_cap - prev_cap));
 
-		for (S i = 0; i < coln; i++) {
-			switch (col_tys[i]) {
-#define REMK(X) cols[i] = (u8*)remk<X>((X*)cols[i], row_cap)
-			CASE(TInt, REMK(i32))
-			CASE(TDbl, REMK(f64))
-			CASE(TChr, REMK(Chr))
-			CASE(TINT, REMK(i32*))
-			CASE(TDBL, REMK(f64*))
-			CASE(TCHR, REMK(Chr*))
-			default: fatal("reZ on T of type {}", TColTy_short[i]);
-			}
+		/* remk the columns */
+		for (i = 0; i < coln; i++) {
+			cols[i] = remk<u8>(cols[i], colZof(i));
 		}
 	}
 }

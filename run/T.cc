@@ -10,6 +10,7 @@ int main() {
 	t.insert(000, 123, 4.56, 'a');
 	t.insert(330, 456, 7.89, 'b');
 	t.insert(001, 1,   2.0,  'c');
+	t.insert(016, 789, 1.23, 'd');
 	std::cout << Fmt::Fmt(&t) << std::endl;
 
 	auto v = T::T(
