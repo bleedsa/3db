@@ -35,8 +35,8 @@ int main() {
 	);
 	auto ptr = (char*)"abcdef";
 	t.insert(00, 1, 2.345);
-	t.insert(16, 2, 6.789);
-	t.insert(32, 3, 22.22);
+	t.insert(01, 2, 6.789);
+	t.insert(33, 3, 22.22);
 	f("tab", t);
 
 	Three::deinit();

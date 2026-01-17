@@ -69,7 +69,7 @@ namespace T {
 		inl auto calc_serial_Z() -> S {
 			S *Zs = new S[coln];
 			for (S i = 0; i < coln; i++) {
-				Zs[i] = colZof(i) * row_cap;
+				Zs[i] = colZof(i);
 			}
 			return U::sum_vec<S>(Zs, coln)
 				+ (Z(bool) * row_cap)
