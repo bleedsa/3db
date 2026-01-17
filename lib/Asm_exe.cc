@@ -67,6 +67,7 @@ inl auto load_Q(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	CASE(Db::INT, r = Q::Q(ent->iA))
 	CASE(Db::DBL, r = Q::Q(ent->dA))
 	CASE(Db::CHR, r = Q::Q(ent->cA))
+	CASE(Db::Tab, r = Q::Q(ent->t))
 	default: return A_err("cannot load entry of type {}", ent->type());
 	}
 

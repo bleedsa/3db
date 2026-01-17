@@ -92,6 +92,19 @@ namespace T {
 
 		void fill_buf(u8 *ptr);
 		void from_buf(u8 *ptr);
+
+		inl void from_buf_full(u8 *ptr) {
+			memcpy(&coln,    ptr, Z(u32));   ptr += Z(u32);
+			memcpy(&row_cap, ptr, Z(u32));   ptr += Z(u32);
+			from_buf(ptr);
+		}
+
+		inl void fill_buf_full(u8 *ptr) {
+			memcpy(ptr, &coln,    Z(u32));   ptr += Z(u32);
+			memcpy(ptr, &row_cap, Z(u32));   ptr += Z(u32);
+			fill_buf(ptr);
+		}
+
 	};
 }
 

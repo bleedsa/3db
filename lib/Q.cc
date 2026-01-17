@@ -34,12 +34,15 @@ Q::Q::Q(QTy ty, u8 *ptr, S L) : ty{ty} {
 	CASE(QChr, c=*(Chr*)ptr)
 	CASE(QVar, var=*(var_t*)ptr)
 
-	/* memcpy vecs */
+	/* construct vecs */
 	CASE(QINT, iA=A::A((i32*)ptr, L))
 	CASE(QDBL, dA=A::A((f64*)ptr, L))
 	CASE(QCHR, cA=A::A((Chr*)ptr, L))
 
-	default: fatal("raw Q::Q::Q with type {}", (S)ty);
+	/* tables have their own thing */
+	CASE(QTab, t.from_buf_full(ptr))
+
+	default: fatal("raw Q::Q::Q with type {}", short_name());
 	}
 }
 
@@ -82,38 +85,3 @@ auto Q::Q::operator=(const Q &x) -> const Q& {
 	return *this;
 }
 
-auto Q::Q::fill_buf_with_elems(u8 *buf) -> void {
-	switch (ty) {
-	CASE(QNil, {})
-
-	/* atoms are a simple cast */
-	CASE(QInt, memcpy(buf, &i, Z(i32)))
-	CASE(QDbl, memcpy(buf, &d, Z(f64)))
-	CASE(QChr, memcpy(buf, &c, Z(Chr)))
-
-	/* vectors are memcpy */
-	CASE(QINT, memcpy(buf, iA.ptr, Z(i32)*iA.len))
-	CASE(QDBL, memcpy(buf, dA.ptr, Z(f64)*dA.len))
-	CASE(QCHR, memcpy(buf, cA.ptr, Z(Chr)*cA.len))
-
-	/* vectors are memcpy */
-	default: fatal("Q::Q::fill_buf_with_elems() on Q of type {}", (S)ty);
-	}
-}
-
-auto Q::Q::to_bytes() -> u8* {
-	auto buf = new u8[Z(Q) - 8];
-	switch (ty) {
-	/* atoms are memcpy */
-	CASE(QInt, memcpy(buf, &i, Z(i32)))
-	CASE(QDbl, memcpy(buf, &d, Z(f64)))
-	CASE(QChr, memcpy(buf, &c, Z(Chr)))
-	/* vectors are operator= */
-	CASE(QINT, *reinterpret_cast<A::A<i32>*>(buf) = iA)
-	CASE(QDBL, *reinterpret_cast<A::A<f64>*>(buf) = dA)
-	CASE(QCHR, *reinterpret_cast<A::A<Chr>*>(buf) = cA)
-	default: fatal("Q::to_bytes() on {}", short_name())
-	}
-
-	return buf;
-}
