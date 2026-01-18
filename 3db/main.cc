@@ -16,6 +16,8 @@
 #include <net/Asm.h>
 #include <net/Q.h>
 
+#include "cfg.h"
+
 #ifndef NAT
 __static_yoink("__die");
 #endif
@@ -24,7 +26,7 @@ struct addrinfo hints, *res;
 int sock;
 std::mutex sock_mut;
 
-inl auto bind_host(char *port) -> void {
+inl auto bind_host(const char *port) -> void {
 	int ret;
 
 	/* get address info */
@@ -52,14 +54,27 @@ int main(int argc, char **argv) {
 	Q::Q q;
 	R<Q::Q> res;
 
-	if (argc < 3) fatal("usage: {} [file] [port]", argv[0]);
-	path = argv[1];
+	if (argc < 2) path = "/zip/cfg.ini";
+	else path = argv[1];
 
-	if (Fs::F_exists(path)) Db::load(path);
+	/* check if the config exists */
+	if (!Fs::F_exists(path)) {
+		std::cerr << "cfg file does not exist: " << path << std::endl;
+		return -1;
+	}
 
-	bind_host(argv[2]);
+	/* load the cfg */
+	auto cfg = Cfg(path);
+	/* load the db file */
+	auto db = cfg.file.c_str();
+
+	if (Fs::F_exists(db)) Db::load(db);
+
+	/* bind & init 3 */
+	bind_host(cfg.port.c_str());
 	Three::init();
 
+	/* start listening */
 	ret = listen(sock, 10);
 	if (ret == -1) fatal("listen(): {}", strerror(errno));
 
@@ -84,12 +99,14 @@ int main(int argc, char **argv) {
 			goto end;
 		}
 
+		/* format the instructions */
 		for (S i = 0; i < x.inL; i++) {
 			auto in = &x.ins[i];
 			std::cout << (S)in->ty << ' ';
 		}
 		std::cout << std::endl;
 
+		/* format the bodies */
 		for (S i = 0; i < x.bodL; i++) {
 			auto b = &x.bods[i];
 			std::cout << b->vars << ' ' << b->start << std::endl;
@@ -102,11 +119,12 @@ int main(int argc, char **argv) {
 			goto end;
 		}
 
+		/* display the resultant Q */
 		q = *res;
 		std::cout << Fmt::Fmt(&q) << std::endl;
 
 		/* write the data to disk */
-		Db::write(path);
+		Db::write(db);
 
 		/* send the result back */
 		err = Net::send_Q(fd, &q);

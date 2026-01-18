@@ -17,7 +17,7 @@ auto Net::send_Q(int sock, Q::Q *x) -> char* {
 	memcpy(head+1, &L, Z(S));
 
 	/* send the header */
-	dbg(std::cout << "sending Q header of " << Fmt::Fmt(x) << "...");
+	dbg(std::cout << "sending Q header of " << x->short_name() << "...");
 	if ((sent = send(sock, (const void*)head, headZ, 0)) == -1) {
 		return A_err("failed to send Q header: {}", strerror(errno));
 	}

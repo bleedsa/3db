@@ -52,16 +52,25 @@ int main(int argc, char **argv) {
 	Three::init();
 
 	auto a = Asm::Asm();
-	auto v = str_to_var("int vec");
+	auto v = str_to_var("table1");
 
-	/* make a vector */
-	a.push_in(1);
-	a.push_in(2);
-	a.push_in(3);
-	a.push_in(4);
-	a.push_in(5);
-	a.push_in(5);
-	a.push_in(Bc::MKAi32);
+	/* make a table */
+	a.push_in("ints");
+	a.push_in(T::TInt);
+	a.push_in("dbls");
+	a.push_in(T::TDbl);
+	a.push_in("strs");
+	a.push_in(T::TCHR);
+	a.push_in(Bc::In(Bc::MKT, 3));
+
+	/* insert some stuff */
+	a.push_in(123);
+	a.push_in(456.789);
+	a.push_in('a');
+	a.push_in('b');
+	a.push_in('c');
+	a.push_in(Bc::In(Bc::MKAChr, 3));
+	a.push_in(Bc::In(Bc::TINSERT, 1));
 
 	/* store&load */
 	a.push_in(Bc::In(Bc::STORE, v));

@@ -25,6 +25,10 @@ namespace INI {
 				throw err;
 			}
 		}
+
+		inl auto operator[](std::string key) -> std::string& {
+			return map[key];
+		}
 	};
 }
 
