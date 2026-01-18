@@ -24,28 +24,6 @@ const S Q::QTy_Z[] = {
 	Z(var_t),
 };
 
-Q::Q::Q(QTy ty, u8 *ptr, S L) : ty{ty} {
-	switch (ty) {
-	CASE(QNil, {})
-
-	/* cast atoms */
-	CASE(QInt, i=*(i32*)ptr)
-	CASE(QDbl, d=*(f64*)ptr)
-	CASE(QChr, c=*(Chr*)ptr)
-	CASE(QVar, var=*(var_t*)ptr)
-
-	/* construct vecs */
-	CASE(QINT, iA=A::A((i32*)ptr, L))
-	CASE(QDBL, dA=A::A((f64*)ptr, L))
-	CASE(QCHR, cA=A::A((Chr*)ptr, L))
-
-	/* tables have their own thing */
-	CASE(QTab, t.from_buf_full(ptr))
-
-	default: fatal("raw Q::Q::Q with type {}", short_name());
-	}
-}
-
 Q::Q::~Q() {
 	switch (ty) {
 	/* only vecs need to be destroyed */

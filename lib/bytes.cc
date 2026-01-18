@@ -59,6 +59,27 @@ auto T::T::from_buf(u8 *ptr) -> void {
 	/* fill the init column */
 	memcpy(init, ptr, Z(bool)*row_cap);
 }
+Q::Q::Q(QTy ty, u8 *ptr, S L) : ty{ty} {
+	switch (ty) {
+	CASE(QNil, {})
+
+	/* cast atoms */
+	CASE(QInt, i=*(i32*)ptr)
+	CASE(QDbl, d=*(f64*)ptr)
+	CASE(QChr, c=*(Chr*)ptr)
+	CASE(QVar, var=*(var_t*)ptr)
+
+	/* construct vecs */
+	CASE(QINT, iA=A::A((i32*)ptr, L))
+	CASE(QDBL, dA=A::A((f64*)ptr, L))
+	CASE(QCHR, cA=A::A((Chr*)ptr, L))
+
+	/* tables have their own thing */
+	CASE(QTab, t.from_buf_full(ptr))
+
+	default: fatal("raw Q::Q::Q with type {}", short_name());
+	}
+}
 
 auto Q::Q::fill_buf_with_elems(u8 *buf) -> void {
 	switch (ty) {
@@ -77,7 +98,6 @@ auto Q::Q::fill_buf_with_elems(u8 *buf) -> void {
 	/* tables */
 	CASE(QTab, t.fill_buf_full(buf))
 
-	/* vectors are memcpy */
 	default: fatal("trying to fill buf with Q of type {}", short_name());
 	}
 }
@@ -88,8 +108,10 @@ auto Q::Q::to_bytes() -> u8* {
 
 	/* copy the type */
 	(ptr++)[0] = ty;
+
 	/* copy the length */
-	memcpy(ptr, &L, Z(u64));
+	memcpy(ptr, &L, Z(u64)); ptr += Z(u64);
+
 	/* fill */
 	fill_buf_with_elems(ptr);
 

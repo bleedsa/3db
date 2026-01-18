@@ -59,7 +59,7 @@ $(RUNCOM): $(O)/run/%.com: run/%.cc $(LIBO)
 
 $(O)/3db/3db.com: $(LIBO) $(TDBO)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LNKXXFLAGS)
-	cd run; zip -r ../$@ cfg.ini
+	cd run; zip -r ../$@ cfg.ini; cd ..
 
 $(O)/3i/3i.com: $(LIBO) $(TIO)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LNKXXFLAGS)

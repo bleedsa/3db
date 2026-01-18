@@ -193,19 +193,20 @@ inl auto Tinsert(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 
 	for (i = 0; i < t->coln; i++) {
 		auto x = stk_pop(s);
-		auto P = x.to_bytes();
 
 		switch (t->col_tys[i]) {
-		#define set_col_ptr(X) memcpy(((X*)t->cols[i])+id, P, Z(X))
-		CASE(T::TInt, set_col_ptr(i32))
-		CASE(T::TDbl, set_col_ptr(f64))
-		CASE(T::TChr, set_col_ptr(Chr))
+		#define set_col_atom(X, f) { \
+			auto R=f(); \
+			if (R) ((X*)t->cols[i])[id]=*R; \
+			else return A_err("cannot convert stack obj: {}", R.error()); \
+		}
+		CASE(T::TInt, set_col_atom(i32, x.to_i32))
+		CASE(T::TDbl, set_col_atom(f64, x.to_f64))
+		CASE(T::TChr, set_col_atom(Chr, x.to_chr))
 		default: return A_err(
 			"cannot insert column of type {}", x.short_name()
 		);
 		}
-
-		delete[] P;
 
 	}
 	t->init[id] = true;

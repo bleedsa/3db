@@ -85,14 +85,14 @@ namespace Q {
 
 		inl auto calc_serial_Z() -> S {
 			switch (ty) {
-			CASE(QTab, return t.calc_serial_Z())
+			CASE(QTab, return Z(u8) + Z(u64) + t.calc_serial_Z())
 			/* vecs */
 			case QINT:
 			case QDBL:
 			case QCHR:
-				return Z(u64) + (atom_size() * len());
+				return Z(u8) + Z(u64) + (atom_size() * len());
 			default:
-				return atom_size();
+				return Z(u8) + Z(u64) + atom_size();
 			}
 		}
 
