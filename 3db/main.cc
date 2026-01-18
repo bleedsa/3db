@@ -6,6 +6,7 @@
 #include <cerrno>
 #include <mutex>
 #include <unistd.h>
+#include <csignal>
 
 #include <u.h>
 #include <str.h>
@@ -25,6 +26,15 @@ __static_yoink("__die");
 struct addrinfo hints, *res;
 int sock;
 std::mutex sock_mut;
+
+static auto sigint_handler(int) -> void {
+	std::cout << "cleaning up...";
+	fflush(stdout);
+	close(sock);
+	Three::deinit();
+	std::cout << "ok" << std::endl;
+	exit(0);
+}
 
 inl auto bind_host(const char *port) -> void {
 	int ret;
@@ -53,6 +63,8 @@ int main(int argc, char **argv) {
 	char *err, *path;
 	Q::Q q;
 	R<Q::Q> res;
+
+	signal(SIGINT, sigint_handler);
 
 	if (argc < 2) path = "/zip/cfg.ini";
 	else path = argv[1];

@@ -212,7 +212,6 @@ inl auto Tinsert(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 				*(S*)ptr = len; \
 				memcpy(buf, vec, Z(X)*len); \
 				((u8**)t->cols[i])[id] = ptr; \
-				t->init[id] = true; \
 			} else { \
 				return A_err( \
 					"'cast: ~{}={}", \
