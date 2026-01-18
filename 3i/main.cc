@@ -52,6 +52,7 @@ int main(int argc, char **argv) {
 	Three::init();
 
 	auto a = Asm::Asm();
+	a.push_bod(VM::Bod(0, 0));
 	auto v = str_to_var("table1");
 
 	/* make a table */
@@ -66,10 +67,11 @@ int main(int argc, char **argv) {
 	/* insert some stuff */
 	a.push_in(123);
 	a.push_in(456.789);
-	a.push_in('a');
-	a.push_in('b');
 	a.push_in('c');
-	a.push_in(Bc::In(Bc::MKAChr, 3));
+	a.push_in('b');
+	a.push_in('a');
+	a.push_in(3);
+	a.push_in(Bc::MKAChr);
 	a.push_in(Bc::In(Bc::TINSERT, 1));
 
 	/* store&load */

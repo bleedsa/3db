@@ -134,13 +134,13 @@ inl auto mkAf64(std::vector<Q::Q> *s) -> char* {
 
 inl auto mkAchr(std::vector<Q::Q> *s) -> char* {
 	auto r = stk_pop(s).to_S();
-	if (!r) return A_err("mkAchr(): {}", r.error());
+	if (!r) return A_err("mkAchr(): (S)x: {}", r.error());
 	auto L = *r;
 	auto a = A::A<Chr>(L);
 
 	for (S i = 0; i < L; i++) {
 		auto x = stk_pop(s).to_chr();
-		if (!x) return A_err("mkAchr(): {}", r.error());
+		if (!x) return A_err("mkAchr(): (Chr)x: {}", r.error());
 		a[i] = *x;
 	}
 
@@ -198,11 +198,31 @@ inl auto Tinsert(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 		#define set_col_atom(X, f) { \
 			auto R=f(); \
 			if (R) ((X*)t->cols[i])[id]=*R; \
-			else return A_err("cannot convert stack obj: {}", R.error()); \
+			else return A_err("'cast: {}", R.error()); \
 		}
 		CASE(T::TInt, set_col_atom(i32, x.to_i32))
 		CASE(T::TDbl, set_col_atom(f64, x.to_f64))
 		CASE(T::TChr, set_col_atom(Chr, x.to_chr))
+		#define set_col_vec(X, Y, v) { \
+			if (Y == x.ty) { \
+				auto vec = x.v.ptr; \
+				auto len = x.v.len; \
+				auto ptr = mk<u8>(Z(S) + (Z(X) * len)); \
+				auto buf = (u8*)(((S*)ptr)+1); \
+				*(S*)ptr = len; \
+				memcpy(buf, vec, Z(X)*len); \
+				((u8**)t->cols[i])[id] = ptr; \
+				t->init[id] = true; \
+			} else { \
+				return A_err( \
+					"'cast: ~{}={}", \
+					x.short_name(), t->col_type(i) \
+				); \
+			} \
+		}
+		CASE(T::TINT, set_col_vec(i32, Q::QINT, iA))
+		CASE(T::TDBL, set_col_vec(f64, Q::QDBL, dA))
+		CASE(T::TCHR, set_col_vec(Chr, Q::QCHR, cA))
 		default: return A_err(
 			"cannot insert column of type {}", x.short_name()
 		);
