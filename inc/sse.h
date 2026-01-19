@@ -1,6 +1,8 @@
 #ifndef __3DB_SSE_H__
 #define __3DB_SSE_H__
 
+#include <cstring>
+
 #include <u.h>
 
 typedef u64 xmm64_t __attribute__((vector_size(16)));

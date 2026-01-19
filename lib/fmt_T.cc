@@ -20,17 +20,20 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 	S x, y, i, rown;
 	std::string *row;
 	auto coln = t->coln; 
-	auto head = new std::string[coln];
-	auto Ls = new S[coln];
+	auto head = new std::string[coln+1];
+	auto Ls = new S[coln+1];
 	auto cells = std::vector<std::string*>();
+
+	/* the id column */
+	head[0] = "ID", Ls[0] = 2;
 
 	/* format the column header with the name and type */
 	for (i = 0; i < coln; i++) {
 		auto n = var_to_str(t->col_names[i]);
-		auto Y = T::TColTy_short[i];
+		auto Y = T::TColTy_short[t->col_tys[i]];
 		auto s = std::format("{}:{}", n, Y);
-		head[i] = s;
-		Ls[i] = s.size();
+		head[i+1] = s;
+		Ls[i+1] = s.size();
 		delete[] n;
 	}
 
@@ -38,7 +41,7 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 	for (y = 0, rown = 0; y < t->row_cap; y++) {
 		if (t->init[y]) {
 			rown++;
-			row = new std::string[coln];
+			row = new std::string[coln+1];
 
 			/* iterate the columns */
 			for (x = 0; x < coln; x++) {
@@ -62,9 +65,15 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 				}
 
 				auto col = ss.str();
-				Ls[x] = std::max(Ls[x], col.size());
-				row[x] = col;
+				Ls[x+1] = std::max(Ls[x+1], col.size());
+				row[x+1] = col;
 			}
+
+
+			/* the id column */
+			auto col = std::format("{}", y);
+			Ls[0] = std::max(Ls[0], col.size());
+			row[0] = col;
 
 			cells.push_back(row);
 		}
@@ -74,7 +83,7 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 	 * make the final string
 	 */
 	std::stringstream ss;
-	auto L_sum = U::sum_vec<S>(Ls, coln);
+	auto L_sum = U::sum_vec<S>(Ls, coln + 1);
 
 	/* pad L chars with c */
 	auto pad = [&](S L, char c) {
@@ -90,7 +99,7 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 
 	/* header */
 	ss << '|';
-	for (i = 0; i < coln; i++) {
+	for (i = 0; i < coln + 1; i++) {
 		auto c = head[i];
 		ss << c;
 		pad(Ls[i] - c.size(), ' ');
@@ -104,7 +113,7 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 	y = 0;
 	for (auto &r : cells) {
 		ss << '|';
-		for (x = 0; x < coln; x++) {
+		for (x = 0; x < coln + 1; x++) {
 			auto c = r[x];
 			ss << c;
 			pad(Ls[x] - c.size(), ' ');
