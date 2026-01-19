@@ -7,6 +7,7 @@ Bc::In::In(InTy ty, char x) : ty{ty}, c{x} {}
 Bc::In::In(InTy ty, const char *x) : ty{ty}, var{str_to_var(x)} {}
 Bc::In::In(InTy ty, var_t x) : ty{ty}, var{x} {}
 Bc::In::In(InTy ty, T::TColTy x) : ty{ty}, i{(i32)x} {}
+Bc::In::In(InTy ty, xmm64_t x64) : ty{ty}, x64{x64} {}
 
 Bc::In::In(I x)    : ty{Bc::LITi32}, i{x} {}
 Bc::In::In(f64 x)  : ty{Bc::LITf64}, d{x} {}

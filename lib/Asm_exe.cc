@@ -189,6 +189,7 @@ inl auto Tinsert(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 
 	}
 
+
 	auto t = *r;
 	t->reZ(id);
 
@@ -237,6 +238,61 @@ inl auto Tinsert(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	return nullptr;
 }
 
+template<typename X>
+inl auto atom_set_cell(T::T *t, S x, S y, X v) -> char* {
+	auto ptr = ((X*)t->cols[x])+y;
+	*ptr = v;
+	return nullptr;
+}
+
+template<typename X>
+inl auto vec_set_cell(T::T *t, S x, S y, A::A<X> v) -> char* {
+	auto len = v.len;
+//	t->free_vec_cell(x, y);
+	auto [ptr, buf] = t->alloc_cell<X>(len, x, y);
+	memmove(buf, v.ptr, Z(X)*len);
+	return nullptr;
+}
+
+inl auto Tsetcell(std::vector<Q::Q> *s, Bc::In *in) -> char* {
+	/* get a ptr to the table */
+	auto r = stk_head(s)->to_T_ptr();
+	if (!r) {
+		std::stringstream ss;
+		ss << "Tsetcell(): bottom of the stack is not a table.";
+		ss << std::endl;
+
+		for (auto &x : *s) {
+			ss << x.short_name() << ' ';
+			ss << Fmt::Fmt(&x) << std::endl;
+		}
+
+		u8 *p = Str::Interns::ptr[Str::Interns::add(ss.str().c_str())];
+		return (char*)p;
+
+	}
+
+	auto t = *r;
+	auto [x, y] = SSE::xmm64_unfuse(in->x64);
+	auto q = stk_pop(s);
+
+	switch (q.ty) {
+	/* atom set cells */
+	CASE(Q::QInt, return atom_set_cell<i32>(t, x, y, q.i))
+	CASE(Q::QDbl, return atom_set_cell<f64>(t, x, y, q.d))
+	CASE(Q::QChr, return atom_set_cell<Chr>(t, x, y, q.c))
+
+	/* vector set cells */
+	CASE(Q::QINT, return vec_set_cell<i32>(t, x, y, q.iA))
+	CASE(Q::QDBL, return vec_set_cell<f64>(t, x, y, q.dA))
+	CASE(Q::QCHR, return vec_set_cell<Chr>(t, x, y, q.cA))
+
+	default: return A_err("cannot set cell of type {}", q.short_name());
+	}
+
+	return nullptr;
+}
+
 inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	char *err;
 
@@ -264,6 +320,7 @@ inl auto exe_in(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	/* table ops */
 	CASE(Bc::MKT, if ((err = mkT(s, in))) return err)
 	CASE(Bc::TINSERT, if ((err = Tinsert(s, in))) return err)
+	CASE(Bc::TSETCELL, if ((err = Tsetcell(s, in))) return err)
 
 	/* arithmetic */
 	CASE(Bc::ADD, if ((err = add(s))) return err)
