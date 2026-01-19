@@ -18,7 +18,7 @@ namespace T {
 	extern S TColTy_Z[6];
 	extern const char *TColTy_short[6];
 	extern const char *TColTy_names[6];
-	extern bool TColTy_free_cell[6];
+	extern bool TColTy_is_vec[6];
 
 	struct T {
 		u32 coln, row_cap;
@@ -48,8 +48,8 @@ namespace T {
 			return TColTy_names[col_tys[i]];
 		}
 
-		inl auto col_free_cell(S i) -> bool {
-			return TColTy_free_cell[col_tys[i]];
+		inl auto col_is_vec(S i) -> bool {
+			return TColTy_is_vec[col_tys[i]];
 		}
 
 		inl auto colZof(S i) -> S {
@@ -139,6 +139,36 @@ namespace T {
 			*ptr = L;
 			((S**)cols[x])[y] = ptr;
 			return {ptr, buf};
+		}
+
+		template<typename X>
+		inl auto set_cell(S x, S y, X v) -> void {
+			if (col_is_vec(x)) {
+				std::cout << "bad set_cell for column of type ";
+				std::cout << col_type(x);
+				exit(-1);
+			} else {
+				auto ptr = ((X*)cols[x])+y;
+				memmove(ptr, &v, Z(X));
+			}
+		}
+
+		template<typename X>
+		inl auto set_cell(S x, S y, X *P, S L) -> void {
+			if (col_is_vec(x)) {
+				/* free the previous cell */ {
+					auto [ptr, buf, len] = get_cell<X>(x, y);
+					free(ptr);
+				}
+
+				/* allocate and set the new cell */
+				auto [ptr, buf] = alloc_cell<X>(L, x, y);
+				memmove(buf, P, Z(X)*L);
+			} else {
+				std::cout << "bad set_cell for column of type ";
+				std::cout << col_type(x);
+				exit(-1);
+			}
 		}
 	};
 }

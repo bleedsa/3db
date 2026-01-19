@@ -18,7 +18,7 @@ const char *T::TColTy_names[] = {
 	[TINT]="I32", [TDBL]="F64", [TCHR]="CHR",
 };
 
-bool T::TColTy_free_cell[] = {
+bool T::TColTy_is_vec[] = {
 	[TInt]=false, [TDbl]=false, [TChr]=false,
 	[TINT]=true,  [TDBL]=true,  [TCHR]=true,
 };
@@ -50,7 +50,7 @@ auto T::T::free_vec_cell(S x, S y) -> void {
 auto T::T::free_cells() -> void {
 	for (S x = 0; x < coln; x++) { 
 		for (S y = 0; y < row_cap; y++) {
-			if (init[y]&&col_free_cell(x)) free_vec_cell(x, y);
+			if (init[y]&&col_is_vec(x)) free_vec_cell(x, y);
 		}
 		free(cols[x]);
 	}
