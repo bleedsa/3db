@@ -12,13 +12,15 @@ int main() {
 
 	/* make a table */
 	auto t = T::T(
-		A::A{"ints", "dbls", "strs"},
-		A::A{T::TInt, T::TDbl, T::TCHR}
+		A::A{"ints", "dbls", "strs", "dbl vecs", "int vecs"},
+		A::A{T::TInt, T::TDbl, T::TCHR, T::TDBL, T::TINT}
 	);
 	auto a = A::A<Chr>{'a', 'b', 'c', 'd', 'e', 'f'};
-	t.insert(01, 1, 1.23, a.ptr, a.len);
-	t.insert(02, 2, 4.56, a.ptr, a.len);
-	t.insert(03, 3, 7.89, a.ptr, a.len);
+	auto d = A::A<f64>{1.2, 3.4, 5.6, 7.8, 9.1, 2.3};
+	auto i = A::A<i32>{1, 2, 3, 4, 5, 6, 7, 8, 9, 1};
+	t.insert(01, 1, 1.23, a.ptr, a.len, d.ptr, d.len, i.ptr, i.len);
+	t.insert(02, 2, 4.56, a.ptr, a.len, d.ptr, d.len, i.ptr, i.len);
+	t.insert(03, 3, 7.89, a.ptr, a.len, d.ptr, d.len, i.ptr, i.len);
 	Db::push_ent("z", t);
 
 	/* write */
