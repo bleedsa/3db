@@ -8,17 +8,17 @@ wrote entry chr chr X
 deserialized entry chr chr X
 wrote entry str CHR "abc"
 deserialized entry str CHR "abc"
-wrote entry tab table ============================
-|ints:i|dbls:d|strs:c      |
-============================
-|1     |2.345 |"abcdefghij"|
-|2     |6.789 |"efghijklmn"|
-|3     |22.22 |"ijklmnopqr"|
+wrote entry tab table ==============================
+|ID|ints:i|dbls:d|strs:C      |
+==============================
+|0 |1     |2.345 |"abcdefghij"|
+|1 |2     |6.789 |"efghijklmn"|
+|33|3     |22.22 |"ijklmnopqr"|
 
-deserialized entry tab table ============================
-|ints:i|dbls:d|strs:c      |
-============================
-|1     |2.345 |"abcdefghij"|
-|2     |6.789 |"efghijklmn"|
-|3     |22.22 |"ijklmnopqr"|
+deserialized entry tab table ==============================
+|ID|ints:i|dbls:d|strs:C      |
+==============================
+|0 |1     |2.345 |"abcdefghij"|
+|1 |2     |6.789 |"efghijklmn"|
+|33|3     |22.22 |"ijklmnopqr"|
 
