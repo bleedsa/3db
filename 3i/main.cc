@@ -55,52 +55,18 @@ int main(int argc, char **argv) {
 	a.push_bod(VM::Bod(0, 0));
 	auto v = str_to_var("table1");
 
-	/* make a table */
-	a.push_in("ints");
-	a.push_in(T::TInt);
-	a.push_in("dbls");
-	a.push_in(T::TDbl);
-	a.push_in("strs");
-	a.push_in(T::TCHR);
-	a.push_in("dbl vecs");
-	a.push_in(T::TDBL);
-	a.push_in(Bc::In(Bc::MKT, 4));
+	/* load a table */
+	a.push_in(Bc::In(Bc::LOAD, v));
 
-	/* insert some stuff */
-	a.push_in(123);
-	a.push_in(456.789);
-	a.push_in('c');
-	a.push_in('b');
-	a.push_in('a');
-	a.push_in(3);
-	a.push_in(Bc::MKAChr);
-	a.push_in(1.0);
-	a.push_in(2.0);
-	a.push_in(3.0);
-	a.push_in(4.0);
-	a.push_in(4);
-	a.push_in(Bc::MKAf64);
-	a.push_in(Bc::In(Bc::TINSERT, 1));
-
-	a.push_in(123);
-	a.push_in(987.654321);
-	a.push_in('x');
-	a.push_in('y');
-	a.push_in('z');
-	a.push_in(3);
-	a.push_in(Bc::MKAChr);
-	a.push_in(5.0);
-	a.push_in(6.0);
-	a.push_in(7.0);
-	a.push_in(8.0);
+	/* update */
+	a.push_in(1.2);
+	a.push_in(3.4);
+	a.push_in(5.6);
+	a.push_in(7.8);
 	a.push_in(9.0);
 	a.push_in(5);
 	a.push_in(Bc::MKAf64);
-	a.push_in(Bc::In(Bc::TINSERT, 2));
-
-	/* store&load */
-	a.push_in(Bc::In(Bc::STORE, v));
-	a.push_in(Bc::In(Bc::LOAD, v));
+	a.push_in(Bc::In(Bc::TSETCELL, SSE::xmm64_fuse(0, 1)));
 
 	/* ret */
 	a.push_in(Bc::In());
