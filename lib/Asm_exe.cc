@@ -193,8 +193,8 @@ inl auto Tinsert(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 
 	for (i = 0; i < t->coln; i++) {
 		auto x = stk_pop(s);
-
 		switch (t->col_tys[i]) {
+		/* atoms */
 		#define set_col_atom(X, f) { \
 			auto R=f(); \
 			if (R) ((X*)t->cols[i])[id]=*R; \
@@ -203,6 +203,8 @@ inl auto Tinsert(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 		CASE(T::TInt, set_col_atom(i32, x.to_i32))
 		CASE(T::TDbl, set_col_atom(f64, x.to_f64))
 		CASE(T::TChr, set_col_atom(Chr, x.to_chr))
+
+		/* vectors */
 		#define set_col_vec(X, Y, v) { \
 			if (Y == x.ty) { \
 				auto vec = x.v.ptr; \
@@ -222,6 +224,7 @@ inl auto Tinsert(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 		CASE(T::TINT, set_col_vec(i32, Q::QINT, iA))
 		CASE(T::TDBL, set_col_vec(f64, Q::QDBL, dA))
 		CASE(T::TCHR, set_col_vec(Chr, Q::QCHR, cA))
+
 		default: return A_err(
 			"cannot insert column of type {}", x.short_name()
 		);

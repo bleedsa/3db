@@ -32,8 +32,10 @@ int main() {
 		A::A{T::TInt, T::TDbl, T::TCHR}
 	);
 	auto a = A::A<Chr>{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
-	t.insert(00,1,2.345,a.ptr,a.len);a=a.each<Chr>([](Chr*c){return*c+4;});
-	t.insert(01,2,6.789,a.ptr,a.len);a=a.each<Chr>([](Chr*c){return*c+4;});
+	t.insert(00,1,2.345,a.ptr,a.len);
+	a=a.each<Chr>([](Chr*c){return*c+4;});
+	t.insert(01,2,6.789,a.ptr,a.len);
+	a=a.each<Chr>([](Chr*c){return*c+4;});
 	t.insert(33,3,22.22,a.ptr,a.len);
 	f("tab", t);
 

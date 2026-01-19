@@ -73,6 +73,7 @@ int main(int argc, char **argv) {
 	a.push_in(3);
 	a.push_in(Bc::MKAChr);
 	a.push_in(Bc::In(Bc::TINSERT, 1));
+	a.push_in(Bc::SHOW);
 
 	/* store&load */
 	a.push_in(Bc::In(Bc::STORE, v));

@@ -158,6 +158,8 @@ namespace Db {
 	inl auto load(std::string path) -> void {
 		load(path.c_str());
 	}
+
+	void deinit();
 }	
 
 namespace Fmt {

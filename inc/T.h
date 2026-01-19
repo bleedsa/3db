@@ -25,7 +25,7 @@ namespace T {
 		var_t *col_names;
 		u8 **cols;
 		bool *init;
-		S *refs;
+		i64 *refs;
 
 		T(A::A<var_t> n, A::A<TColTy> a);
 
@@ -36,6 +36,8 @@ namespace T {
 			*this = T(v, a);
 		}
 
+		void free_vec_cell(S x, S y);
+		void free_cells();
 		~T();
 
 		T(const T &x);
@@ -53,25 +55,37 @@ namespace T {
 			return init[i];
 		}
 
-		inl auto alloc_row() -> u8* {
-			/* calculate the buffer size */
-			S *Zs = new S[coln], z;
-			for (S i = 0; i < coln; i++) Zs[i]=TColTy_Z[col_tys[i]];
-			z = U::sum_vec<S>(Zs, coln);
-
-			/* alloc */
-			auto ptr = new u8[z];
-			return ptr;
+		template<typename X>
+		inl auto calc_vec_col_Z(S x) -> S {
+			S z = 0;
+			for (S y = 0; y < row_cap; y++) {
+				if (init[y]) {
+					auto [ptr, buf, len] = get_cell<X>(x, y);
+					z += Z(u64) + (Z(X) * len);
+				}
+			}
+			return z;
 		}
 
 		/* calculate the size of the buffer needed to serialize this
 		 * table into bytes. */
 		inl auto calc_serial_Z() -> S {
-			S *Zs = new S[coln];
+			S z = 0;
 			for (S i = 0; i < coln; i++) {
-				Zs[i] = colZof(i);
+				switch (col_tys[i]) {
+				case TInt:
+				case TDbl:
+				case TChr:
+					z += colZof(i);
+					break;
+				
+				/* vecs are a little more complicated */
+				CASE(TINT, z += calc_vec_col_Z<i32>(i))
+				CASE(TDBL, z += calc_vec_col_Z<f64>(i))
+				CASE(TCHR, z += calc_vec_col_Z<Chr>(i))
+				}
 			}
-			return U::sum_vec<S>(Zs, coln)
+			return z
 				+ (Z(bool) * row_cap)
 				+ (Z(TColTy) * coln)
 				+ (Z(var_t) * coln);
@@ -105,6 +119,22 @@ namespace T {
 			fill_buf(ptr);
 		}
 
+		template<typename X>
+		inl auto get_cell(S x, S y) -> std::tuple<S*, X*, S> {
+			auto ptr = ((S**)cols[x])[y];
+			auto buf = (X*)(ptr+1);
+			auto len = *ptr;
+			return {ptr, buf, len};
+		}
+
+		template<typename X>
+		inl auto alloc_cell(S L, S x, S y) -> std::tuple<S*, X*> {
+			auto ptr = (S*)mk<u8>(Z(S) + (Z(X) * L));
+			auto buf = (X*)(ptr+1);
+			*ptr = L;
+			((S**)cols[x])[y] = ptr;
+			return {ptr, buf};
+		}
 	};
 }
 

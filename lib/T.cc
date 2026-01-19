@@ -24,7 +24,7 @@ T::T::T(A::A<var_t> n, A::A<TColTy> a)
 	, col_names{mk<var_t>(coln)}
 	, cols{mk<u8*>(coln)}
 	, init{mk<bool>(row_cap)}
-	, refs{new S}
+	, refs{new i64}
 {
 	*refs = 1;
 	/* just rip the pointer directly from the vecs */
@@ -35,9 +35,28 @@ T::T::T(A::A<var_t> n, A::A<TColTy> a)
 	for (S i = 0; i < coln; i++) cols[i] = mk<u8>(colZof(i));
 }
 
+auto T::T::free_vec_cell(S x, S y) -> void {
+	auto ptr = ((S**)cols[x])[y];
+	free(ptr);
+}
+
+auto T::T::free_cells() -> void {
+	for (S i = 0; i < coln; i++) { 
+		switch (col_tys[i]) {
+		CASE(TINT, for(S j=0;j<row_cap;j++) if (init[j]) free_vec_cell(i, j))
+		CASE(TDBL, for(S j=0;j<row_cap;j++) if (init[j]) free_vec_cell(i, j))
+		CASE(TCHR, for(S j=0;j<row_cap;j++) if (init[j]) free_vec_cell(i, j))
+		default: {}
+		}
+		free(cols[i]);
+	}
+}
+
+
 T::T::~T() {
-	if (0 == --refs) {
-		for (S i = 0; i < coln; i++) free(cols[i]);
+	*refs -= 1;
+	if (*refs == 0) {
+		free_cells();
 		free(cols);
 		free(col_tys);
 		free(col_names);

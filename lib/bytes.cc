@@ -5,41 +5,68 @@
 #include <fs.h>
 
 auto T::T::fill_buf(u8 *ptr) -> void {
-	S x, z;
+	S x, y, z;
 
 	/* fill with the column types */
-	z = Z(TColTy)*coln; memcpy(ptr, col_tys,   z); ptr += z;
+	z = Z(TColTy)*coln;  memmove(ptr, col_tys,   z); ptr += z;
 	/* fill with the column names */
-	z = Z(var_t)*coln;  memcpy(ptr, col_names, z); ptr += z;
+	z = Z(var_t)*coln;   memmove(ptr, col_names, z); ptr += z;
+	/* fill the init column */
+	z = Z(bool)*row_cap; memmove(ptr, init,      z); ptr += z;
 
 	/* fill the buffer with the columns */
 	for (
 		x = 0, z = colZof(x);
 		x < coln;
 	) {
-		z = colZof(x);
-		memcpy(ptr, cols[x], z);
-		ptr += z;
+		switch (col_tys[x]) {
+		/* atoms */
+		case TInt:
+		case TDbl:
+		case TChr:
+			z = colZof(x);
+			memcpy(ptr, cols[x], z);
+			ptr += z;
+			break;
+
+		case TCHR:
+			for (y = 0; y < row_cap; y++) {
+				if (init[y]) {
+					/* deconstruct the cell */
+					auto [P, buf, len] = get_cell<Chr>(x, y);
+					/* write the length */
+					z = Z(u64);
+					memmove(ptr, &len, z);
+					ptr += z;
+					/* write the buf */
+					z = Z(Chr) * len;
+					memmove(ptr, buf, z);
+					ptr += z;
+				}
+			}
+
+			break;
+		default: fatal("fill_buf with column of type {}", col_type(x));
+		}
 		x++;
 	}
-
-	/* fill with the init column */
-	memcpy(ptr, init, Z(bool)*row_cap);
 }
 
 auto T::T::from_buf(u8 *ptr) -> void {
-	S x, z;
+	S x, y, z;
+	u64 len;
 
 	/* construct */
 	col_tys = mk<TColTy>(coln);
 	col_names = mk<var_t>(coln);
 	cols = mk<u8*>(coln);
 	init = mk<bool>(row_cap);
-	refs = new S;
+	refs = new i64;
 
 	/* copy some column information */
-	z = Z(TColTy)*coln; memmove(col_tys,   ptr, z); ptr += z;
-	z = Z(var_t)*coln;  memmove(col_names, ptr, z); ptr += z;
+	z = Z(TColTy)*coln;  memmove(col_tys,   ptr, z); ptr += z;
+	z = Z(var_t)*coln;   memmove(col_names, ptr, z); ptr += z;
+	z = Z(bool)*row_cap; memmove(init,      ptr, z); ptr += z;
 
 	/* finish setting up the columns */
 	for (x = 0; x < coln; x++) cols[x] = mk<u8>(colZof(x));
@@ -50,15 +77,40 @@ auto T::T::from_buf(u8 *ptr) -> void {
 		x = 0, z = colZof(x);
 		x < coln;
 	) {
-		z = colZof(x);
-		memmove(cols[x], ptr, z);
-		ptr += z;
+		switch (col_tys[x]) {
+		case TInt:
+		case TDbl:
+		case TChr:
+			z = colZof(x);
+			memmove(cols[x], ptr, z);
+			ptr += z;
+			break;
+
+		case TCHR:
+			for (y = 0; y < row_cap; y++) {
+				if (init[y]) {
+					/* load the length */
+					z = Z(u64);
+					memmove(&len, ptr, z);
+					ptr += z;
+
+					/* allocate the cell */
+					auto [P, buf] = alloc_cell<Chr>(len, x, y);
+
+					/* load the buffer */
+					z = Z(Chr) * len;
+					memmove(buf, ptr, z);
+					ptr += z;
+				}
+			}
+			break;
+
+		default: fatal("table from buffer of type {}", col_type(x));
+		}
 		x++;
 	}
-
-	/* fill the init column */
-	memcpy(init, ptr, Z(bool)*row_cap);
 }
+
 Q::Q::Q(QTy ty, u8 *ptr, S L) : ty{ty} {
 	switch (ty) {
 	CASE(QNil, {})
@@ -241,6 +293,8 @@ auto Db::write(const char *path) -> void {
 		for (S j = 0; j < z; j++) {
 			f << b[j];
 		}
+
+		free(b);
 	}
 }
 
@@ -265,7 +319,7 @@ auto Db::load(const char *path) -> void {
 		}
 
 		auto e = Ent(ptr);
-		push_ent(e);
+		push_ent(std::move(e));
 		delete[] ptr;
 	}
 }
