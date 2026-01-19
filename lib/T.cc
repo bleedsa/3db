@@ -27,28 +27,27 @@ T::T::T(A::A<var_t> n, A::A<TColTy> a)
 	, refs{new i64}
 {
 	*refs = 1;
+
 	/* just rip the pointer directly from the vecs */
 	memcpy(col_tys, a.ptr, Z(TColTy)*coln);
 	memcpy(col_names, n.ptr, Z(var_t)*coln);
 	memset(init, false, Z(bool)*row_cap);
+
 	/* allocate buffers for the columns */
 	for (S i = 0; i < coln; i++) cols[i] = mk<u8>(colZof(i));
 }
 
 auto T::T::free_vec_cell(S x, S y) -> void {
-	auto ptr = ((S**)cols[x])[y];
+	auto [ptr, buf, len] = get_cell<void>(x, y);
 	free(ptr);
 }
 
 auto T::T::free_cells() -> void {
-	for (S i = 0; i < coln; i++) { 
-		switch (col_tys[i]) {
-		CASE(TINT, for(S j=0;j<row_cap;j++) if (init[j]) free_vec_cell(i, j))
-		CASE(TDBL, for(S j=0;j<row_cap;j++) if (init[j]) free_vec_cell(i, j))
-		CASE(TCHR, for(S j=0;j<row_cap;j++) if (init[j]) free_vec_cell(i, j))
-		default: {}
+	for (S x = 0; x < coln; x++) { 
+		for (S y = 0; y < row_cap; y++) {
+			if (init[y]) free_vec_cell(x, y);
 		}
-		free(cols[i]);
+		free(cols[x]);
 	}
 }
 
