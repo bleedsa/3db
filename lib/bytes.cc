@@ -4,8 +4,58 @@
 #include <db.h>
 #include <fs.h>
 
+template<typename X>
+inl auto T_fill_buf_with_vec_col(T::T *t, u8 *ptr, S x) -> u8* {
+	S y, z;
+
+	for (y = 0; y < t->row_cap; y++) {
+		if (t->init[y]) {
+			/* deconstruct the cell */
+			auto [P, buf, len] = t->get_cell<X>(x, y);
+
+			/* write the length */
+			z = Z(u64);
+			memmove(ptr, &len, z);
+			ptr += z;
+
+			/* write the buf */
+			z = Z(X) * len;
+			memmove(ptr, buf, z);
+			ptr += z;
+		}
+	}
+
+	return ptr;
+}
+
+template<typename X>
+inl auto T_from_buf_with_vec_col(T::T *t, u8 *ptr, S x) -> u8* {
+	S y, z;
+	u64 len;
+
+	for (y = 0; y < t->row_cap; y++) {
+		if (t->init[y]) {
+			/* load the length */
+			z = Z(u64);
+			memmove(&len, ptr, z);
+			ptr += z;
+
+			/* allocate the cell */
+			auto [P, buf] = t->alloc_cell<X>(len, x, y);
+
+			/* load the buffer */
+			z = Z(X) * len;
+			memmove(buf, ptr, z);
+			ptr += z;
+		}
+	}
+
+	return ptr;
+}
+
+
 auto T::T::fill_buf(u8 *ptr) -> void {
-	S x, y, z;
+	S x, z;
 
 	/* fill with the column types */
 	z = Z(TColTy)*coln;  memmove(ptr, col_tys,   z); ptr += z;
@@ -20,7 +70,7 @@ auto T::T::fill_buf(u8 *ptr) -> void {
 		x < coln;
 	) {
 		switch (col_tys[x]) {
-		/* atoms */
+		/* atoms you just memcpy */
 		case TInt:
 		case TDbl:
 		case TChr:
@@ -29,23 +79,11 @@ auto T::T::fill_buf(u8 *ptr) -> void {
 			ptr += z;
 			break;
 
-		case TCHR:
-			for (y = 0; y < row_cap; y++) {
-				if (init[y]) {
-					/* deconstruct the cell */
-					auto [P, buf, len] = get_cell<Chr>(x, y);
-					/* write the length */
-					z = Z(u64);
-					memmove(ptr, &len, z);
-					ptr += z;
-					/* write the buf */
-					z = Z(Chr) * len;
-					memmove(ptr, buf, z);
-					ptr += z;
-				}
-			}
+		/* vecs have their own wrapper */
+		CASE(TINT, ptr = T_fill_buf_with_vec_col<i32>(this, ptr, x))
+		CASE(TDBL, ptr = T_fill_buf_with_vec_col<f64>(this, ptr, x))
+		CASE(TCHR, ptr = T_fill_buf_with_vec_col<Chr>(this, ptr, x))
 
-			break;
 		default: fatal("fill_buf with column of type {}", col_type(x));
 		}
 		x++;
@@ -53,8 +91,7 @@ auto T::T::fill_buf(u8 *ptr) -> void {
 }
 
 auto T::T::from_buf(u8 *ptr) -> void {
-	S x, y, z;
-	u64 len;
+	S x, z;
 
 	/* construct */
 	col_tys = mk<TColTy>(coln);
@@ -86,24 +123,9 @@ auto T::T::from_buf(u8 *ptr) -> void {
 			ptr += z;
 			break;
 
-		case TCHR:
-			for (y = 0; y < row_cap; y++) {
-				if (init[y]) {
-					/* load the length */
-					z = Z(u64);
-					memmove(&len, ptr, z);
-					ptr += z;
-
-					/* allocate the cell */
-					auto [P, buf] = alloc_cell<Chr>(len, x, y);
-
-					/* load the buffer */
-					z = Z(Chr) * len;
-					memmove(buf, ptr, z);
-					ptr += z;
-				}
-			}
-			break;
+		CASE(TINT, ptr = T_from_buf_with_vec_col<i32>(this, ptr, x))
+		CASE(TDBL, ptr = T_from_buf_with_vec_col<f64>(this, ptr, x))
+		CASE(TCHR, ptr = T_from_buf_with_vec_col<Chr>(this, ptr, x))
 
 		default: fatal("table from buffer of type {}", col_type(x));
 		}
