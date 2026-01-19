@@ -18,6 +18,7 @@ namespace T {
 	extern S TColTy_Z[6];
 	extern const char *TColTy_short[6];
 	extern const char *TColTy_names[6];
+	extern bool TColTy_free_cell[6];
 
 	struct T {
 		u32 coln, row_cap;
@@ -45,6 +46,10 @@ namespace T {
 
 		inl auto col_type(S i) -> const char* {
 			return TColTy_names[col_tys[i]];
+		}
+
+		inl auto col_free_cell(S i) -> bool {
+			return TColTy_free_cell[col_tys[i]];
 		}
 
 		inl auto colZof(S i) -> S {

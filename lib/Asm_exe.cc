@@ -55,8 +55,9 @@ inl auto load_Q(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	res = Db::get(in->var);
 	if (!res) {
 		auto v = var_to_str(in->var);
-		//auto e = A_err("entry {} not found", v);
-		return v;
+		auto e = A_err("entry {} not found", v);
+		delete[] v;
+		return e;
 	}
 
 	ent = *res;
