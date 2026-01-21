@@ -1,7 +1,7 @@
 O := o
 CXX := ape/bin/cosmoc++
 CXXFLAGS := -std=gnu++23 -fshort-enums \
-	    -Wall -Wextra -Wno-unused-parameter \
+	    -Wall -Wextra -Wno-unused-parameter -Wno-c99-designator \
 	    -Iinc
 
 ifdef UBSAN

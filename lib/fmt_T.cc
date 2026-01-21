@@ -91,7 +91,7 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 	};
 	/* make a line */
 	auto ln = [&]() {
-		pad(L_sum + coln + 1, '=');
+		pad(L_sum + coln + 2, '=');
 		ss << std::endl;
 	};
 

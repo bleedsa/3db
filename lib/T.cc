@@ -4,8 +4,8 @@
 #include <T.h>
 
 S T::TColTy_Z[] = {
-	Z(i32), Z(f64), Z(Chr),
-	Z(i32*), Z(f64*), Z(Chr*),
+	[TInt]=Z(i32),  [TDbl]=Z(f64),  [TChr]=Z(Chr),
+	[TINT]=Z(i32*), [TDBL]=Z(f64*), [TCHR]=Z(Chr*),
 };
 
 const char *T::TColTy_short[] = {
@@ -174,7 +174,6 @@ auto T::T::cln() -> void {
 	for (x = 0; x < coln; x++) {
 		auto ptr = mk<u8>(colZof(x));
 		auto col = this->cols[x];
-		cols[x] = ptr;
 
 		switch (col_tys[x]) {
 		/* atoms are memmove */
@@ -189,6 +188,8 @@ auto T::T::cln() -> void {
 
 		default: fatal("can't cln T with column of {}", col_type(x));
 		}
+
+		cols[x] = ptr;
 	}
 
 	this->col_tys=col_tys, this->col_names=col_names, this->cols=cols;

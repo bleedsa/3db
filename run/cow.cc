@@ -1,7 +1,9 @@
 #include <db.h>
 #include <T.h>
 
+#ifndef NAT
 __static_yoink("__die");
+#endif
 
 int main() {
 	auto x = T::T(
@@ -16,8 +18,8 @@ int main() {
 	x.insert(12, 5, 9.0, i.ptr, i.len);
 
 	auto y = x;
-	y.set_cell<i32>(0, 10, 0);
 
+	y.set_cell<i32>(0, 10, 0);
 	i = A::A{9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 	y.set_cell<i32>(2, 10, i.ptr, i.len);
 

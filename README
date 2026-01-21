@@ -1,0 +1,41 @@
+3DB
+
+	A networked database with a focus on vectorization built with Justine
+	Tunney's cosmopolitan libc.
+
+BUILDING
+
+	% etc/cosmo.sh   # setup toolchain
+	% make -j6       # build
+	% make -j6 test  # run tests
+
+A QUICK TOUR OF THE CODEBASE
+
+	=======================================================================
+	| path           | description
+	=----------------%-----------------------------------------------------
+	| inc/u.h        | "Univeral" header. The "prelude".
+	| inc/A.h        | A::A<X>: static width, memcpy-able template vectors.
+	| inc/Q.h        | Q::Q: bytecode VM stack object type.
+	| inc/T.h        | T::T: an RC&COW database table object.
+	| inc/Asm.h      | Asm::Asm: a serializable virtual machine object.
+	| inc/bc.h       | VM bytecode types, objects, and functions.
+	| inc/sse.h      | SIMD SSE types and functions.
+	| inc/mem.h      | Memory management functions.
+	| inc/net.h      | Networking types and functions.
+	| inc/net/*.h    | Send specific objects over the network.
+	| inc/db.h       | Values and functions for managing the in-memory DB.
+	| inc/fs.h       | Filesystem helpers.
+	| inc/str.h      | Interned string table and other misc str functions.
+	| inc/var.h      | var_t: variable name SSE representation.
+	| inc/ini.h      | .ini config file parser.
+	=----------------%-----------------------------------------------------
+	| lib/bytes.cc   | Object serialization into raw buffers of bytes.
+	| lib/fmt_*.cc   | Format objects into strings that you can print out.
+	| lib/Asm_exe.cc | Execute code inside an Asm::Asm.
+	| lib/net_*.cc   | Send objects over the network.
+	=======================================================================
+
+LICENSE
+
+	(c) Skylar Alexandra Bleed, MPL/2.0.

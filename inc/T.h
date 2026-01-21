@@ -134,6 +134,7 @@ namespace T {
 			return {ptr, buf, len};
 		}
 
+		/* make a new cell, but don't add it to the table yet */
 		template<typename X>
 		inl auto mk_cell(S L, S x, S y) -> std::tuple<S*, X*> {
 			auto ptr = (S*)mk<u8>(Z(S) + (Z(X) * L));
@@ -142,6 +143,7 @@ namespace T {
 			return {ptr, buf};
 		}
 
+		/* make a new cell and add it to the table at (x,y) */
 		template<typename X>
 		inl auto alloc_cell(S L, S x, S y) -> std::tuple<S*, X*> {
 			auto [ptr, buf] = mk_cell<X>(L, x, y);
@@ -149,6 +151,7 @@ namespace T {
 			return {ptr, buf};
 		}
 
+		/* set a cell at (x,y) to a value v */
 		template<typename X>
 		inl auto set_cell(S x, S y, X v) -> void {
 			if (col_is_vec(x)) {
@@ -161,13 +164,14 @@ namespace T {
 			}
 		}
 
+		/* set a cell at (x,y) to a vector P with length L */
 		template<typename X>
 		inl auto set_cell(S x, S y, X *P, S L) -> void {
 			cln();
 			if (col_is_vec(x)) {
 				/* free the previous cell */ {
-				//	auto [ptr, buf, len] = get_cell<X>(x, y);
-				//	free(ptr);
+					auto [ptr, buf, len] = get_cell<X>(x, y);
+					free(ptr);
 				}
 
 				/* allocate and set the new cell */
