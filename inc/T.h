@@ -65,8 +65,8 @@ namespace T {
 			S z = 0;
 			for (S y = 0; y < row_cap; y++) {
 				if (init[y]) {
-					auto [ptr, buf, len] = get_cell<X>(x, y);
-					z += Z(u64) + (Z(X) * len);
+					auto a = get_cell<X>(x, y);
+					z += Z(u64) + (Z(X) * a->len);
 				}
 			}
 			return z;
@@ -96,15 +96,6 @@ namespace T {
 				+ (Z(var_t) * coln);
 		}
 
-		/* get a cell as an A::A. NOT memory safe */
-		template<typename X>
-		inl auto cell_to_A(S x, S y) -> A::A<X> {
-			auto ptr = ((S**)cols[x])[y];
-			auto buf = (X*)(ptr+1);
-			auto len = *ptr;
-			return A::A<X>(buf, len);
-		}
-
 		void reZ(S row);
 		char *insert(S id, ...);
 		char *insert_col(S id, S col, u8 *ptr, S z);
@@ -126,34 +117,46 @@ namespace T {
 			fill_buf(ptr);
 		}
 
+		/* get a vector cell from the table */
 		template<typename X>
-		inl auto get_cell(S x, S y) -> std::tuple<S*, X*, S> {
-			auto ptr = ((S**)cols[x])[y];
-			auto buf = (X*)(ptr+1);
-			auto len = *ptr;
-			return {ptr, buf, len};
-		}
-
-		/* make a new cell, but don't add it to the table yet */
-		template<typename X>
-		inl auto mk_cell(S L, S x, S y) -> std::tuple<S*, X*> {
-			auto ptr = (S*)mk<u8>(Z(S) + (Z(X) * L));
-			auto buf = (X*)(ptr+1);
-			*ptr = L;
-			return {ptr, buf};
+		inl auto get_cell(S x, S y) -> A::A<X>* {
+			auto a = ((A::A<X>*)cols[x])+y;
+			return a;
 		}
 
 		/* make a new cell and add it to the table at (x,y) */
 		template<typename X>
-		inl auto alloc_cell(S L, S x, S y) -> std::tuple<S*, X*> {
-			auto [ptr, buf] = mk_cell<X>(L, x, y);
-			((S**)cols[x])[y] = ptr;
-			return {ptr, buf};
+		inl auto alloc_cell(S L, S x, S y) -> A::A<X>* {
+			auto ptr = get_cell<X>(x, y);
+			*ptr = A::A<X>(L);
+			return ptr;
+		}
+
+		/* set a cell at (x,y) to a vector a */
+		template<typename X>
+		inl auto set_cell(S x, S y, A::A<X> a) -> void {
+			cln();
+			if (col_is_vec(x)) {
+				/* free the previous cell */ {
+					auto ptr = get_cell<X>(x, y);
+					ptr->~A();
+				}
+
+				/* allocate and set the new cell */
+				auto len = a.len;
+				auto vec = alloc_cell<X>(len, x, y);
+				*vec = a;
+			} else {
+				std::cout << "bad set_cell for column of type ";
+				std::cout << col_type(x);
+				exit(-1);
+			}
 		}
 
 		/* set a cell at (x,y) to a value v */
 		template<typename X>
 		inl auto set_cell(S x, S y, X v) -> void {
+			cln();
 			if (col_is_vec(x)) {
 				std::cout << "bad set_cell for column of type ";
 				std::cout << col_type(x);
@@ -161,26 +164,6 @@ namespace T {
 			} else {
 				auto ptr = ((X*)cols[x])+y;
 				memmove(ptr, &v, Z(X));
-			}
-		}
-
-		/* set a cell at (x,y) to a vector P with length L */
-		template<typename X>
-		inl auto set_cell(S x, S y, X *P, S L) -> void {
-			cln();
-			if (col_is_vec(x)) {
-				/* free the previous cell */ {
-					auto [ptr, buf, len] = get_cell<X>(x, y);
-					free(ptr);
-				}
-
-				/* allocate and set the new cell */
-				auto [ptr, buf] = alloc_cell<X>(L, x, y);
-				memmove(buf, P, Z(X)*L);
-			} else {
-				std::cout << "bad set_cell for column of type ";
-				std::cout << col_type(x);
-				exit(-1);
 			}
 		}
 	};

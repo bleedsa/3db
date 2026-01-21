@@ -169,6 +169,12 @@ inl auto mkT(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	return nullptr;
 }
 
+template<typename X>
+inl auto insert_col_vec(T::T *t, S x, S y, A::A<X> a) -> void {
+	auto ptr = t->get_cell<X>(x, y);
+	*ptr = a;
+}
+
 inl auto Tinsert(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 	S i, id = (S)in->i;
 
@@ -207,25 +213,9 @@ inl auto Tinsert(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 		CASE(T::TChr, set_col_atom(Chr, x.to_chr))
 
 		/* vectors */
-		#define set_col_vec(X, Y, v) { \
-			if (Y == x.ty) { \
-				auto vec = x.v.ptr; \
-				auto len = x.v.len; \
-				auto ptr = mk<u8>(Z(S) + (Z(X) * len)); \
-				auto buf = (u8*)(((S*)ptr)+1); \
-				*(S*)ptr = len; \
-				memcpy(buf, vec, Z(X)*len); \
-				((u8**)t->cols[i])[id] = ptr; \
-			} else { \
-				return A_err( \
-					"'cast: ~{}={}", \
-					x.short_name(), t->col_type(i) \
-				); \
-			} \
-		}
-		CASE(T::TINT, set_col_vec(i32, Q::QINT, iA))
-		CASE(T::TDBL, set_col_vec(f64, Q::QDBL, dA))
-		CASE(T::TCHR, set_col_vec(Chr, Q::QCHR, cA))
+		CASE(T::TINT, insert_col_vec<i32>(t, i, id, x.iA))
+		CASE(T::TDBL, insert_col_vec<f64>(t, i, id, x.dA))
+		CASE(T::TCHR, insert_col_vec<Chr>(t, i, id, x.cA))
 
 		default: return A_err(
 			"cannot insert column of type {}", x.short_name()
@@ -248,9 +238,8 @@ inl auto atom_set_cell(T::T *t, S x, S y, X v) -> char* {
 template<typename X>
 inl auto vec_set_cell(T::T *t, S x, S y, A::A<X> v) -> char* {
 	auto len = v.len;
-//	t->free_vec_cell(x, y);
-	auto [ptr, buf] = t->alloc_cell<X>(len, x, y);
-	memmove(buf, v.ptr, Z(X)*len);
+	auto a = t->alloc_cell<X>(len, x, y);
+	*a = v;
 	return nullptr;
 }
 

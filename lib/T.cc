@@ -4,8 +4,8 @@
 #include <T.h>
 
 S T::TColTy_Z[] = {
-	[TInt]=Z(i32),  [TDbl]=Z(f64),  [TChr]=Z(Chr),
-	[TINT]=Z(i32*), [TDBL]=Z(f64*), [TCHR]=Z(Chr*),
+	[TInt]=Z(i32), [TDbl]=Z(f64), [TChr]=Z(Chr),
+	[TINT]=Z(A::A<i32>), [TDBL]=Z(A::A<f64>), [TCHR]=Z(A::A<Chr>),
 };
 
 const char *T::TColTy_short[] = {
@@ -43,8 +43,8 @@ T::T::T(A::A<var_t> n, A::A<TColTy> a)
 }
 
 auto T::T::free_vec_cell(S x, S y) -> void {
-	auto [ptr, buf, len] = get_cell<void>(x, y);
-	free(ptr);
+	auto ptr = get_cell<u8>(x, y);
+	ptr->~A();
 }
 
 auto T::T::free_cells() -> void {
@@ -108,8 +108,8 @@ template<typename X>
 inl auto T_insert_vec_col(T::T *t, va_list args, S x, S y) -> void {
 	auto arg = va_arg(args, X*);
 	auto len = va_arg(args, S);
-	auto [ptr, buf] = t->alloc_cell<X>(len, x, y);
-	memmove(buf, arg, Z(X)*len);
+	auto a = t->alloc_cell<X>(len, x, y);
+	memmove(a->ptr, arg, Z(X)*len);
 }
 
 auto T::T::insert(S id, ...) -> char* {
@@ -117,22 +117,22 @@ auto T::T::insert(S id, ...) -> char* {
 	va_start(args, id);
 
 	reZ(id);
-
 	init[id] = true;
+
 	for (S i = 0; i < coln; i++) {
 		switch (col_tys[i]) {
 		/* basic setter for atomic types */
-		#define set_col(Y) { \
-			auto arg = va_arg(args, Y); \
-			((Y*)cols[i])[id] = arg; \
-		}
+		#define set_col(Y) \
+			auto arg = va_arg(args, Y);((Y*)cols[i])[id] = arg;
 		CASE(TInt, set_col(i32))
 		CASE(TDbl, set_col(f64))
 		CASE(TChr, set_col(Chr))
+
 		/* setters for vecs expect a ptr and a length */
 		CASE(TINT, T_insert_vec_col<i32>(this, args, i, id))
 		CASE(TDBL, T_insert_vec_col<f64>(this, args, i, id))
 		CASE(TCHR, T_insert_vec_col<Chr>(this, args, i, id))
+
 		default: return A_err(
 			"cannot insert col of type {}", TColTy_short[col_tys[i]]
 		);
@@ -146,17 +146,15 @@ auto T::T::insert(S id, ...) -> char* {
 template<typename X>
 inl auto cln_col(T::T *t, u8 *ptr, u8 **cols, S x) -> void {
 	for (S y = 0; y < t->row_cap; y++) if (t->init[y]) {
-		auto [P, B, L] = t->get_cell<X>(x, y);
-		auto [N, buf] = t->mk_cell<X>(x, y, L);
-		auto z = Z(S) + (Z(X) * L);
-		memmove(N, P, z);
-		((S**)ptr)[y] = N;
+		auto a = t->get_cell<X>(x, y);
+		auto L = a->len;
+		auto N = A::A<X>(L);
+		memmove(N.ptr, a->ptr, Z(X)*L);
+		((A::A<X>*)ptr)[y] = N;
 	}
 }
 
 auto T::T::cln() -> void {
-	S x, y;
-
 	/* make a bunch of pointers */
 	auto col_tys = mk<TColTy>(coln);
 	auto col_names = mk<var_t>(coln);
@@ -171,7 +169,7 @@ auto T::T::cln() -> void {
 	*refs = *this->refs;
 
 	/* fill all the columns */
-	for (x = 0; x < coln; x++) {
+	for (S x = 0; x < coln; x++) {
 		auto ptr = mk<u8>(colZof(x));
 		auto col = this->cols[x];
 
@@ -182,9 +180,9 @@ auto T::T::cln() -> void {
 		CASE(TChr, memmove(ptr, col, Z(Chr)*row_cap))
 
 		/* vecs are their own thing */
-		CASE(TINT,cln_col<i32>(this,ptr,cols,x))
-		CASE(TDBL,cln_col<f64>(this,ptr,cols,x))
-		CASE(TCHR,cln_col<Chr>(this,ptr,cols,x))
+		CASE(TINT,cln_col<i32>(this, ptr, cols, x))
+		CASE(TDBL,cln_col<f64>(this, ptr, cols, x))
+		CASE(TCHR,cln_col<Chr>(this, ptr, cols, x))
 
 		default: fatal("can't cln T with column of {}", col_type(x));
 		}

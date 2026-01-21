@@ -11,7 +11,9 @@ inl auto T_fill_buf_with_vec_col(T::T *t, u8 *ptr, S x) -> u8* {
 	for (y = 0; y < t->row_cap; y++) {
 		if (t->init[y]) {
 			/* deconstruct the cell */
-			auto [P, buf, len] = t->get_cell<X>(x, y);
+			auto a = t->get_cell<X>(x, y);
+			auto len = a->len;
+			auto buf = a->ptr;
 
 			/* write the length */
 			z = Z(u64);
@@ -41,11 +43,11 @@ inl auto T_from_buf_with_vec_col(T::T *t, u8 *ptr, S x) -> u8* {
 			ptr += z;
 
 			/* allocate the cell */
-			auto [P, buf] = t->alloc_cell<X>(len, x, y);
+			auto a = t->alloc_cell<X>(len, x, y);
 
 			/* load the buffer */
 			z = Z(X) * len;
-			memmove(buf, ptr, z);
+			memmove(a->ptr, ptr, z);
 			ptr += z;
 		}
 	}

@@ -44,7 +44,7 @@ namespace A {
 		template<typename Y, typename F>
 		inl auto each(F f) -> A<Y> {
 			auto a = A<Y>(len);
-			for (S i = 0; i < len; i++) a[i] = f(&ptr[i]);
+			for (S i = 0; i < len; i++) a[i] = f(ptr+i);
 			return a;
 		}
 	};

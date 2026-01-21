@@ -3,17 +3,11 @@
 
 #include <T.h>
 
-template<typename X>
-static auto fmt_vector(std::stringstream &ss, X *ptr, S len) -> void {
-	auto a = A::A<X>(ptr, len);
-	ss << Fmt::Fmt(&a);
-}
-
 /* format vector column */
 template<typename Y>
 inl auto fmt_vec_col(std::stringstream &ss, T::T *t, S x, S y) -> void {
-	auto [ptr, buf, len] = t->get_cell<Y>(x, y);
-	fmt_vector<Y>(ss, buf, len);
+	auto a = t->get_cell<Y>(x, y);
+	ss << Fmt::Fmt(a);
 }
 
 auto Fmt::Fmt(T::T *t) -> std::string {
@@ -38,45 +32,40 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 	}
 
 	/* format each row */
-	for (y = 0, rown = 0; y < t->row_cap; y++) {
-		if (t->init[y]) {
-			rown++;
-			row = new std::string[coln+1];
+	for (y = 0, rown = 0; y < t->row_cap; y++) if (t->init[y]) {
+		rown++;
+		row = new std::string[coln+1];
 
-			/* iterate the columns */
-			for (x = 0; x < coln; x++) {
-				std::stringstream ss;
+		/* iterate the columns */
+		for (x = 0; x < coln; x++) {
+			std::stringstream ss;
 
-				switch (t->col_tys[x]) {
-				/* format atomic column */
-				#define fmt_col(Y) ss << ((Y*)t->cols[x])[y]
-				CASE(T::TInt, fmt_col(i32))
-				CASE(T::TDbl, fmt_col(f64))
-				CASE(T::TChr, fmt_col(Chr))
+			switch (t->col_tys[x]) {
+			/* format atomic column */
+			#define fmt_col(Y) ss << ((Y*)t->cols[x])[y]
+			CASE(T::TInt, fmt_col(i32))
+			CASE(T::TDbl, fmt_col(f64))
+			CASE(T::TChr, fmt_col(Chr))
 
-				/* format vector columns */
-				CASE(T::TINT, fmt_vec_col<i32>(ss, t, x, y))
-				CASE(T::TDBL, fmt_vec_col<f64>(ss, t, x, y))
-				CASE(T::TCHR, fmt_vec_col<Chr>(ss, t, x, y))
+			/* format vector columns */
+			CASE(T::TINT, fmt_vec_col<i32>(ss, t, x, y))
+			CASE(T::TDBL, fmt_vec_col<f64>(ss, t, x, y))
+			CASE(T::TCHR, fmt_vec_col<Chr>(ss, t, x, y))
 
-				default:
-					ss << '{' << t->col_type(x);
-					ss << "???}";
-				}
-
-				auto col = ss.str();
-				Ls[x+1] = std::max(Ls[x+1], col.size());
-				row[x+1] = col;
+			default: ss << '{' << t->col_type(x) << "???}";
 			}
 
-
-			/* the id column */
-			auto col = std::format("{}", y);
-			Ls[0] = std::max(Ls[0], col.size());
-			row[0] = col;
-
-			cells.push_back(row);
+			auto col = ss.str();
+			Ls[x+1] = std::max(Ls[x+1], col.size());
+			row[x+1] = col;
 		}
+
+		/* the id column */
+		auto col = std::format("{}", y);
+		Ls[0] = std::max(Ls[0], col.size());
+		row[0] = col;
+
+		cells.push_back(row);
 	}
 
 	/*
@@ -91,7 +80,7 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 	};
 	/* make a line */
 	auto ln = [&]() {
-		pad(L_sum + coln + 2, '=');
+		pad(L_sum + coln + 1, '=');
 		ss << std::endl;
 	};
 
