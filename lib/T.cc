@@ -141,3 +141,57 @@ auto T::T::insert(S id, ...) -> char* {
 
 	return nullptr;
 }
+
+
+template<typename X>
+inl auto cln_col(T::T *t, u8 *ptr, u8 **cols, S x) -> void {
+	for (S y = 0; y < t->row_cap; y++) if (t->init[y]) {
+		auto [P, B, L] = t->get_cell<X>(x, y);
+		auto [N, buf] = t->mk_cell<X>(x, y, L);
+		auto z = Z(S) + (Z(X) * L);
+		memmove(N, P, z);
+		((S**)ptr)[y] = N;
+	}
+}
+
+auto T::T::cln() -> void {
+	S x, y;
+
+	/* make a bunch of pointers */
+	auto col_tys = mk<TColTy>(coln);
+	auto col_names = mk<var_t>(coln);
+	auto cols = mk<u8*>(coln);
+	auto init = mk<bool>(row_cap);
+	auto refs = new i64;
+
+	/* copy everything over */
+	memmove(col_tys,   this->col_tys,   Z(TColTy)*coln);
+	memmove(col_names, this->col_names, Z(var_t)*coln);
+	memmove(init,      this->init,      Z(bool)*row_cap);
+	*refs = *this->refs;
+
+	/* fill all the columns */
+	for (x = 0; x < coln; x++) {
+		auto ptr = mk<u8>(colZof(x));
+		auto col = this->cols[x];
+		cols[x] = ptr;
+
+		switch (col_tys[x]) {
+		/* atoms are memmove */
+		CASE(TInt, memmove(ptr, col, Z(i32)*row_cap))
+		CASE(TDbl, memmove(ptr, col, Z(f64)*row_cap))
+		CASE(TChr, memmove(ptr, col, Z(Chr)*row_cap))
+
+		/* vecs are their own thing */
+		CASE(TINT,cln_col<i32>(this,ptr,cols,x))
+		CASE(TDBL,cln_col<f64>(this,ptr,cols,x))
+		CASE(TCHR,cln_col<Chr>(this,ptr,cols,x))
+
+		default: fatal("can't cln T with column of {}", col_type(x));
+		}
+	}
+
+	this->col_tys=col_tys, this->col_names=col_names, this->cols=cols;
+	this->init=init,       this->refs=refs;
+}
+

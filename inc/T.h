@@ -112,6 +112,8 @@ namespace T {
 		void fill_buf(u8 *ptr);
 		void from_buf(u8 *ptr);
 
+		void cln();
+
 		inl void from_buf_full(u8 *ptr) {
 			memcpy(&coln,    ptr, Z(u32));   ptr += Z(u32);
 			memcpy(&row_cap, ptr, Z(u32));   ptr += Z(u32);
@@ -133,10 +135,16 @@ namespace T {
 		}
 
 		template<typename X>
-		inl auto alloc_cell(S L, S x, S y) -> std::tuple<S*, X*> {
+		inl auto mk_cell(S L, S x, S y) -> std::tuple<S*, X*> {
 			auto ptr = (S*)mk<u8>(Z(S) + (Z(X) * L));
 			auto buf = (X*)(ptr+1);
 			*ptr = L;
+			return {ptr, buf};
+		}
+
+		template<typename X>
+		inl auto alloc_cell(S L, S x, S y) -> std::tuple<S*, X*> {
+			auto [ptr, buf] = mk_cell<X>(L, x, y);
 			((S**)cols[x])[y] = ptr;
 			return {ptr, buf};
 		}
@@ -155,10 +163,11 @@ namespace T {
 
 		template<typename X>
 		inl auto set_cell(S x, S y, X *P, S L) -> void {
+			cln();
 			if (col_is_vec(x)) {
 				/* free the previous cell */ {
-					auto [ptr, buf, len] = get_cell<X>(x, y);
-					free(ptr);
+				//	auto [ptr, buf, len] = get_cell<X>(x, y);
+				//	free(ptr);
 				}
 
 				/* allocate and set the new cell */

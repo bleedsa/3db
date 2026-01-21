@@ -1,6 +1,8 @@
 #include <db.h>
 #include <T.h>
 
+__static_yoink("__die");
+
 int main() {
 	auto x = T::T(
 		A::A{"ints", "dbls", "int vec"},
