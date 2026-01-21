@@ -74,6 +74,9 @@ namespace U {
 		memcpy((H*)(&r)+1, &x, Z(H));
 		return r;
 	}
+
+	[[noreturn]]
+	void exit(int q);
 }
 
 #endif

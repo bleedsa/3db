@@ -27,12 +27,9 @@ struct addrinfo hints, *res;
 int sock;
 std::mutex sock_mut;
 
-static auto sigint_handler(int) -> void {
-	std::cout << "cleaning up...";
-	fflush(stdout);
-	close(sock);
-	Three::deinit();
-	std::cout << "ok" << std::endl;
+auto sigint_handler(int) -> void {
+//	close(sock);
+//	Three::deinit();
 	exit(0);
 }
 
@@ -63,11 +60,14 @@ int main(int argc, char **argv) {
 	char *err, *path;
 	Q::Q q;
 	R<Q::Q> res;
+	struct sigaction sa;
 
-	signal(SIGINT, sigint_handler);
+	sa.sa_handler = sigint_handler;
+	sa.sa_flags = 0;
+	sigemptyset(&sa.sa_mask);
+	if (sigaction(SIGINT, &sa, NULL) < 0) perror("sigaction");
 
-	if (argc < 2) path = "/zip/cfg.ini";
-	else path = argv[1];
+	path = argc<2 ? (char*)"/zip/cfg.ini" : argv[1];
 
 	/* check if the config exists */
 	if (!Fs::F_exists(path)) {

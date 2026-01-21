@@ -14,7 +14,6 @@ namespace Str::Interns {
 	}
 
 	void deinit() {
-		auto G = LOCK(mut);
 		for (S i = 0; i < len; i++) {
 			delete[] ptr[i];
 		}

@@ -47,6 +47,11 @@ namespace A {
 			for (S i = 0; i < len; i++) a[i] = f(ptr+i);
 			return a;
 		}
+
+		template<typename F>
+		inl auto for_each(F f) -> void {
+			for (S i = 0; i < len; i++) f(ptr+i);
+		}
 	};
 }
 

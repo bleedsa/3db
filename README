@@ -36,6 +36,12 @@ A QUICK TOUR OF THE CODEBASE
 	| lib/net_*.cc   | Send objects over the network.
 	=======================================================================
 
+3RD PARTY CODE
+
+	+==================================+
+	| gk | https://github.com/cmh25/gk |
+	+----------------------------------+
+
 LICENSE
 
 	(c) Skylar Alexandra Bleed, MPL/2.0.
