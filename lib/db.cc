@@ -17,8 +17,7 @@ namespace Db {
 	};
 }
 
-auto Db::deinit() -> void {
-}
+auto Db::deinit() -> void {}
 
 Db::Ent::~Ent() {
 	switch (ty) {

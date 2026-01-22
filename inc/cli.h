@@ -12,9 +12,13 @@ namespace Cli {
 		~Cli();
 
 		R<Q::Q> set(var_t n, Q::Q *q);
-
 		inl auto set(const char *n, Q::Q *q) -> R<Q::Q> {
 			return set(str_to_var(n), q);
+		}
+
+		R<Q::Q> get(var_t n);
+		inl auto get(const char *n) -> R<Q::Q> {
+			return get(str_to_var(n));
 		}
 	};
 }

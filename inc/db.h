@@ -126,9 +126,13 @@ namespace Db {
 	/* push a raw entry to the database */
 	inl auto push_ent(Ent x) -> void {
 		auto o = get(x.name);
+		auto G = LOCK(mut);
 		if (!o) {
-			auto G = LOCK(mut);
 			ents.push_back(x);
+		} else {
+			auto ptr = *o;
+			ptr->~Ent();
+			*ptr = x;
 		}
 	}
 

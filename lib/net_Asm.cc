@@ -24,7 +24,7 @@ auto Net::send_Asm(int sock, Asm::Asm *x) -> char* {
 	u32s[0] = x->start, u32s[1] = x->inL, u32s[2] = x->bodL;
 
 	/* send the header */
-	std::cout << "sending header...";
+	std::cout << "sending Asm header...";
 	sent = send(sock, (const void*)head, headZ, 0);
 	if (sent == -1) {
 		return A_err("failed to send header: {}", strerror(errno));
@@ -61,7 +61,7 @@ auto Net::recv_Asm(int sock, Asm::Asm *x) -> char* {
 	u8 *body;
 
 	/* recv the head */
-	dbg(std::cout << "recv()...");
+	dbg(std::cout << "recv'ing Asm header...");
 	if ((got = recv(sock, (void*)head, Z(u32)*3, 0)) == -1) {
 		return A_err("failed to recv header: {}", strerror(errno));
 	}
@@ -77,7 +77,7 @@ auto Net::recv_Asm(int sock, Asm::Asm *x) -> char* {
 	body = mk<u8>(bytes);
 
 	/* recv the body */
-	dbg(std::cout << "recv()...");
+	dbg(std::cout << "recv'ing Asm body...");
 	if ((got = recv(sock, (void*)body, bytes, 0)) == -1) {
 		return A_err("failed to recv body: {}", strerror(errno));
 	}

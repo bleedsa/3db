@@ -12,7 +12,7 @@
 #include <net/Asm.h>
 
 inl auto connect_host(const char *addr_port) -> int {
-	int ret, sock, on;
+	int ret, sock;
 	const char *addr, *port;
 	struct addrinfo hints, *res;
 	auto r = Net::parse_addr_port((char*)addr_port);
@@ -37,6 +37,8 @@ inl auto connect_host(const char *addr_port) -> int {
 	/* make connection */
 	ret = connect(sock, res->ai_addr, res->ai_addrlen);
 	if (ret < 0) fatal("connect(): {}", strerror(errno));
+	
+	freeaddrinfo(res);
 
 	return sock;
 }
@@ -74,7 +76,6 @@ inl auto set_atom(Cli::Cli *cli, var_t n, X x) -> R<Q::Q> {
 	a.push_bod(VM::Bod(0, 0));
 
 	a.push_in(x); a.push_in(Bc::In(Bc::STORE, n));
-	a.push_in(Bc::In(Bc::LOAD, n));
 
 	return send_asm(cli, &a);
 }
@@ -85,11 +86,15 @@ inl auto set_vec(Cli::Cli *cli, var_t n, A::A<X> *v, Bc::InTy Y) -> R<Q::Q> {
 	/* push the default body */
 	a.push_bod(VM::Bod(0, 0));
 
-	v->for_each([&](X *x){a.push_in(*x);}); /* push each elem */
-	a.push_in((i32)v->len);                 /* push the len */
-	a.push_in(Y);                           /* the vec constructor instr */
-	a.push_in(Bc::In(Bc::STORE, n));        /* the store instr */
-	a.push_in(Bc::In(Bc::LOAD, n));
+	/* push each elem */
+	auto r = v->rev();
+	r.for_each([&](X *x){a.push_in(*x);}); 
+	/* push the len */
+	a.push_in((i32)v->len);
+	/* the vec constructor instr */
+	a.push_in(Y);
+	/* the store instr */
+	a.push_in(Bc::In(Bc::STORE, n));
 
 	return send_asm(cli, &a);
 }
@@ -106,4 +111,11 @@ auto Cli::Cli::set(var_t n, Q::Q *q) -> R<Q::Q> {
 	CASE(Q::QCHR, return set_vec<Chr>(this, n, &q->cA, Bc::MKAChr))
 	default: return err_fmt("cannot set Q of type {}", q->short_name());
 	}
+}
+
+auto Cli::Cli::get(var_t n) -> R<Q::Q> {
+	auto a = Asm::Asm();
+	a.push_bod(VM::Bod(0, 0));
+	a.push_in(Bc::In(Bc::LOAD, n));
+	return send_asm(this, &a);
 }

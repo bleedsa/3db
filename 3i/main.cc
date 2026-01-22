@@ -24,13 +24,13 @@ int main(int argc, char **argv) {
 	Three::init();
 
 	auto cli = Cli::Cli(argv[1]);
-	
-	auto nil = un(cli.set("an atomic int", &q));
-	std::cout << Fmt::Fmt(&nil) << std::endl;
 
-	q = Q::Q(A::A{1, 2, 3, 4, 5, 6, 7, 8, 9, 0});
-	nil = un(cli.set("vec1", &q));
-	std::cout << Fmt::Fmt(&nil) << std::endl;
+	auto a = Q::Q(A::A{1, 2, 3, 4, 5, 6, 7, 9});
+	q = un(cli.set("vec1", &a));
+	std::cout << Fmt::Fmt(&q) << std::endl;
+
+	q = un(cli.get("vec1"));
+	std::cout << Fmt::Fmt(&q) << std::endl;
 
 	Three::deinit();
 }

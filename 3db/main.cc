@@ -26,11 +26,12 @@ __static_yoink("__die");
 struct addrinfo hints, *res;
 int sock;
 std::mutex sock_mut;
+bool EXIT;
 
 auto sigint_handler(int) -> void {
-//	close(sock);
-//	Three::deinit();
-	exit(0);
+	close(sock);
+	Three::deinit();
+	EXIT = true;
 }
 
 inl auto bind_host(const char *port) -> void {
@@ -90,7 +91,7 @@ int main(int argc, char **argv) {
 	ret = listen(sock, 10);
 	if (ret == -1) fatal("listen(): {}", strerror(errno));
 
-	for (;;) {
+	while (!EXIT) {
 		auto x = Asm::Asm();
 		auto G = LOCK(sock_mut);
 

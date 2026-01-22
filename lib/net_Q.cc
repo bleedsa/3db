@@ -35,6 +35,7 @@ auto Net::send_Q(int sock, Q::Q *x) -> char* {
 	}
 	dbg(std::cout << "ok " << sent << std::endl);
 
+	free(body);
 	return nullptr;
 }
 

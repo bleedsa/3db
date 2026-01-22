@@ -52,6 +52,12 @@ namespace A {
 		inl auto for_each(F f) -> void {
 			for (S i = 0; i < len; i++) f(ptr+i);
 		}
+
+		inl auto rev() -> A<X> {
+			auto r = A<X>(len);
+			for (S i = 0; i < len; i++) r[len - i - 1] = ptr[i];
+			return r;
+		}
 	};
 }
 
