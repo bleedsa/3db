@@ -19,7 +19,7 @@ namespace Bc {
 		LITVar,  /* (v)       -- Q                 | create lit var */
 		/* stack/var ops */
 		SHOW,    /* ( ) x     -- cout<<stk         | show the stack */
-		POP,     /* ( ) x     --                   | pop off the stack */
+		POP,     /* ( ) x     --                   | pop the stack */
 		LOAD,    /* (x)       -- vars[x]           | load var at x */
 		STORE,   /* (x) y     -- vars[x]:y         | store y at var x */
 		DEL,     /* (x)       -- drop vars[x]      | delete var x */
@@ -27,11 +27,12 @@ namespace Bc {
 		MKAi32,  /* ( ) i xs  -- vec i long        | make a vector */
 		MKAf64,  /* ( ) i xs  -- vec i long        | make a vector */
 		MKAChr,  /* ( ) i xs  -- vec i long        | make a vector */
-		GETVEC,  /* ( ) x i   -- x[i]              | get elem from vec */
+		GETVEC,  /* ( ) x i   -- x[i]              | get from vec */
 		/* table ops */
 		MKT,     /* (x)   t*x -- tab with cols t   | new table with X */
 		TINSERT, /* (x)   insert into tab at row x |                  */
-		TSETCELL,/* (x,y) x   -- set cell at (x,y) |                  */
+		TSETCELL,/* (x,y) v   -- set cell (x,y)    |                  */
+		TSELALL, /* ( )   x   -- select all from x |                  */
 		/* arithmetic */
 		ADD,     /* ( ) x y   -- x+y               | addition */
 		SUB,     /* ( ) x y   -- x-y               | subtraction*/

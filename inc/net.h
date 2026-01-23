@@ -7,6 +7,10 @@
 
 namespace Net {
 	R<std::tuple<std::string, std::string>> parse_addr_port(char *x);
+	int connect_host(const char *addr_port);
+
+	char *send_str(int sock, std::string *str);
+	char *recv_str(int sock, std::string *str);
 }
 
 #endif

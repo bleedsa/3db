@@ -26,12 +26,12 @@ __static_yoink("__die");
 struct addrinfo hints, *res;
 int sock;
 std::mutex sock_mut;
-bool EXIT;
+bool main_exit = false;
 
 auto sigint_handler(int) -> void {
 	close(sock);
 	Three::deinit();
-	EXIT = true;
+	main_exit = true;
 }
 
 inl auto bind_host(const char *port) -> void {
@@ -91,7 +91,8 @@ int main(int argc, char **argv) {
 	ret = listen(sock, 10);
 	if (ret == -1) fatal("listen(): {}", strerror(errno));
 
-	while (!EXIT) {
+	while (!main_exit) {
+		auto str = std::string();
 		auto x = Asm::Asm();
 		auto G = LOCK(sock_mut);
 
@@ -105,46 +106,20 @@ int main(int argc, char **argv) {
 		}
 		std::cout << "ok " << fd << std::endl;
 
-		/* read the assembly */
-		err = Net::recv_Asm(fd, &x);
-		if (err) {
+		if ((err = Net::recv_str(fd, &str))) {
 			std::cerr << err << std::endl;
 			goto end;
 		}
 
-		/* format the instructions */
-		for (S i = 0; i < x.inL; i++) {
-			auto in = &x.ins[i];
-			std::cout << (S)in->ty << ' ';
-		}
-		std::cout << std::endl;
-
-		/* format the bodies */
-		for (S i = 0; i < x.bodL; i++) {
-			auto b = &x.bods[i];
-			std::cout << b->vars << ' ' << b->start << std::endl;
-		}
-
-		/* execute the assembly */
-		res = x.exe();
-		if (!res) {
-			std::cerr << res.error() << std::endl;
-			goto end;
-		}
-
-		/* display the resultant Q */
-		q = *res;
-		std::cout << Fmt::Fmt(&q) << std::endl;
-
-		/* write the data to disk */
-		Db::write(db);
-
-		/* send the result back */
-		err = Net::send_Q(fd, &q);
-		if (err) {
-			std::cerr << err << std::endl;
-			goto end;
-		}
+//		/* write the data to disk */
+//		Db::write(db);
+//
+//		/* send the result back */
+//		err = Net::send_Q(fd, &q);
+//		if (err) {
+//			std::cerr << err << std::endl;
+//			goto end;
+//		}
 
 end:
 		close(fd);

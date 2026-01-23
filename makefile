@@ -5,7 +5,7 @@ R := $(shell pwd)
 CXX := $(R)/ape/bin/cosmoc++
 CXXFLAGS := -std=gnu++23 -fshort-enums \
 	    -Wall -Wextra -Wno-unused-parameter -Wno-c99-designator \
-	    -Iinc
+	    -Iinc -I3rd
 
 # c
 CC := $(R)/ape/bin/cosmocc
@@ -31,9 +31,7 @@ else
 	CXXFLAGS += -mcosmo -mclang -mdbg
 endif
 
-all: $(O)/ $(O)/3db/3db.com $(O)/3i/3i.com $(BINCOM) o/gk/gk.com
-
-include mk/gk.mk
+all: $(O)/ $(O)/3db/3db.com $(O)/3i/3i.com $(BINCOM)
 
 # make object files from cc files
 LIBO := $(patsubst lib/%.cc,$(O)/%.o,$(wildcard lib/*.cc))

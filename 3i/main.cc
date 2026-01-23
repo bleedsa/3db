@@ -19,18 +19,18 @@ inl auto un(R<X> r) -> X {
 
 int main(int argc, char **argv) {
 	Q::Q q(1);
+	char *err;
+	int sock;
+	std::string str;
 	if (argc < 2) fatal("usage: {} [addr]", argv[0]);
 
 	Three::init();
 
-	auto cli = Cli::Cli(argv[1]);
+	sock = Net::connect_host((const char*)argv[1]);
+	str = "!10";
 
-	auto a = Q::Q(A::A{1, 2, 3, 4, 5, 6, 7, 9});
-	q = un(cli.set("vec1", &a));
-	std::cout << Fmt::Fmt(&q) << std::endl;
-
-	q = un(cli.get("vec1"));
-	std::cout << Fmt::Fmt(&q) << std::endl;
+	if ((err = Net::send_str(sock, &str)))
+		fatal("{}", err);
 
 	Three::deinit();
 }

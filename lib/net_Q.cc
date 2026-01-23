@@ -55,9 +55,6 @@ auto Net::recv_Q(int sock, Q::Q *x) -> char* {
 	x->ty = (Q::QTy)head[0];
 	memcpy(&L, head+1, Z(S));
 
-	std::cout << "header of " << x->short_name();
-	std::cout << " with len " << L << std::endl;
-
 	/* make a buffer to hold the body */
 	z = x->atom_size() * L;
 	body = mk<u8>(z);

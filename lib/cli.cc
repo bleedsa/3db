@@ -1,47 +1,8 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <errno.h>
-#include <unistd.h>
 
 #include <cli.h>
 #include <net.h>
 #include <net/Q.h>
 #include <net/Asm.h>
-
-inl auto connect_host(const char *addr_port) -> int {
-	int ret, sock;
-	const char *addr, *port;
-	struct addrinfo hints, *res;
-	auto r = Net::parse_addr_port((char*)addr_port);
-	if (!r) fatal("failed to parse address: {}", r.error());
-	auto [addr_str, port_str] = *r;
-
-	addr = addr_str.c_str();
-	port = port_str.c_str();
-
-	/* get address info */
-	memset(&hints, 0, Z(hints));
-	hints.ai_family = AF_UNSPEC; /* v4 or v6 */
-	hints.ai_socktype = SOCK_STREAM;
-	if ((ret = getaddrinfo(addr, port, &hints, &res)) != 0) {
-		fatal("getaddrinfo(): {}", gai_strerror(ret));
-	}
-
-	/* make socket */
-	sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-	if (sock == -1) fatal("socket(): {}", strerror(errno));
-
-	/* make connection */
-	ret = connect(sock, res->ai_addr, res->ai_addrlen);
-	if (ret < 0) fatal("connect(): {}", strerror(errno));
-	
-	freeaddrinfo(res);
-
-	return sock;
-}
 
 Cli::Cli::Cli(const char *a) {
 	auto L = strlen(a) + 1;
@@ -57,7 +18,7 @@ Cli::Cli::~Cli() {
 inl auto send_asm(Cli::Cli *cli, Asm::Asm *a) -> R<Q::Q> {
 	Q::Q q;
 	char *err;
-	auto sock = connect_host(cli->addr);
+	auto sock = Net::connect_host(cli->addr);
 	R<Q::Q> r;
 
 	/* send the asm, get a response */
