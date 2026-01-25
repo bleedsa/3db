@@ -60,11 +60,13 @@ namespace Three {
 }
 
 namespace U {
+	S sum_vec(S *v, S n);
+
 	template<typename X>
 	inl auto sum_vec(X *v, S n) -> X {
-		X sum = 0;
-		for (S i = 0; i < n; i++) sum += v[i];
-		return sum;
+		X r = 0;
+		for (S i = 0; i < n; i++) r += v[i];
+		return r;
 	}
 
 	template<typename R, typename H>

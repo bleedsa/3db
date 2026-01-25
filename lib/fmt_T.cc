@@ -72,7 +72,7 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 	 * make the final string
 	 */
 	std::stringstream ss;
-	auto L_sum = U::sum_vec<S>(Ls, coln + 1);
+	auto L_sum = U::sum_vec(Ls, coln + 1);
 
 	/* pad L chars with c */
 	auto pad = [&](S L, char c) {
@@ -80,7 +80,7 @@ auto Fmt::Fmt(T::T *t) -> std::string {
 	};
 	/* make a line */
 	auto ln = [&]() {
-		pad(L_sum + coln + 1, '=');
+		pad(L_sum + coln + 2, '=');
 		ss << std::endl;
 	};
 

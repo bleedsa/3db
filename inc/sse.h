@@ -31,4 +31,8 @@ namespace SSE {
 	}
 }
 
+namespace Fmt {
+	std::string Fmt(xmm64_t *x);
+}
+
 #endif

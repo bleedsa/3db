@@ -14,7 +14,7 @@
 #include <net.h>
 #include <mem.h>
 
-inl auto Net::connect_host(const char *addr_port) -> int {
+auto Net::connect_host(const char *addr_port) -> int {
 	int ret, sock;
 	const char *addr, *port;
 	struct addrinfo hints, *res;
