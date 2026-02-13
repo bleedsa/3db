@@ -6,8 +6,7 @@ __static_yoink("__die");
 
 template<typename X>
 inl auto f(const char *n, X a) -> void {
-	Db::push_ent(n, a);
-	auto e = *Db::get(n);
+	auto e = Db::add(n, a);
 
 	std::cout << "wrote entry " << Fmt::Fmt(e) << std::endl;
 

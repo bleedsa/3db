@@ -195,7 +195,6 @@ inl auto Tinsert(std::vector<Q::Q> *s, Bc::In *in) -> char* {
 
 	}
 
-
 	auto t = *r;
 	t->reZ(id);
 

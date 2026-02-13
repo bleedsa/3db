@@ -6,7 +6,7 @@
 #include <Asm.h>
 #include <net/Asm.h>
 #include <net/Q.h>
-#include <cli.h>
+#include <cmd.h>
 
 template<typename X>
 inl auto un(R<X> r) -> X {
@@ -18,19 +18,14 @@ inl auto un(R<X> r) -> X {
 }
 
 int main(int argc, char **argv) {
-	Q::Q q(1);
-	char *err;
-	int sock;
-	std::string str;
 	if (argc < 2) fatal("usage: {} [addr]", argv[0]);
 
 	Three::init();
 
-	sock = Net::connect_host((const char*)argv[1]);
-	str = "!10";
+	auto cmd = Cmd::Cmd(argv[1])
+		.entry("table0");
 
-	if ((err = Net::send_str(sock, &str)))
-		fatal("{}", err);
+	std::cout << Fmt::Fmt(&cmd) << std::endl;
 
 	Three::deinit();
 }

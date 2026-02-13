@@ -100,6 +100,12 @@ namespace Db {
 			}
 		}
 
+		/* casts */
+		inl auto as_T() -> T::T* {
+			return &t;
+		}
+
+		/* serialization functions */
 		Ent(u8 *ptr);
 		std::tuple<u8*, u64> to_bytes_simple();
 		std::tuple<u8*, u64> to_bytes_table();
@@ -108,6 +114,8 @@ namespace Db {
 
 	extern std::vector<Ent> ents;
 	extern std::mutex mut;
+
+	void deinit();
 
 	std::optional<Ent*> get(var_t name);
 
@@ -125,15 +133,8 @@ namespace Db {
 
 	/* push a raw entry to the database */
 	inl auto push_ent(Ent x) -> void {
-		auto o = get(x.name);
 		auto G = LOCK(mut);
-		if (!o) {
-			ents.push_back(x);
-		} else {
-			auto ptr = *o;
-			ptr->~Ent();
-			*ptr = x;
-		}
+		ents.push_back(x);
 	}
 
 	/* push an entry onto the db and figure out the type based on the
@@ -149,6 +150,20 @@ namespace Db {
 		push_ent(v, x);
 	}
 
+	template<typename X>
+	inl auto add(var_t name, X x) -> Ent* {
+		auto o = get(name);
+		if (!o) {push_ent(name, x);return *get(name);}
+		else return *o;
+	}
+
+	template<typename X>
+	inl auto add(const char *name, X x) -> Ent* {
+		auto o = get(name);
+		if (!o) {push_ent(name, x);return *get(name);}
+		else return *o;
+	}
+
 	/* write the database to a path on disk */
 	void write(const char *path);
 
@@ -162,8 +177,6 @@ namespace Db {
 	inl auto load(std::string path) -> void {
 		load(path.c_str());
 	}
-
-	void deinit();
 }	
 
 namespace Fmt {

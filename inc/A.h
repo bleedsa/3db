@@ -13,8 +13,8 @@ namespace A {
 		S len;
 		X *ptr;
 
-		inl A(S len) : len{len}, ptr{mk<X>(len)} {}
-		inl ~A() {free(ptr);}
+		inl A(S len) : len{len}, ptr{len ? mk<X>(len) : nullptr} {}
+		inl ~A() {if (len) free(ptr);}
 
 		A(std::initializer_list<X> x) : len{x.size()}, ptr{mk<X>(len)} {
 			S i = 0;
@@ -27,13 +27,16 @@ namespace A {
 			memcpy(ptr, buf, Z(X)*len);
 		}
 
-		inl A(const A &x) : len{x.len}, ptr{mk<X>(len)} {
-			memcpy(ptr, x.ptr, Z(X)*len);
+		inl A(const A &x)
+			: len{x.len}
+			, ptr{len ? mk<X>(len) : nullptr}
+		{
+			if (ptr) memcpy(ptr, x.ptr, Z(X)*len);
 		}
 
 		inl auto operator=(const A &x) -> const A& {
-			len = x.len, ptr = mk<X>(len);
-			memcpy(ptr, x.ptr, Z(X)*len);
+			len = x.len, len ? ptr = mk<X>(len) : nullptr;
+			if (ptr) memcpy(ptr, x.ptr, Z(X)*len);
 			return *this;
 		}
 
