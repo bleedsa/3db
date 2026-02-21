@@ -5,14 +5,23 @@ namespace Db {
 	std::vector<Ent> ents;
 
 	const char *EntTy_names[] = {
-		"i32", "usize", "f32", "f64", "chr",
-		"I32", "USIZE", "F32", "F64", "CHR",
+		"err",
+		"i32", "f64", "chr",
+		"I32", "F64", "CHR",
 		"table"
 	};
 
+	const char *EntTy_short[] = {
+		"e",
+		"i", "d", "c",
+		"I", "D", "C",
+		"T"
+	};
+
 	const S EntTy_Z[] = {
-		Z(i32), Z(S), Z(f32), Z(f64), Z(Chr),
-		Z(i32), Z(S), Z(f32), Z(f64), Z(Chr),
+		0,
+		Z(i32), Z(f64), Z(Chr),
+		Z(i32), Z(f64), Z(Chr),
 		Z(T::T),
 	};
 }
@@ -22,8 +31,6 @@ auto Db::deinit() -> void {}
 Db::Ent::~Ent() {
 	switch (ty) {
 	CASE(INT, this->iA.~A())
-	CASE(SZ,  this->zA.~A())
-	CASE(FLT, this->fA.~A())
 	CASE(DBL, this->dA.~A())
 	CASE(CHR, this->cA.~A())
 	CASE(Tab, this->t.~T())
@@ -36,14 +43,10 @@ inl auto ent_cpy_value(Db::Ent *x, Db::Ent *y) -> void {
 	switch (y->ty) {
 	/* atoms */
 	CASE(Db::Int,x->i=y->i)
-	CASE(Db::Sz, x->z=y->z)
-	CASE(Db::Flt,x->f=y->f)
 	CASE(Db::Dbl,x->d=y->d)
 	CASE(Db::Ch, x->c=y->c)
 	/* vectors */
 	CASE(Db::INT,x->iA=y->iA)
-	CASE(Db::SZ, x->zA=y->zA)
-	CASE(Db::FLT,x->fA=y->fA)
 	CASE(Db::DBL,x->dA=y->dA)
 	CASE(Db::CHR,x->cA=y->cA)
 	/* misc */
@@ -66,14 +69,10 @@ auto Db::Ent::operator=(const Ent &x) -> const Ent& {
 #define EntBasicImpl(T,f) \
 	Db::Ent::Ent(var_t name, EntTy ty, T x) : name{name}, ty{ty}, f{x} {}
 EntBasicImpl(i32,i);
-EntBasicImpl(S,  z);
-EntBasicImpl(f32,f);
 EntBasicImpl(f64,d);
 EntBasicImpl(Chr,c);
 
 EntBasicImpl(A::A<i32>, iA);
-EntBasicImpl(A::A<S>,   zA);
-EntBasicImpl(A::A<f32>, fA);
 EntBasicImpl(A::A<f64>, dA);
 EntBasicImpl(A::A<Chr>, cA);
 EntBasicImpl(T::T,      t );
@@ -81,14 +80,10 @@ EntBasicImpl(T::T,      t );
 #define EntNoTypImpl(X,T,f) \
 	Db::Ent::Ent(var_t name, X x) : name{name}, ty{T}, f{x} {}
 EntNoTypImpl(i32,Int,i);
-EntNoTypImpl(S,  Sz, z);
-EntNoTypImpl(f32,Flt,f);
 EntNoTypImpl(f64,Dbl,d);
 EntNoTypImpl(Chr,Ch, c);
 
 EntNoTypImpl(A::A<i32>,INT,iA);
-EntNoTypImpl(A::A<S>,  SZ, zA);
-EntNoTypImpl(A::A<f32>,FLT,fA);
 EntNoTypImpl(A::A<f64>,DBL,dA);
 EntNoTypImpl(A::A<Chr>,CHR,cA);
 EntNoTypImpl(T::T,     Tab,t );

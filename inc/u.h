@@ -14,7 +14,8 @@
 
 #define LOCK(x) (std::lock_guard<std::mutex>(x))
 
-#define err_fmt(f...) (std::unexpected(std::format(f)))
+#define str_fmt(f...) (std::format(f))
+#define err_fmt(f...) (std::unexpected(str_fmt(f)))
 #define println(f...) {auto _x=std::format(f);std::cout<<_x<<std::endl;}
 #define fatal(f...) { \
 	auto _x=std::format("FATAL: " f); \
@@ -27,6 +28,7 @@
 	auto _x=std::format(f); \
 	(char*)Str::Interns::ptr[Str::Interns::add(_x.c_str())]; \
 })
+#define OK(f...) (std::expected(f))
 
 #ifdef DBG 
 #define dbg(x...) {x;}

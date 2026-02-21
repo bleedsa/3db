@@ -11,14 +11,10 @@ auto Fmt::Fmt(Db::Ent *x) -> std::string {
 	switch (x->ty) {
 	/* atoms */
 	CASE(Db::Int, ss<<x->i)
-	CASE(Db::Sz,  ss<<x->z)
-	CASE(Db::Flt, ss<<x->f)
 	CASE(Db::Dbl, ss<<x->d)
 	CASE(Db::Ch,  ss<<x->c)
 	/* vecs */
 	CASE(Db::INT, ss<<Fmt::Fmt(&x->iA))
-	CASE(Db::SZ,  ss<<Fmt::Fmt(&x->zA))
-	CASE(Db::FLT, ss<<Fmt::Fmt(&x->fA))
 	CASE(Db::DBL, ss<<Fmt::Fmt(&x->dA))
 	CASE(Db::CHR, ss<<Fmt::Fmt(&x->cA))
 	/* misc */

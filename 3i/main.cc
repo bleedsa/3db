@@ -22,10 +22,13 @@ int main(int argc, char **argv) {
 
 	Three::init();
 
-	auto cmd = Cmd::Cmd(argv[1])
+	Cmd::Create cmd = Cmd::Create(argv[1])
 		.entry("table0");
 
 	std::cout << Fmt::Fmt(&cmd) << std::endl;
+
+	auto ent = un(cmd.Cmd::send());
+	std::cout << Fmt::Fmt(&ent) << std::endl;
 
 	Three::deinit();
 }

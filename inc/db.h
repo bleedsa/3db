@@ -9,34 +9,28 @@
 
 namespace Db {
 	enum EntTy {
+		Err,
 		Int,
-		Sz,
-		Flt,
 		Dbl,
 		Ch,
 		INT,
-		SZ,
-		FLT,
 		DBL,
 		CHR,
 		Tab,
 	};
 
-	extern const char *EntTy_names[11];
-	extern const S EntTy_Z[11];
+	extern const char *EntTy_names[8];
+	extern const char *EntTy_short[8];
+	extern const S EntTy_Z[8];
 
 	struct Ent {
 		var_t name; 
 		EntTy ty;
 		union {
 			i32 i; /* Int */
-			S z;   /* Sz */
-			f32 f; /* Flt */
 			f64 d; /* Dbl */
 			Chr c; /* Chr */
 			A::A<i32> iA;
-			A::A<S> zA;
-			A::A<f32> fA;
 			A::A<f64> dA;
 			A::A<Chr> cA;
 			T::T t;
@@ -49,13 +43,9 @@ namespace Db {
 		/* basic Ent constructors */
 		#define EntBasic(T) Ent(var_t name, EntTy ty, T x)
 		EntBasic(i32);
-		EntBasic(S);
-		EntBasic(f32);
 		EntBasic(f64);
 		EntBasic(Chr);
 		EntBasic(A::A<i32>);
-		EntBasic(A::A<S>);
-		EntBasic(A::A<f32>);
 		EntBasic(A::A<f64>);
 		EntBasic(A::A<Chr>);
 		EntBasic(T::T);
@@ -63,19 +53,19 @@ namespace Db {
 		/* entry constructors with no EntTy parameter */
 		#define EntNoTyp(T) Ent(var_t name, T x)
 		EntNoTyp(i32);
-		EntNoTyp(S);
-		EntNoTyp(f32);
 		EntNoTyp(f64);
 		EntNoTyp(Chr);
 		EntNoTyp(A::A<i32>);
-		EntNoTyp(A::A<S>);
-		EntNoTyp(A::A<f32>);
 		EntNoTyp(A::A<f64>);
 		EntNoTyp(A::A<Chr>);
 		EntNoTyp(T::T);
 
 		inl auto type() -> const char* {
 			return EntTy_names[(S)ty];
+		}
+
+		inl auto short_name() -> const char* {
+			return EntTy_short[(S)ty];
 		}
 
 		inl auto atom_size() -> S {
@@ -85,14 +75,10 @@ namespace Db {
 		inl auto len() -> S {
 			switch (ty) {
 			case Int:
-			case Sz:
-			case Flt:
 			case Dbl:
 			case Ch:
 				return 1;
 			CASE(INT, return iA.len)
-			CASE(SZ,  return zA.len)
-			CASE(FLT, return fA.len)
 			CASE(DBL, return dA.len)
 			CASE(CHR, return cA.len)
 			CASE(Tab, return t.row_cap)
@@ -104,6 +90,8 @@ namespace Db {
 		inl auto as_T() -> T::T* {
 			return &t;
 		}
+
+		void fill_buf_with_elems(u8 *ptr);
 
 		/* serialization functions */
 		Ent(u8 *ptr);

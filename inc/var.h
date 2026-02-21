@@ -11,4 +11,8 @@ typedef char var_t __attribute__((vector_size(16)));
 var_t str_to_var(const char *y);
 char *var_to_str(var_t y);
 
+inl auto empty_var() -> var_t {
+	return (var_t){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+}
+
 #endif

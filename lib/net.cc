@@ -136,3 +136,123 @@ auto Net::recv_str(int sock, std::string *str) -> char* {
 
 	return nullptr;
 }
+
+auto operator<<(const Net::TcpS &x, u8 &y) -> const Net::TcpS& {
+	int sent;
+
+	dbg(std::cout << "sending byte...");
+	if ((sent = send(x.sock, (void*)&y, 1, 0)) < 0) {
+		throw str_fmt("failed to send byte: {}", strerror(errno));
+	} else if (sent == 0) throw "connection reset";
+	dbg(std::cout << "ok " << sent << std::endl);
+
+	return x;
+}
+
+auto operator>>(const Net::TcpS &x, u8 &y) -> const Net::TcpS& {
+	int got;
+
+	dbg(std::cout << "recv'ing byte...");
+	if ((got = recv(x.sock, (void*)&y, 1, 0)) < 0) {
+		throw str_fmt("failed to recv byte: {}", strerror(errno));
+	} else if (got == 0) throw "connection reset";
+	dbg(std::cout << "ok " << got << std::endl);
+
+	return x;
+}
+
+auto operator<<(const Net::TcpS &x, u64 &y) -> const Net::TcpS& {
+	int sent;
+
+	dbg(std::cout << "sending u64...");
+	if ((sent = send(x.sock, (void*)&y, Z(u64), 0)) < 0) {
+		throw str_fmt("failed to send u64: {}", strerror(errno));
+	} else if (sent == 0) throw "connection reset";
+	dbg(std::cout << "ok " << sent << std::endl);
+
+	return x;
+}
+
+auto operator>>(const Net::TcpS &x, u64 &y) -> const Net::TcpS& {
+	int got;
+
+	dbg(std::cout << "recv'ing u64...");
+	if ((got = recv(x.sock, (void*)&y, Z(u64), 0)) < 0) {
+		throw str_fmt("failed to recv u64: {}", strerror(errno));
+	} else if (got == 0) throw "connection reset";
+	dbg(std::cout << "ok " << got << std::endl);
+
+	return x;
+}
+
+auto operator<<(const Net::TcpS &x, var_t &y) -> const Net::TcpS& {
+	int sent;
+
+	dbg(std::cout << "sending var...");
+	if ((sent = send(x.sock, (void*)&y, Z(var_t), 0)) < 0) {
+		throw str_fmt("failed to send var: {}", strerror(errno));
+	} else if (sent == 0) throw "connection reset";
+	dbg(std::cout << "ok " << sent << std::endl);
+
+	return x;
+}
+
+auto operator>>(const Net::TcpS &x, var_t &y) -> const Net::TcpS& {
+	int got;
+
+	dbg(std::cout << "recv'ing var...");
+	if ((got = recv(x.sock, (void*)&y, Z(var_t), 0)) < 0) {
+		throw str_fmt("failed to recv var: {}", strerror(errno));
+	} else if (got == 0) throw "connection reset";
+	dbg(std::cout << "ok " << got << std::endl);
+
+	return x;
+}
+
+auto operator<<(
+	const Net::TcpS &x,
+	std::tuple<u8*, u64> &tup
+) -> const Net::TcpS& {
+	int sent;
+	auto &[ptr, L] = tup;
+
+	x << L;
+
+	dbg(std::cout << "sending " << L << " bytes...");
+	if ((sent = send(x.sock, (void*)ptr, L, 0)) < 0) {
+		throw str_fmt("failed to send bytes: {}", strerror(errno));
+	} else if (sent == 0) throw "connection reset";
+	dbg(std::cout << "ok " << sent << std::endl);
+
+	return x;
+}
+
+auto operator>>(
+	const Net::TcpS &x,
+	std::tuple<u8*, u64> &tup
+) -> const Net::TcpS& {
+	int got;
+	auto &[ptr, L] = tup;
+
+	x >> L;
+
+	dbg(std::cout << "recv'ing " << L << " bytes...");
+	if ((got = recv(x.sock, (void*)ptr, L, 0)) < 0) {
+		throw str_fmt("failed to send bytes: {}", strerror(errno));
+	} else if (got == 0) throw "connection reset";
+	dbg(std::cout << "ok " << got << std::endl);
+
+	return x;
+}
+
+auto operator>>(const Net::TcpS &x, Cmd::Insert &y) -> const Net::TcpS& {
+	char *err;
+	if ((err = Net::recv_Insert(x.sock, &y))) throw err;
+	return x;
+}
+
+auto operator>>(const Net::TcpS &x, Cmd::Create &y) -> const Net::TcpS& {
+	char *err;
+	if ((err = Net::recv_Create(x.sock, &y))) throw err;
+	return x;
+}

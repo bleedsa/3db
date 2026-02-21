@@ -178,6 +178,21 @@ auto Q::Q::fill_buf_with_elems(u8 *buf) -> void {
 	}
 }
 
+auto Db::Ent::fill_buf_with_elems(u8 *ptr) -> void {
+	switch (ty) {
+	/* atoms */
+	CASE(Int, memcpy(ptr, &i, Z(i32)))
+	CASE(Dbl, memcpy(ptr, &d, Z(f64)))
+	CASE(Ch, memcpy(ptr, &c, Z(Chr)))
+	/* vectors */
+	CASE(INT, memcpy(ptr, iA.ptr, Z(i32)*iA.len))
+	CASE(DBL, memcpy(ptr, dA.ptr, Z(f64)*dA.len))
+	CASE(CHR, memcpy(ptr, cA.ptr, Z(Chr)*cA.len))
+	/* tables */
+	CASE(Tab, t.fill_buf_full(ptr))
+	}
+}
+
 auto Q::Q::to_bytes() -> u8* {
 	u64 L = len();
 	u8 *buf = new u8[calc_serial_Z()], *ptr = buf;
@@ -202,7 +217,7 @@ constexpr S headZ = Z(var_t) /* name */
 /* Ent from bytes */
 Db::Ent::Ent(u8 *ptr) : ty{(EntTy)(ptr++)[0]} {
 	/* special case for tables */
-	if (ty == Tab) {
+	if (ty == Tab) [[likely]] {
 		/* unpack the header */
 		memcpy(&t.coln,    ptr, Z(u32));   ptr += Z(u32);
 		memcpy(&t.row_cap, ptr, Z(u32));   ptr += Z(u32);
@@ -219,14 +234,10 @@ Db::Ent::Ent(u8 *ptr) : ty{(EntTy)(ptr++)[0]} {
 		switch (ty) {
 		/* atoms */
 		CASE(Int, memcpy(&i, ptr, Z(i32)))
-		CASE(Sz,  memcpy(&z, ptr, Z(S)))
-		CASE(Flt, memcpy(&f, ptr, Z(f32)))
 		CASE(Dbl, memcpy(&d, ptr, Z(f64)))
 		CASE(Ch,  memcpy(&c, ptr, Z(Chr)))
 		/* vecs */
 		CASE(INT, iA=A::A<i32>((i32*)ptr, L))
-		CASE(SZ,  zA=A::A<S>((S*)ptr, L))
-		CASE(FLT, fA=A::A<f32>((f32*)ptr, L))
 		CASE(DBL, dA=A::A<f64>((f64*)ptr, L))
 		CASE(CHR, cA=A::A<Chr>((Chr*)ptr, L))
 		default: fatal(
@@ -276,14 +287,10 @@ auto Db::Ent::to_bytes_simple() -> std::tuple<u8*, u64> {
 	switch (ty) {
 	/* atoms */
 	CASE(Int, memcpy(ptr, &i, Z(i32)))
-	CASE(Sz,  memcpy(ptr, &z, Z(S)))
-	CASE(Flt, memcpy(ptr, &f, Z(f32)))
 	CASE(Dbl, memcpy(ptr, &d, Z(f64)))
 	CASE(Ch,  memcpy(ptr, &c, Z(Chr)))
 	/* vecs */
 	CASE(INT, memcpy(ptr, iA.ptr, z))
-	CASE(SZ,  memcpy(ptr, zA.ptr, z))
-	CASE(FLT, memcpy(ptr, fA.ptr, z))
 	CASE(DBL, memcpy(ptr, dA.ptr, z))
 	CASE(CHR, memcpy(ptr, cA.ptr, z))
 	default: fatal("to_bytes_simple() called on entry of type {}", type());

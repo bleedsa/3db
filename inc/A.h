@@ -35,8 +35,63 @@ namespace A {
 		}
 
 		inl auto operator=(const A &x) -> const A& {
-			len = x.len, len ? ptr = mk<X>(len) : nullptr;
+			len = x.len, ptr = len ? mk<X>(len) : nullptr;
 			if (ptr) memcpy(ptr, x.ptr, Z(X)*len);
+			return *this;
+		}
+
+		inl auto operator[](int i) -> X& {
+			return ptr[i];
+		}
+
+		template<typename Y, typename F>
+		inl auto each(F f) -> A<Y> {
+			auto a = A<Y>(len);
+			for (S i = 0; i < len; i++) a[i] = f(ptr+i);
+			return a;
+		}
+
+		template<typename F>
+		inl auto for_each(F f) -> void {
+			for (S i = 0; i < len; i++) f(ptr+i);
+		}
+
+		inl auto rev() -> A<X> {
+			auto r = A<X>(len);
+			for (S i = 0; i < len; i++) r[len - i - 1] = ptr[i];
+			return r;
+		}
+	};
+
+	template<typename X>
+	struct B {
+		S len;
+		X *ptr;
+
+		inl B(S len) : len{len}, ptr{len ? mk<X>(len) : nullptr} {}
+		inl ~B() {if (len) free(ptr);}
+
+		B(std::initializer_list<X> x) : len{x.size()}, ptr{mk<X>(len)} {
+			S i = 0;
+			for (auto e : x) {
+				ptr[i++] = e;
+			}
+		}
+
+		B(X *buf, S len) : len{len}, ptr{mk<X>(len)} {
+			for (S i = 0; i < len; i++) ptr[i] = buf[i];
+		}
+
+		inl B(const B &x)
+			: len{x.len}
+			, ptr{len ? mk<X>(len) : nullptr}
+		{
+			if (ptr) for (S i = 0; i < len; i++) ptr[i] = x.ptr[i];
+		}
+
+		inl auto operator=(const B &x) -> const B& {
+			len = x.len, ptr = len ? mk<X>(len) : nullptr;
+			if (ptr) for (S i = 0; i < len; i++) ptr[i] = x.ptr[i];
 			return *this;
 		}
 

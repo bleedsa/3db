@@ -52,8 +52,8 @@ auto Net::recv_Q(int sock, Q::Q *x) -> char* {
 	dbg(std::cout << "ok " << got << std::endl);
 
 	/* decode */
-	x->ty = (Q::QTy)head[0];
-	memcpy(&L, head+1, Z(S));
+	x->ty = (Q::QTy)head[0];  /* typ */
+	memcpy(&L, head+1, Z(S)); /* len */
 
 	/* make a buffer to hold the body */
 	z = x->atom_size() * L;

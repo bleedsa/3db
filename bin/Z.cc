@@ -6,6 +6,7 @@
 #include <vm.h>
 #include <Asm.h>
 #include <T.h>
+#include <cmd.h>
 
 struct Z_t {
 	const char *name;
@@ -20,7 +21,8 @@ int main() {
 	auto zs = {
 		Zof(u64), Zof(S),
 		Zof(Db::EntTy), Zof(Db::Ent), Zof(Q::Q), Zof(Bc::In),
-		Zof(VM::Bod), Zof(Asm::Asm), Zof(T::T),
+		Zof(VM::Bod), Zof(Asm::Asm), Zof(T::T), Zof(Cmd::Cmd),
+		Zof(Cmd::Create), Zof(Cmd::Insert),
 	};
 	for (auto &z : zs) {
 		std::cout<<z.name<<' '<<z.size*8<<' '<<z.size<<std::endl;

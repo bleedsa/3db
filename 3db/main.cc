@@ -16,6 +16,8 @@
 #include <Asm.h>
 #include <net/Asm.h>
 #include <net/Q.h>
+#include <net/Cmd.h>
+#include <net/Ent.h>
 
 #include "cfg.h"
 
@@ -58,7 +60,7 @@ int main(int argc, char **argv) {
 	int ret, fd;
 	struct sockaddr_storage them;
 	socklen_t addrZ = Z(them);
-	char *err, *path;
+	char *path, *err;
 	Q::Q q;
 	R<Q::Q> res;
 	struct sigaction sa;
@@ -92,7 +94,6 @@ int main(int argc, char **argv) {
 	if (ret == -1) fatal("listen(): {}", strerror(errno));
 
 	while (!main_exit) {
-		auto str = std::string();
 		auto x = Asm::Asm();
 		auto G = LOCK(sock_mut);
 
@@ -106,8 +107,17 @@ int main(int argc, char **argv) {
 		}
 		std::cout << "ok " << fd << std::endl;
 
-		if ((err = Net::recv_str(fd, &str))) {
-			std::cerr << err << std::endl;
+		try {
+			auto cmd = Net::get_cmd(fd);
+			std::cout << Fmt::Fmt(&cmd) << std::endl;
+			auto o = cmd.exe();
+			if (!o) throw A_err("'exe: {}", o.error());
+			auto ent = *o;
+
+			if ((err = Net::send_Ent(fd, ent))) throw err;
+			std::cout << "ok!!" << std::endl;
+		} catch (const char *e) {
+			std::cout << e << std::endl;
 			goto end;
 		}
 
