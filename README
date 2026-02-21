@@ -9,16 +9,17 @@ BUILDING
 	% make -j6       # build
 	% make -j6 test  # run tests
 
-A QUICK TOUR OF THE CODEBASE
+CODEBASE REFERENCE
 
 	=======================================================================
 	| path           | description
 	=----------------%-----------------------------------------------------
 	| inc/u.h        | "Univeral" header. The "prelude".
-	| inc/A.h        | A::A<X>: static width, memcpy-able template vectors.
+	| inc/A.h        | A::A<X>: static width, memcpy-able vectors.
 	| inc/Q.h        | Q::Q: bytecode VM stack object type.
 	| inc/T.h        | T::T: an RC&COW database table object.
 	| inc/Asm.h      | Asm::Asm: a serializable virtual machine object.
+	| inc/cmd.h      | High-level C++ database command API.
 	| inc/bc.h       | VM bytecode types, objects, and functions.
 	| inc/sse.h      | SIMD SSE types and functions.
 	| inc/mem.h      | Memory management functions.
@@ -35,12 +36,6 @@ A QUICK TOUR OF THE CODEBASE
 	| lib/Asm_exe.cc | Execute code inside an Asm::Asm.
 	| lib/net_*.cc   | Send objects over the network.
 	=======================================================================
-
-3RD PARTY CODE
-
-	+==================================+
-	| gk | https://github.com/cmh25/gk |
-	+----------------------------------+
 
 LICENSE
 

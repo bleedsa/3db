@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
 			std::cerr << strerror(errno) << std::endl;
 			goto end;
 		}
-		std::cout << "ok " << fd << std::endl;
+		std::cout << "fd@" << fd << std::endl;
 
 		try {
 			auto cmd = Net::get_cmd(fd);

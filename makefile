@@ -34,7 +34,9 @@ endif
 all: $(O)/ $(O)/3db/3db.com $(O)/3i/3i.com $(BINCOM)
 
 # make object files from cc files
-LIBO := $(patsubst lib/%.cc,$(O)/%.o,$(wildcard lib/*.cc))
+NETO := $(patsubst lib/%.cc,$(O)/%.o,$(wildcard lib/net/*.cc))
+FMTO := $(patsubst lib/%.cc,$(O)/%.o,$(wildcard lib/fmt/*.cc))
+LIBO := $(patsubst lib/%.cc,$(O)/%.o,$(wildcard lib/*.cc)) $(FMTO) $(NETO)
 TDBO := $(patsubst %.cc,$(O)/%.o,$(wildcard 3db/*.cc))
 TIO := $(patsubst %.cc,$(O)/%.o,$(wildcard 3i/*.cc))
 
