@@ -24,23 +24,27 @@ namespace A {
 		}
 
 		A(X *buf, S len) : len{len}, ptr{mk<X>(len)} {
-			memcpy(ptr, buf, Z(X)*len);
+			memmove(ptr, buf, Z(X)*len);
 		}
 
 		inl A(const A &x)
 			: len{x.len}
 			, ptr{len ? mk<X>(len) : nullptr}
 		{
-			if (ptr) memcpy(ptr, x.ptr, Z(X)*len);
+			if (ptr) memmove(ptr, x.ptr, Z(X)*len);
 		}
 
 		inl auto operator=(const A &x) -> const A& {
 			len = x.len, ptr = len ? mk<X>(len) : nullptr;
-			if (ptr) memcpy(ptr, x.ptr, Z(X)*len);
+			if (ptr) memmove(ptr, x.ptr, Z(X)*len);
 			return *this;
 		}
 
 		inl auto operator[](int i) -> X& {
+			return ptr[i];
+		}
+
+		inl auto at(int i) -> X& {
 			return ptr[i];
 		}
 
@@ -62,6 +66,20 @@ namespace A {
 			return r;
 		}
 	};
+
+	template<typename X, typename Y>
+	inline auto unzip(A<std::tuple<X, Y>> &q) -> std::tuple<A<X>, A<Y>> {
+		auto L = q.len;
+		auto x = A<X>(L);
+		auto y = A<Y>(L);
+
+		for (S i = 0; i < L; i++) {
+			auto &[m, n] = q[i];
+			x[i] = m, y[i] = n;
+		}
+
+		return std::tuple{x, y};
+	}
 
 	template<typename X>
 	struct B {

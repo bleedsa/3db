@@ -28,6 +28,9 @@ namespace Net {
 
 }
 
+const Net::TcpS &operator>>(const Net::TcpS &x, bool &y);
+const Net::TcpS &operator<<(const Net::TcpS &x, bool y);
+
 const Net::TcpS &operator>>(const Net::TcpS &x, u8 &y);
 const Net::TcpS &operator<<(const Net::TcpS &x, u8 &y);
 
@@ -37,7 +40,7 @@ const Net::TcpS &operator>>(const Net::TcpS &x, u64 &y);
 const Net::TcpS &operator<<(const Net::TcpS &x, var_t &y);
 const Net::TcpS &operator>>(const Net::TcpS &x, var_t &y);
 
-const Net::TcpS &operator<<(const Net::TcpS &x, std::tuple<u8*, u64> &y);
+const Net::TcpS &operator<<(const Net::TcpS &x, std::tuple<u8*, u64> y);
 const Net::TcpS &operator>>(const Net::TcpS &x, std::tuple<u8*, u64> &y);
 
 const Net::TcpS &operator>>(const Net::TcpS &x, Cmd::Insert &y);

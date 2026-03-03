@@ -137,6 +137,30 @@ auto Net::recv_str(int sock, std::string *str) -> char* {
 	return nullptr;
 }
 
+auto operator<<(const Net::TcpS &x, bool y) -> const Net::TcpS& {
+	int sent;
+
+	dbg(std::cout << "sending bool...");
+	if ((sent = send(x.sock, (void*)&y, 1, 0)) < 0) {
+		throw str_fmt("failed to send bool: {}", strerror(errno));
+	} else if (sent == 0) throw "connection reset";
+	dbg(std::cout << "ok " << sent << std::endl);
+
+	return x;
+}
+
+auto operator>>(const Net::TcpS &x, bool &y) -> const Net::TcpS& {
+	int got;
+
+	dbg(std::cout << "recv'ing bool...");
+	if ((got = recv(x.sock, (void*)&y, 1, 0)) < 0) {
+		throw str_fmt("failed to recv bool: {}", strerror(errno));
+	} else if (got == 0) throw "connection reset";
+	dbg(std::cout << "ok " << got << std::endl);
+
+	return x;
+}
+
 auto operator<<(const Net::TcpS &x, u8 &y) -> const Net::TcpS& {
 	int sent;
 
@@ -211,7 +235,7 @@ auto operator>>(const Net::TcpS &x, var_t &y) -> const Net::TcpS& {
 
 auto operator<<(
 	const Net::TcpS &x,
-	std::tuple<u8*, u64> &tup
+	std::tuple<u8*, u64> tup
 ) -> const Net::TcpS& {
 	int sent;
 	auto &[ptr, L] = tup;
@@ -235,6 +259,7 @@ auto operator>>(
 	auto &[ptr, L] = tup;
 
 	x >> L;
+	ptr = new u8[L];
 
 	dbg(std::cout << "recv'ing " << L << " bytes...");
 	if ((got = recv(x.sock, (void*)ptr, L, 0)) < 0) {

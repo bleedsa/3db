@@ -14,19 +14,27 @@ namespace Cmd {
 
 	extern const char *CmdTy_names[4];
 
+	using Col = std::tuple<var_t, T::TColTy>;
+
 	/* a create command */
 	struct Create {
 		var_t name;
 		Db::EntTy ty;
+		std::optional<A::A<Col>> cols;
 
-		inl Create() : name{empty_var()}, ty{Db::Int} {};
+		inl Create()
+			: name{empty_var()}
+			, ty{Db::Int}
+			, cols{A::A<std::tuple<var_t, T::TColTy>>(0)}
+		{};
+
 		~Create() = default;
 
 		inl auto cpy(const Create &x) -> void {
-			name = x.name, ty = x.ty;
+			name = x.name, ty = x.ty, cols = x.cols;
 		}
 
-		inl Create(const Create &x) {cpy(x);}
+		inl Create(const Create &x) : cols{x.cols} {cpy(x);}
 		Create &operator=(const Create &x) {cpy(x);return *this;}
 	};
 
@@ -72,7 +80,9 @@ namespace Cmd {
 			switch (ty) {
 			CASE(CREATE, create.name = name)
 			CASE(INSERT, insert.name = name)
-			default: throw str_fmt("{} has no entry field", type_name());
+			default: throw str_fmt(
+				"{} has no entry field", type_name()
+			);
 			}
 			return *this;
 		}
@@ -85,7 +95,26 @@ namespace Cmd {
 		inl auto type(Db::EntTy ty) -> Cmd& {
 			switch (this->ty) {
 			CASE(CREATE, create.ty = ty)
-			default: throw str_fmt("{} has no type field", type_name());
+			default: throw str_fmt(
+				"{} has no type field", type_name()
+			);
+			}
+			return *this;
+		}
+
+		inl auto columns(
+			A::A<std::tuple<const char*, T::TColTy>> cols
+		) -> Cmd& {
+			switch (ty) {
+			case CREATE:
+				create.cols = cols.each<Col>([](std::tuple<const char*, T::TColTy> *tup) {
+					auto n = str_to_var(std::get<0>(*tup));
+					return std::tuple{n, std::get<1>(*tup)};
+				});
+				break;
+			default: throw str_fmt(
+				"{} has no valid columns field", type_name()
+			);
 			}
 			return *this;
 		}

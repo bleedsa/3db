@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
 			auto ent = *o;
 
 			if ((err = Net::send_Ent(fd, ent))) throw err;
-			std::cout << "ok!!" << std::endl;
+			std::cout << "returned entry" << std::endl;
 		} catch (const char *e) {
 			std::cout << e << std::endl;
 			goto end;

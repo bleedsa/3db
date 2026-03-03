@@ -24,7 +24,12 @@ int main(int argc, char **argv) {
 	try {
 		auto cmd = Cmd::Cmd(Cmd::CREATE, argv[1])
 			.entry("table0")
-			.type(Db::Int);
+			.type(Db::Tab)
+			.columns(A::A{
+				std::tuple{"int", T::TInt},
+				std::tuple{"DBL", T::TDBL},
+				std::tuple{"CHR", T::TCHR}
+			});
 
 		auto res = cmd.send();
 		if (!res) std::cout << res.error() << std::endl;

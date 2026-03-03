@@ -50,6 +50,17 @@ inl auto insert_exe(Cmd::Insert *x, T::T *t) -> R<Db::Ent*> {
 
 }
 
+inl auto create_table(var_t name, std::optional<A::A<Cmd::Col>> &c)->Db::Ent* {
+	if (c) {
+		auto cols = *c;
+		auto [names, types] = A::unzip<var_t, T::TColTy>(cols);
+		auto t = T::T(names, types);
+		return Db::add(name, t);
+	} else {
+		return Db::add(name, T::empty());
+	}
+}
+
 auto Cmd::Cmd::exe() -> R<Db::Ent*> {
 	switch (ty) {
 	case INSERT: {
@@ -87,7 +98,7 @@ auto Cmd::Cmd::exe() -> R<Db::Ent*> {
 		CASE(Db::INT, return Db::add(n, A::A<i32>(0)))
 		CASE(Db::DBL, return Db::add(n, A::A<f64>(0)))
 		CASE(Db::CHR, return Db::add(n, A::A<Chr>(0)))
-		CASE(Db::Tab, return Db::add(n, T::empty()))
+		CASE(Db::Tab, return create_table(n, create.cols))
 		}
 	}
 

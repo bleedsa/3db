@@ -149,7 +149,24 @@ auto Net::send_Create(int sock, Cmd::Create *x) -> char* {
 
 	u8 e = (u8)x->ty;
 	try {
-		tcp << e << x->name;
+		tcp << e << x->name << !!x->cols;
+
+		if (x->cols) {
+			auto cols = *x->cols;
+			/* make the name and type column buffers */
+			auto L = cols.len;
+			auto names = new var_t[L];
+			auto types = new T::TColTy[L];
+			for (S i = 0; i < L; i++) {
+				auto &[n, t] = cols[i];
+				names[i] = n, types[i] = t;
+			}
+
+			/* send everything */
+			tcp
+				<< std::tuple{(u8*)names, Z(var_t)*L}
+				<< std::tuple{(u8*)types, Z(T::TColTy)*L};
+		}
 	} catch (std::string &e) {
 		return A_err("failed to send Create: {}", e);
 	}
@@ -160,10 +177,26 @@ auto Net::send_Create(int sock, Cmd::Create *x) -> char* {
 auto Net::recv_Create(int sock, Cmd::Create *x) -> char* {
 	auto tcp = TcpS(sock);
 	u8 e;
+	bool has_cols;
 
 	/* recv */
 	try {
-		tcp >> e >> x->name;
+		tcp >> e >> x->name >> has_cols;
+
+		if (has_cols) {
+			auto tup = std::tuple<u8*, u64>{nullptr, 0};
+			tcp >> tup;
+			auto names = (var_t*)std::get<0>(tup);
+			tcp >> tup;
+			auto types = (T::TColTy*)std::get<0>(tup);
+			auto L = std::get<1>(tup);
+
+			x->cols = A::A<Cmd::Col>(L);
+
+			for (S i = 0; i < L; i++) {
+				x->cols->at(i) = std::tuple{names[i], types[i]};
+			}
+		}
 	} catch (std::string &e) {
 		return A_err("failed to recv Create: {}", e);
 	}
