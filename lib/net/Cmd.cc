@@ -29,51 +29,25 @@ auto Net::send_Cmd(int sock, Cmd::Cmd *x) -> char* {
 
 	switch (x->ty) {
 	CASE(Cmd::NIL, return "send() called on NIL")
-	CASE(Cmd::INSERT, dynamic_cast<Cmd::Insert*>(x)->send())
-	CASE(Cmd::CREATE, dynamic_cast<Cmd::Create*>(x)->send())
+	CASE(Cmd::INSERT, return send_Insert(sock, &x->insert))
+	CASE(Cmd::CREATE, return send_Create(sock, &x->create))
 	}
-
-	return nullptr;
 }
 
-auto Net::get_cmd(int sock) -> Cmd::Cmd {
-	u8 ty;
+auto Net::recv_Cmd(int sock, Cmd::Cmd *x) -> char* {
 	auto tcp = Net::TcpS(sock);
 
-	tcp >> ty;
-	switch (ty) {
-	[[unlikely]]
-	CASE(Cmd::NIL, throw "get_cmd() called on NIL")
+	u8 t;
+	tcp >> t;
+	x->ty = (Cmd::CmdTy)t, x->sock = sock;
 
-	case Cmd::CREATE: {
-		Cmd::Create x;
-		tcp >> x;
-		return x;
-	}
-
-	case Cmd::INSERT: {
-		Cmd::Insert x;
-		tcp >> x;
-		return x;
-	}
+	switch (x->ty) {
+	CASE(Cmd::NIL, return "recv() called on NIL")
+	CASE(Cmd::INSERT, return recv_Insert(sock, &x->insert))
+	CASE(Cmd::CREATE, return recv_Create(sock, &x->create))
 	}
 }
 
-
-auto Cmd::Insert::send() -> R<Db::Ent> {
-	char *err;
-	Db::Ent ent = Db::Ent(empty_var(), -1);
-
-	if ((err = Net::send_Insert(sock, this))) {
-		return err_fmt("failed to send insert cmd: {}", err);
-	}
-
-	if ((err = Net::recv_Ent(sock, &ent))) {
-		return err_fmt("failed to recv entry: {}", err);
-	}
-
-	return R<Db::Ent>(ent);
-}
 
 constexpr S Insert_headZ = Z(var_t) + (2*Z(u64));
 
@@ -173,9 +147,9 @@ constexpr S Create_headZ = Z(var_t) + Z(Db::EntTy);
 auto Net::send_Create(int sock, Cmd::Create *x) -> char* {
 	auto tcp = TcpS(sock);
 
-	u8 t = (u8)x->ty, e = (u8)x->entty;
+	u8 e = (u8)x->ty;
 	try {
-		tcp << t << e << x->name;
+		tcp << e << x->name;
 	} catch (std::string &e) {
 		return A_err("failed to send Create: {}", e);
 	}
@@ -185,32 +159,17 @@ auto Net::send_Create(int sock, Cmd::Create *x) -> char* {
 
 auto Net::recv_Create(int sock, Cmd::Create *x) -> char* {
 	auto tcp = TcpS(sock);
-	u8 t, e;
+	u8 e;
 
 	/* recv */
 	try {
-		tcp >> t >> e >> x->name;
+		tcp >> e >> x->name;
 	} catch (std::string &e) {
 		return A_err("failed to recv Create: {}", e);
 	}
 
 	/* decode */
-	x->ty = (Cmd::CmdTy)t, x->entty = (Db::EntTy)e;
+	x->ty = (Db::EntTy)e;
 
 	return nullptr;
-}
-
-auto Cmd::Create::send() -> R<Db::Ent> {
-	char *err;
-	Db::Ent ent(empty_var(), -1);
-
-	if ((err = Net::send_Create(sock, this))) {
-		return err_fmt("failed to send Create: {}", err);
-	}
-
-	if ((err = Net::recv_Ent(sock, &ent))) {
-		return err_fmt("failed to recv entry: {}", err);
-	}
-
-	return R<Db::Ent>(ent);
 }

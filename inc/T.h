@@ -167,6 +167,10 @@ namespace T {
 			}
 		}
 	};
+
+	inl auto empty() -> T {
+		return T(A::A<var_t>(0), A::A<TColTy>(0));
+	}
 }
 
 namespace Fmt {

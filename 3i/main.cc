@@ -19,16 +19,22 @@ inl auto un(R<X> r) -> X {
 
 int main(int argc, char **argv) {
 	if (argc < 2) fatal("usage: {} [addr]", argv[0]);
-
 	Three::init();
 
-	Cmd::Create cmd = Cmd::Create(argv[1])
-		.entry("table0");
+	try {
+		auto cmd = Cmd::Cmd(Cmd::CREATE, argv[1])
+			.entry("table0")
+			.type(Db::Int);
 
-	std::cout << Fmt::Fmt(&cmd) << std::endl;
-
-	auto ent = un(cmd.Cmd::send());
-	std::cout << Fmt::Fmt(&ent) << std::endl;
+		auto res = cmd.send();
+		if (!res) std::cout << res.error() << std::endl;
+		else {
+			auto e = *res;
+			std::cout << Fmt::Fmt(&e) << std::endl;
+		}
+	} catch (std::string &e) {
+		std::cerr << "'exc: " << e << std::endl;
+	}
 
 	Three::deinit();
 }

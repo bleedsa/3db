@@ -105,10 +105,10 @@ int main(int argc, char **argv) {
 			std::cerr << strerror(errno) << std::endl;
 			goto end;
 		}
-		std::cout << "fd@" << fd << std::endl;
+		std::cout << "fd " << fd << std::endl;
 
 		try {
-			auto cmd = Net::get_cmd(fd);
+			auto cmd = Cmd::Cmd(fd);
 			std::cout << Fmt::Fmt(&cmd) << std::endl;
 			auto o = cmd.exe();
 			if (!o) throw A_err("'exe: {}", o.error());

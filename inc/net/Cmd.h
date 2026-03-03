@@ -5,7 +5,7 @@
 
 namespace Net {
 	char *send_Cmd(int sock, Cmd::Cmd *x);
-	Cmd::Cmd get_cmd(int sock);
+	char *recv_Cmd(int sock, Cmd::Cmd *x);
 
 	char *send_Insert(int sock, Cmd::Insert *x);
 	char *recv_Insert(int sock, Cmd::Insert *x);

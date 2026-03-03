@@ -34,8 +34,8 @@ T::T::T(A::A<var_t> n, A::A<TColTy> a)
 	*refs = 1;
 
 	/* just rip the pointer directly from the vecs */
-	memcpy(col_tys, a.ptr, Z(TColTy)*coln);
-	memcpy(col_names, n.ptr, Z(var_t)*coln);
+	if (a.ptr) memcpy(col_tys, a.ptr, Z(TColTy)*coln);
+	if (n.ptr) memcpy(col_names, n.ptr, Z(var_t)*coln);
 	memset(init, false, Z(bool)*row_cap);
 
 	/* allocate buffers for the columns */
