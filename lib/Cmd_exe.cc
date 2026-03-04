@@ -5,10 +5,11 @@ inl auto set_col(T::T *t, S row, S col, X x) -> void {
 	((X*)t->cols[col])[row] = x;
 }
 
-inl auto insert_exe(Cmd::Insert *x, T::T *t) -> R<Db::Ent*> {
+inl auto insert_exe(Cmd::Insert *x, T::T *t) -> R<void> {
 	S col;
 	Q::Q *q;
 
+	/* safety */
 	[[unlikely]]
 	if (t->coln != x->cols.len) {
 		auto n = var_to_str(x->name);
@@ -21,6 +22,7 @@ inl auto insert_exe(Cmd::Insert *x, T::T *t) -> R<Db::Ent*> {
 		return r;
 	}
 
+	/* set each column */
 	for (
 		col = 0, q = &x->cols[col];
 		col < x->cols.len;
@@ -46,8 +48,10 @@ inl auto insert_exe(Cmd::Insert *x, T::T *t) -> R<Db::Ent*> {
 		}
 	};
 
-	return {};
+	/* set the row as init */
+	t->init[x->row] = true;
 
+	return {};
 }
 
 inl auto create_table(var_t name, std::optional<A::A<Cmd::Col>> &c)->Db::Ent* {
@@ -84,7 +88,11 @@ auto Cmd::Cmd::exe() -> R<Db::Ent*> {
 		/* grab the table and make room for the row */
 		auto t = e->as_T();
 		t->reZ(insert.row);
-		return insert_exe(&insert, t);
+		
+		auto r = insert_exe(&insert, t);
+		if (!r) return std::unexpected(r.error());
+
+		return e;
 	}
 
 	case CREATE: {

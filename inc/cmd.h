@@ -102,12 +102,34 @@ namespace Cmd {
 			return *this;
 		}
 
+		inl auto row(S row) -> Cmd& {
+			switch (ty) {
+			CASE(INSERT, insert.row = row)
+			default: throw str_fmt(
+				"{} has no row field", type_name()
+			);
+			}
+			return *this;
+		}
+
+		inl auto columns(A::A<Q::Q> cols) -> Cmd& {
+			switch (ty) {
+			CASE(INSERT, insert.cols = cols)
+			default: throw str_fmt(
+				"{} has no columns field", type_name()
+			);
+			}
+			return *this;
+		}
+
 		inl auto columns(
 			A::A<std::tuple<const char*, T::TColTy>> cols
 		) -> Cmd& {
 			switch (ty) {
 			case CREATE:
-				create.cols = cols.each<Col>([](std::tuple<const char*, T::TColTy> *tup) {
+				create.cols = cols.each<Col>([](
+					std::tuple<const char*, T::TColTy> *tup
+				) {
 					auto n = str_to_var(std::get<0>(*tup));
 					return std::tuple{n, std::get<1>(*tup)};
 				});

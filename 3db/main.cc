@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
 		}
 
 //		/* write the data to disk */
-//		Db::write(db);
+		Db::write(db);
 //
 //		/* send the result back */
 //		err = Net::send_Q(fd, &q);

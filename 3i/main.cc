@@ -22,13 +22,12 @@ int main(int argc, char **argv) {
 	Three::init();
 
 	try {
-		auto cmd = Cmd::Cmd(Cmd::CREATE, argv[1])
+		auto cmd = Cmd::Cmd(Cmd::INSERT, argv[1])
 			.entry("table0")
-			.type(Db::Tab)
+			.row(1)
 			.columns(A::A{
-				std::tuple{"int", T::TInt},
-				std::tuple{"DBL", T::TDBL},
-				std::tuple{"CHR", T::TCHR}
+				Q::Q(1),
+				Q::Q(A::A<Chr>{'a', 'b', 'c', 'd'})
 			});
 
 		auto res = cmd.send();
