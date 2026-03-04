@@ -106,8 +106,16 @@ auto Cmd::Cmd::exe() -> R<Db::Ent*> {
 		CASE(Db::INT, return Db::add(n, A::A<i32>(0)))
 		CASE(Db::DBL, return Db::add(n, A::A<f64>(0)))
 		CASE(Db::CHR, return Db::add(n, A::A<Chr>(0)))
+		[[likely]]
 		CASE(Db::Tab, return create_table(n, create.cols))
 		}
+	}
+
+	case GET: {
+		auto n = get.name;
+		auto o = Db::get(n);
+		if (o) [[likely]] return *o;
+		else return err_fmt("entry {} not found", var_to_str(n));
 	}
 
 	default: return err_fmt("cannot exe Cmd of type {}", (u8)ty);

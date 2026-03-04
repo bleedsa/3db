@@ -10,9 +10,10 @@ namespace Cmd {
 		SELECT,
 		INSERT,
 		CREATE,
+		GET,
 	};
 
-	extern const char *CmdTy_names[4];
+	extern const char *CmdTy_names[5];
 
 	using Col = std::tuple<var_t, T::TColTy>;
 
@@ -25,7 +26,7 @@ namespace Cmd {
 		inl Create()
 			: name{empty_var()}
 			, ty{Db::Int}
-			, cols{A::A<std::tuple<var_t, T::TColTy>>(0)}
+			, cols{std::nullopt}
 		{};
 
 		~Create() = default;
@@ -55,12 +56,28 @@ namespace Cmd {
 		Insert &operator=(const Insert &x) {cpy(x);return *this;}
 	};
 
+	/* get an entry from the database */
+	struct Get {
+		var_t name;
+
+		inl Get() : name{empty_var()} {}
+		~Get() = default;
+
+		inl auto cpy(const Get &x) -> void {
+			name = x.name;
+		}
+
+		inl Get(const Get &x) {cpy(x);}
+		inl Get &operator=(const Get &x) {cpy(x);return *this;}
+	};
+
 	struct Cmd {
 		CmdTy ty;
 		int sock;
 		union {
 			Create create;
 			Insert insert;
+			Get get;
 		};
 
 		Cmd(int fd);
@@ -80,6 +97,7 @@ namespace Cmd {
 			switch (ty) {
 			CASE(CREATE, create.name = name)
 			CASE(INSERT, insert.name = name)
+			CASE(GET,    get.name = name)
 			default: throw str_fmt(
 				"{} has no entry field", type_name()
 			);

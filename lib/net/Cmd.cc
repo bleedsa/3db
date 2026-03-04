@@ -28,10 +28,14 @@ auto Net::send_Cmd(int sock, Cmd::Cmd *x) -> char* {
 	tcp << t;
 
 	switch (x->ty) {
+	[[unlikely]]
 	CASE(Cmd::NIL, return "send() called on NIL")
 	CASE(Cmd::INSERT, return send_Insert(sock, &x->insert))
 	CASE(Cmd::CREATE, return send_Create(sock, &x->create))
+	CASE(Cmd::GET, return send_Get(sock, &x->get))
 	}
+
+	return nullptr;
 }
 
 auto Net::recv_Cmd(int sock, Cmd::Cmd *x) -> char* {
@@ -42,10 +46,14 @@ auto Net::recv_Cmd(int sock, Cmd::Cmd *x) -> char* {
 	x->ty = (Cmd::CmdTy)t, x->sock = sock;
 
 	switch (x->ty) {
+	[[unlikely]]
 	CASE(Cmd::NIL, return "recv() called on NIL")
 	CASE(Cmd::INSERT, return recv_Insert(sock, &x->insert))
 	CASE(Cmd::CREATE, return recv_Create(sock, &x->create))
+	CASE(Cmd::GET, return recv_Get(sock, &x->get))
 	}
+
+	return nullptr;
 }
 
 
@@ -148,10 +156,12 @@ auto Net::send_Create(int sock, Cmd::Create *x) -> char* {
 	auto tcp = TcpS(sock);
 
 	u8 e = (u8)x->ty;
-	try {
-		tcp << e << x->name << !!x->cols;
+	auto has_cols = x->cols.has_value() && x->cols->len != 0;
 
-		if (x->cols) {
+	try {
+		tcp << e << x->name << has_cols;
+
+		if (has_cols) {
 			auto cols = *x->cols;
 			/* make the name and type column buffers */
 			auto L = cols.len;
@@ -196,6 +206,8 @@ auto Net::recv_Create(int sock, Cmd::Create *x) -> char* {
 			for (S i = 0; i < L; i++) {
 				x->cols->at(i) = std::tuple{names[i], types[i]};
 			}
+		} else {
+			x->cols = {};
 		}
 	} catch (std::string &e) {
 		return A_err("failed to recv Create: {}", e);
@@ -203,6 +215,30 @@ auto Net::recv_Create(int sock, Cmd::Create *x) -> char* {
 
 	/* decode */
 	x->ty = (Db::EntTy)e;
+
+	return nullptr;
+}
+
+auto Net::send_Get(int sock, Cmd::Get *x) -> char* {
+	auto tcp = TcpS(sock);
+
+	try {
+		tcp << x->name;
+	} catch (std::string &e) {
+		return A_err("failed to send Get: {}", e);
+	}
+
+	return nullptr;
+}
+
+auto Net::recv_Get(int sock, Cmd::Get *x) -> char* {
+	auto tcp = TcpS(sock);
+
+	try {
+		tcp >> x->name;
+	} catch (std::string &e) {
+		return A_err("failed to recv Get: {}", e);
+	}
 
 	return nullptr;
 }

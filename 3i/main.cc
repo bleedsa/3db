@@ -22,13 +22,9 @@ int main(int argc, char **argv) {
 	Three::init();
 
 	try {
-		auto cmd = Cmd::Cmd(Cmd::INSERT, argv[1])
-			.entry("table0")
-			.row(1)
-			.columns(A::A{
-				Q::Q(1),
-				Q::Q(A::A<Chr>{'a', 'b', 'c', 'd'})
-			});
+		auto cmd = Cmd::Cmd(Cmd::CREATE, argv[1])
+			.entry("str")
+			.type(Db::CHR);
 
 		auto res = cmd.send();
 		if (!res) std::cout << res.error() << std::endl;
@@ -37,6 +33,8 @@ int main(int argc, char **argv) {
 			std::cout << Fmt::Fmt(&e) << std::endl;
 		}
 	} catch (std::string &e) {
+		std::cerr << "'exc: " << e << std::endl;
+	} catch (const char *e) {
 		std::cerr << "'exc: " << e << std::endl;
 	}
 
