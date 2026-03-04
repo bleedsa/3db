@@ -65,6 +65,18 @@ inl auto create_table(var_t name, std::optional<A::A<Cmd::Col>> &c)->Db::Ent* {
 	}
 }
 
+inl auto set_ent(Db::Ent *ent, Q::Q val) -> R<Db::Ent*> {
+	switch (val.ty) {
+	CASE(Q::QInt, ent->ty = Db::Int, ent->i = val.i)
+	CASE(Q::QDbl, ent->ty = Db::Dbl, ent->d = val.d)
+	CASE(Q::QChr, ent->ty = Db::Ch,  ent->c = val.c)
+	CASE(Q::QINT, ent->ty = Db::INT, ent->iA = val.iA)
+	CASE(Q::QDBL, ent->ty = Db::DBL, ent->dA = val.dA)
+	CASE(Q::QCHR, ent->ty = Db::CHR, ent->cA = val.cA)
+	}
+	return ent;
+}
+
 auto Cmd::Cmd::exe() -> R<Db::Ent*> {
 	switch (ty) {
 	case INSERT: {
@@ -115,6 +127,14 @@ auto Cmd::Cmd::exe() -> R<Db::Ent*> {
 		auto n = get.name;
 		auto o = Db::get(n);
 		if (o) [[likely]] return *o;
+		else return err_fmt("entry {} not found", var_to_str(n));
+	}
+
+	case SET: {
+		auto n = set.name;
+		auto q = set.val;
+		auto o = Db::get(n);
+		if (o) [[likely]] return set_ent(*o, q);
 		else return err_fmt("entry {} not found", var_to_str(n));
 	}
 

@@ -33,6 +33,7 @@ auto Net::send_Cmd(int sock, Cmd::Cmd *x) -> char* {
 	CASE(Cmd::INSERT, return send_Insert(sock, &x->insert))
 	CASE(Cmd::CREATE, return send_Create(sock, &x->create))
 	CASE(Cmd::GET, return send_Get(sock, &x->get))
+	CASE(Cmd::SET, return send_Set(sock, &x->set))
 	}
 
 	return nullptr;
@@ -51,6 +52,7 @@ auto Net::recv_Cmd(int sock, Cmd::Cmd *x) -> char* {
 	CASE(Cmd::INSERT, return recv_Insert(sock, &x->insert))
 	CASE(Cmd::CREATE, return recv_Create(sock, &x->create))
 	CASE(Cmd::GET, return recv_Get(sock, &x->get))
+	CASE(Cmd::SET, return recv_Set(sock, &x->set))
 	}
 
 	return nullptr;
@@ -238,6 +240,30 @@ auto Net::recv_Get(int sock, Cmd::Get *x) -> char* {
 		tcp >> x->name;
 	} catch (std::string &e) {
 		return A_err("failed to recv Get: {}", e);
+	}
+
+	return nullptr;
+}
+
+auto Net::send_Set(int sock, Cmd::Set *x) -> char* {
+	auto tcp = TcpS(sock);
+
+	try {
+		tcp << x->name << x->val;
+	} catch (std::string &e) {
+		return A_err("failed to send Set: {}", e);
+	}
+
+	return nullptr;
+}
+
+auto Net::recv_Set(int sock, Cmd::Set *x) -> char* {
+	auto tcp = TcpS(sock);
+
+	try {
+		tcp >> x->name >> x->val;
+	} catch (std::string &e) {
+		return A_err("failed to recv Set: {}", e);
 	}
 
 	return nullptr;

@@ -46,4 +46,10 @@ const Net::TcpS &operator>>(const Net::TcpS &x, std::tuple<u8*, u64> &y);
 const Net::TcpS &operator>>(const Net::TcpS &x, Cmd::Insert &y);
 const Net::TcpS &operator>>(const Net::TcpS &x, Cmd::Create &y);
 
+const Net::TcpS &operator>>(const Net::TcpS &x, Db::Ent &y);
+const Net::TcpS &operator<<(const Net::TcpS &x, Db::Ent y);
+
+const Net::TcpS &operator>>(const Net::TcpS &x, Q::Q &y);
+const Net::TcpS &operator<<(const Net::TcpS &x, Q::Q y);
+
 #endif

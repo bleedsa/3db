@@ -41,7 +41,9 @@ namespace Db {
 		const Ent &operator=(const Ent &x);
 
 		/* basic Ent constructors */
-		#define EntBasic(T) Ent(var_t name, EntTy ty, T x)
+		#define EntBasic(T) \
+			Ent(var_t name, EntTy ty, T x); \
+			Ent(const char *name, EntTy ty, T x);
 		EntBasic(i32);
 		EntBasic(f64);
 		EntBasic(Chr);
@@ -51,7 +53,9 @@ namespace Db {
 		EntBasic(T::T);
 
 		/* entry constructors with no EntTy parameter */
-		#define EntNoTyp(T) Ent(var_t name, T x)
+		#define EntNoTyp(T) \
+			Ent(var_t name, T x); \
+			Ent(const char *name, T x);
 		EntNoTyp(i32);
 		EntNoTyp(f64);
 		EntNoTyp(Chr);

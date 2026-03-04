@@ -13,6 +13,8 @@
 #include <str.h>
 #include <net.h>
 #include <mem.h>
+#include <net/Ent.h>
+#include <net/Q.h>
 
 auto Net::connect_host(const char *addr_port) -> int {
 	int ret, sock;
@@ -279,5 +281,29 @@ auto operator>>(const Net::TcpS &x, Cmd::Insert &y) -> const Net::TcpS& {
 auto operator>>(const Net::TcpS &x, Cmd::Create &y) -> const Net::TcpS& {
 	char *err;
 	if ((err = Net::recv_Create(x.sock, &y))) throw err;
+	return x;
+}
+
+auto operator>>(const Net::TcpS &x, Db::Ent &y) -> const Net::TcpS& {
+	char *err;
+	if ((err = Net::recv_Ent(x.sock, &y))) throw err;
+	return x;
+}
+
+auto operator<<(const Net::TcpS &x, Db::Ent y) -> const Net::TcpS& {
+	char *err;
+	if ((err = Net::send_Ent(x.sock, &y))) throw err;
+	return x;
+}
+
+auto operator>>(const Net::TcpS &x, Q::Q &y) -> const Net::TcpS& {
+	char *err;
+	if ((err = Net::recv_Q(x.sock, &y))) throw err;
+	return x;
+}
+
+auto operator<<(const Net::TcpS &x, Q::Q y) -> const Net::TcpS& {
+	char *err;
+	if ((err = Net::send_Q(x.sock, &y))) throw err;
 	return x;
 }

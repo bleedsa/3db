@@ -67,7 +67,10 @@ auto Db::Ent::operator=(const Ent &x) -> const Ent& {
 /* make a basic ent constructor with value type T and field name f.
  * adds entry name to the interned string table. */
 #define EntBasicImpl(T,f) \
-	Db::Ent::Ent(var_t name, EntTy ty, T x) : name{name}, ty{ty}, f{x} {}
+	Db::Ent::Ent(var_t name, EntTy ty, T x) : name{name}, ty{ty}, f{x} {} \
+	Db::Ent::Ent(const char *name, EntTy ty, T x) \
+		: name{str_to_var(name)}, ty{ty}, f{x} \
+	{}
 EntBasicImpl(i32,i);
 EntBasicImpl(f64,d);
 EntBasicImpl(Chr,c);
@@ -78,7 +81,10 @@ EntBasicImpl(A::A<Chr>, cA);
 EntBasicImpl(T::T,      t );
 
 #define EntNoTypImpl(X,T,f) \
-	Db::Ent::Ent(var_t name, X x) : name{name}, ty{T}, f{x} {}
+	Db::Ent::Ent(var_t name, X x) : name{name}, ty{T}, f{x} {} \
+	Db::Ent::Ent(const char *name, X x) \
+		: name{str_to_var(name)}, ty{T}, f{x} \
+	{}
 EntNoTypImpl(i32,Int,i);
 EntNoTypImpl(f64,Dbl,d);
 EntNoTypImpl(Chr,Ch, c);

@@ -16,6 +16,9 @@ namespace Net {
 
 	char *send_Get(int sock, Cmd::Get *x);
 	char *recv_Get(int sock, Cmd::Get *x);
+
+	char *send_Set(int sock, Cmd::Set *x);
+	char *recv_Set(int sock, Cmd::Set *x);
 }
 
 #endif

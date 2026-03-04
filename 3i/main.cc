@@ -22,9 +22,9 @@ int main(int argc, char **argv) {
 	Three::init();
 
 	try {
-		auto cmd = Cmd::Cmd(Cmd::CREATE, argv[1])
+		auto cmd = Cmd::Cmd(Cmd::SET, argv[1])
 			.entry("str")
-			.type(Db::CHR);
+			.value(Q::Q(A::A<Chr>{'a', 'b', 'c'}));
 
 		auto res = cmd.send();
 		if (!res) std::cout << res.error() << std::endl;

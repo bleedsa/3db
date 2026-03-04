@@ -11,9 +11,10 @@ namespace Cmd {
 		INSERT,
 		CREATE,
 		GET,
+		SET,
 	};
 
-	extern const char *CmdTy_names[5];
+	extern const char *CmdTy_names[6];
 
 	using Col = std::tuple<var_t, T::TColTy>;
 
@@ -71,6 +72,21 @@ namespace Cmd {
 		inl Get &operator=(const Get &x) {cpy(x);return *this;}
 	};
 
+	struct Set {
+		var_t name;
+		Q::Q val;
+
+		inl Set() {}
+		~Set() = default;
+
+		inl auto cpy(const Set &x) -> void {
+			name = x.name, val = x.val;
+		}
+
+		inl Set(const Set &x) {cpy(x);}
+		inl Set &operator=(const Set &x) {cpy(x);return *this;}
+	};
+
 	struct Cmd {
 		CmdTy ty;
 		int sock;
@@ -78,6 +94,7 @@ namespace Cmd {
 			Create create;
 			Insert insert;
 			Get get;
+			Set set;
 		};
 
 		Cmd(int fd);
@@ -98,6 +115,7 @@ namespace Cmd {
 			CASE(CREATE, create.name = name)
 			CASE(INSERT, insert.name = name)
 			CASE(GET,    get.name = name)
+			CASE(SET,    set.name = name)
 			default: throw str_fmt(
 				"{} has no entry field", type_name()
 			);
@@ -154,6 +172,16 @@ namespace Cmd {
 				break;
 			default: throw str_fmt(
 				"{} has no valid columns field", type_name()
+			);
+			}
+			return *this;
+		}
+
+		inl auto value(Q::Q val) -> Cmd& {
+			switch (ty) {
+			CASE(SET, set.val = val)
+			default: throw str_fmt(
+				"{} has no valid value field", type_name()
 			);
 			}
 			return *this;
