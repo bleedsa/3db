@@ -32,10 +32,59 @@ CODEBASE REFERENCE
 	| inc/ini.h      | .ini config file parser.
 	=----------------%-----------------------------------------------------
 	| lib/bytes.cc   | Object serialization into raw buffers of bytes.
-	| lib/fmt_*.cc   | Format objects into strings that you can print out.
+	| lib/fmt/*.cc   | Format objects into strings that you can print out.
 	| lib/Asm_exe.cc | Execute code inside an Asm::Asm.
-	| lib/net_*.cc   | Send objects over the network.
+	| lib/Cmd_exe.cc | Execute Cmd::Cmd commands. 
+	| lib/net/*.cc   | Send objects over the network.
 	=======================================================================
+
+RUNNING THE SERVER
+
+	1. Make a config file cfg.ini (see example run/cfg.ini)
+	2. zip -r o/3db/3db.com cfg.ini
+	3. o/3db/3db.com
+
+EXECUTING COMMANDS IN C++
+
+	An example client program is included in this project under 3i (3
+	interpreter). You can use this template to create your own query
+	programs.
+
+	A query is constructed through chains of methods. Note that these
+	methods may throw runtime exceptions.
+
+	=======================================================================
+	| CREATE
+	=======================================================================
+
+	Create commands create entries in the database to be initialized later.
+
+	/* create a table */
+	auto cmd = Cmd::Cmd(Cmd::CREATE, "example.com:2222")
+		.entry("table0")
+		.type(Db::Tab)
+		.columns(A::A{
+			std::tuple{"int", T::TInt},
+			std::tuple{"CHR", T::TCHR},
+			std::tuple{"DBL", T::TDBL}
+		});
+
+	=======================================================================
+	| INSERT
+	=======================================================================
+
+	Insert commands insert columns into tables in the database. This comm-
+	and only works on tables.
+
+	/* insert some stuff */
+	auto cmd = Cmd::Cmd(Cmd::INSERT, "example.com:2222")
+		.entry("table0")
+		.row(22)
+		.columns(A::A{
+			Q::Q(1),
+			Q::Q(A::A<Chr>{'a', 'b', 'c'}),
+			Q::Q(A::A<f64>{1.2, 3.4, 5.6})
+		});
 
 LICENSE
 
