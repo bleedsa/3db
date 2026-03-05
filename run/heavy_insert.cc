@@ -7,12 +7,12 @@ int main() {
 
 	for (S i = 0; i < 2222; i++) {
 		auto n = (std::stringstream() << i).str().c_str();
-		Db::push_ent(n, i);
+		Db::add(n, (i32)i);
 	}
 
 	for (auto &e : Db::ents) {
 		auto str = var_to_str(e.name);
-		std::cout << str << ' ' << e.z << ' ';
+		std::cout << str << ' ' << e.i << ' ';
 		delete[] str;
 	}
 

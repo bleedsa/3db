@@ -53,3 +53,80 @@ inl auto Cmd::Cmd::cpy(const Cmd &x) -> void {
 
 Cmd::Cmd::Cmd(const Cmd &x) {cpy(x);}
 auto Cmd::Cmd::operator=(const Cmd &x)->Cmd&{cpy(x);return *this;}
+
+auto Cmd::Cmd::entry(var_t name) -> Cmd& {
+	switch (ty) {
+	CASE(CREATE, create.name = name)
+	CASE(INSERT, insert.name = name)
+	CASE(GET,    get.name = name)
+	CASE(SET,    set.name = name)
+	default: throw str_fmt(
+		"{} has no entry field", type_name()
+	);
+	}
+	return *this;
+}
+
+auto Cmd::Cmd::entry(const char *name) -> Cmd& {
+	auto n = str_to_var(name);
+	return entry(n);
+}
+
+auto Cmd::Cmd::type(Db::EntTy ty) -> Cmd& {
+	switch (this->ty) {
+	CASE(CREATE, create.ty = ty)
+	default: throw str_fmt(
+		"{} has no type field", type_name()
+	);
+	}
+	return *this;
+}
+
+auto Cmd::Cmd::row(S row) -> Cmd& {
+	switch (ty) {
+	CASE(INSERT, insert.row = row)
+	default: throw str_fmt(
+		"{} has no row field", type_name()
+	);
+	}
+	return *this;
+}
+
+auto Cmd::Cmd::columns(A::A<Q::Q> cols) -> Cmd& {
+	switch (ty) {
+	CASE(INSERT, insert.cols = cols)
+	default: throw str_fmt(
+		"{} has no columns field", type_name()
+	);
+	}
+	return *this;
+}
+
+auto Cmd::Cmd::columns(
+	A::A<std::tuple<const char*, T::TColTy>> cols
+) -> Cmd& {
+	switch (ty) {
+	case CREATE:
+		create.cols = cols.each<Col>([](
+			std::tuple<const char*, T::TColTy> *tup
+		) {
+			auto n = str_to_var(std::get<0>(*tup));
+			return std::tuple{n, std::get<1>(*tup)};
+		});
+		break;
+	default: throw str_fmt(
+		"{} has no valid columns field", type_name()
+	);
+	}
+	return *this;
+}
+
+auto Cmd::Cmd::value(Q::Q val) -> Cmd& {
+	switch (ty) {
+	CASE(SET, set.val = val)
+	default: throw str_fmt(
+		"{} has no valid value field", type_name()
+	);
+	}
+	return *this;
+}

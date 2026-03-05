@@ -2,8 +2,6 @@ wrote entry x I32 (1;2;3)
 deserialized entry x I32 (1;2;3)
 wrote entry y F64 (1.2;3.4)
 deserialized entry y F64 (1.2;3.4)
-wrote entry z usize 1234567890
-deserialized entry z usize 8
 wrote entry chr chr X
 deserialized entry chr chr X
 wrote entry str CHR "abc"

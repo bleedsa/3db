@@ -22,7 +22,7 @@ namespace INI {
 		{
 			char *err;
 			if ((err = parse(path))) {
-				throw err;
+				throw std::string(err);
 			}
 		}
 
