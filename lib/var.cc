@@ -1,5 +1,6 @@
 #include <cassert>
 
+#include <u.h>
 #include <var.h>
 
 auto str_to_var(const char *y) -> var_t {
@@ -22,4 +23,10 @@ auto var_to_str(var_t y) -> char* {
 	memcpy(x, &y, Z(var_t));
 	x[16] = 0;
 	return x;
+}
+
+auto vareq(var_t x, var_t y) -> bool {
+	auto mask = x == y;
+	for (S i = 0; i < 16; i++) if (!mask[i]) return false;
+	return true;
 }

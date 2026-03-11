@@ -3,6 +3,7 @@
 
 #include <Q.h>
 #include <db.h>
+#include <MaybePtr.h>
 
 namespace Cmd {
 	enum CmdTy {
@@ -22,7 +23,7 @@ namespace Cmd {
 	struct Create {
 		var_t name;
 		Db::EntTy ty;
-		std::optional<A::A<Col>> cols;
+		std::optional<std::vector<Col>> cols;
 
 		inl Create()
 			: name{empty_var()}
@@ -44,16 +45,16 @@ namespace Cmd {
 	struct Insert {
 		var_t name;
 		S row;
-		A::A<Q::Q> cols;
+		std::vector<Q::Q> cols;
 
-		inl Insert() : name{empty_var()},row{0},cols{A::A<Q::Q>(0)} {}
+		inl Insert() : name{empty_var()},row{0},cols{{}} {}
 		~Insert() = default;
 
 		inl auto cpy(const Insert &x) -> void {
 			name = x.name, row = x.row, cols = x.cols;
 		}
 
-		Insert(const Insert &x) : cols{x.cols} {cpy(x);}
+		Insert(const Insert &x) : cols{{}} {cpy(x);}
 		Insert &operator=(const Insert &x) {cpy(x);return *this;}
 	};
 
@@ -87,10 +88,26 @@ namespace Cmd {
 		inl Set &operator=(const Set &x) {cpy(x);return *this;}
 	};
 
+	struct Select {
+		var_t name;
+		A::A<var_t> cols;
+
+		inl Select() : cols{A::A<var_t>(0)} {}
+		~Select() = default;
+
+		inl auto cpy(const Select &x) -> void {
+			name = x.name, cols = x.cols;
+		}
+
+		inl Select(const Select &x) : cols{A::A<var_t>(0)} {cpy(x);}
+		inl Select &operator=(const Select &x) {cpy(x);return *this;}
+	};
+
 	struct Cmd {
 		CmdTy ty;
 		int sock;
 		union {
+			Select select;
 			Create create;
 			Insert insert;
 			Get get;
@@ -110,17 +127,23 @@ namespace Cmd {
 			return CmdTy_names[(S)ty];
 		}
 
+		/* set the entry targeted by this command */
 		Cmd &entry(var_t name);
 		Cmd &entry(const char *name);
+
+		/* set the "columns" field for this command */
+		Cmd &columns(std::vector<Q::Q> cols);
+		Cmd &columns(std::vector<std::tuple<const char*, T::TColTy>> cols);
+		Cmd &columns(A::A<var_t> cols);
+		Cmd &columns(A::A<const char*> cols);
+
+		Cmd &value(Q::Q val);
 		Cmd &type(Db::EntTy ty);
 		Cmd &row(S row);
-		Cmd &columns(A::A<Q::Q> cols);
-		Cmd &columns(A::A<std::tuple<const char*, T::TColTy>> cols);
-		Cmd &value(Q::Q val);
 
 		/* exe executes the query on the backend. It modifies
 		 * the array on disk. for networked access, use send. */
-		R<Db::Ent*> exe();
+		R<MaybePtr<Db::Ent>> exe();
 
 		/* send a command over the wire. */
 		R<Db::Ent> send();

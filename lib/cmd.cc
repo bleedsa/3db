@@ -14,6 +14,7 @@ Cmd::Cmd::Cmd(int sock) : sock{sock} {
 
 Cmd::Cmd::Cmd(CmdTy ty, int sock) : ty{ty}, sock{sock} {
 	switch (ty) {
+	CASE(SELECT, select=Select())
 	CASE(CREATE, create=Create())
 	CASE(INSERT, insert=Insert())
 	CASE(GET,    get=Get())
@@ -25,6 +26,7 @@ Cmd::Cmd::Cmd(CmdTy ty, const char *addr)
 	: ty{ty}, sock{Net::connect_host(addr)}
 {
 	switch (ty) {
+	CASE(SELECT, select=Select())
 	CASE(CREATE, create=Create())
 	CASE(INSERT, insert=Insert())
 	CASE(GET,    get=Get())
@@ -34,6 +36,7 @@ Cmd::Cmd::Cmd(CmdTy ty, const char *addr)
 
 Cmd::Cmd::~Cmd() {
 	switch (ty) {
+	CASE(SELECT, select.~Select())
 	CASE(CREATE, create.~Create())
 	CASE(INSERT, insert.~Insert())
 	CASE(GET,    get.~Get())
@@ -44,6 +47,7 @@ Cmd::Cmd::~Cmd() {
 inl auto Cmd::Cmd::cpy(const Cmd &x) -> void {
 	ty = x.ty, sock = x.sock;
 	switch (ty) {
+	CASE(SELECT, select = x.select)
 	CASE(CREATE, create = x.create)
 	CASE(INSERT, insert = x.insert)
 	CASE(GET,    get = x.get)
@@ -56,6 +60,7 @@ auto Cmd::Cmd::operator=(const Cmd &x)->Cmd&{cpy(x);return *this;}
 
 auto Cmd::Cmd::entry(var_t name) -> Cmd& {
 	switch (ty) {
+	CASE(SELECT, select.name = name)
 	CASE(CREATE, create.name = name)
 	CASE(INSERT, insert.name = name)
 	CASE(GET,    get.name = name)
@@ -92,7 +97,7 @@ auto Cmd::Cmd::row(S row) -> Cmd& {
 	return *this;
 }
 
-auto Cmd::Cmd::columns(A::A<Q::Q> cols) -> Cmd& {
+auto Cmd::Cmd::columns(std::vector<Q::Q> cols) -> Cmd& {
 	switch (ty) {
 	CASE(INSERT, insert.cols = cols)
 	default: throw str_fmt(
@@ -103,22 +108,38 @@ auto Cmd::Cmd::columns(A::A<Q::Q> cols) -> Cmd& {
 }
 
 auto Cmd::Cmd::columns(
-	A::A<std::tuple<const char*, T::TColTy>> cols
+	std::vector<std::tuple<const char*, T::TColTy>> cols
 ) -> Cmd& {
 	switch (ty) {
-	case CREATE:
-		create.cols = cols.each<Col>([](
-			std::tuple<const char*, T::TColTy> *tup
-		) {
-			auto n = str_to_var(std::get<0>(*tup));
-			return std::tuple{n, std::get<1>(*tup)};
-		});
+	case CREATE: {
+		auto r = std::vector<Col>();
+		for (auto &[name, type] : cols) {
+			auto n = str_to_var(name);
+			r.push_back(std::tuple{n, type});
+		}
+		create.cols = r;
 		break;
+	}
 	default: throw str_fmt(
 		"{} has no valid columns field", type_name()
 	);
 	}
 	return *this;
+}
+
+auto Cmd::Cmd::columns(A::A<var_t> cols) -> Cmd& {
+	switch (ty) {
+	CASE(SELECT, select.cols = cols)
+	default: throw str_fmt(
+		"{} has no valid columns field", type_name()
+	);
+	}
+	return *this;
+}
+
+auto Cmd::Cmd::columns(A::A<const char*> cols) -> Cmd& {
+	auto x = cols.each<var_t>([](const char **x){return str_to_var(*x);});
+	return columns(x);
 }
 
 auto Cmd::Cmd::value(Q::Q val) -> Cmd& {

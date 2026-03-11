@@ -65,10 +65,15 @@ namespace A {
 			for (S i = 0; i < len; i++) r[len - i - 1] = ptr[i];
 			return r;
 		}
+
+		inl auto find(X x) -> i64 {
+			for (S i = 0; i < len; i++) if (x == ptr[i]) return i;
+			return -1;
+		}
 	};
 
 	template<typename X, typename Y>
-	inline auto unzip(A<std::tuple<X, Y>> &q) -> std::tuple<A<X>, A<Y>> {
+	auto unzip(A<std::tuple<X, Y>> &q) -> std::tuple<A<X>, A<Y>> {
 		auto L = q.len;
 		auto x = A<X>(L);
 		auto y = A<Y>(L);
@@ -79,6 +84,14 @@ namespace A {
 		}
 
 		return std::tuple{x, y};
+	}
+
+	template<typename X>
+	auto from_vec(std::vector<X> &x) -> A<X> {
+		auto L = x.size();
+		auto r = A<X>(L);
+		for (S i = 0; i < L; i++) r[i] = x[i];
+		return r;
 	}
 
 	template<typename X>

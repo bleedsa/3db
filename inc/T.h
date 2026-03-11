@@ -37,6 +37,14 @@ namespace T {
 			*this = T(v, a);
 		}
 
+		T(
+			A::A<var_t> &names,
+			A::A<TColTy> &tys,
+			u8 **cols,
+			u32 row_cap,
+			bool *init
+		);
+
 		void free_vec_cell(S x, S y);
 		void free_cells();
 		~T();

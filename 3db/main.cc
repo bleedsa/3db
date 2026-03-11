@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
 			std::cout << Fmt::Fmt(&cmd) << std::endl;
 			auto o = cmd.exe();
 			if (!o) throw A_err("'exe: {}", o.error());
-			auto ent = *o;
+			auto ent = **o;
 
 			if ((err = Net::send_Ent(fd, ent))) throw err;
 			std::cout << "returned entry" << std::endl;

@@ -68,11 +68,10 @@ inl auto set_header_field(u8 *ptr, X x) -> S {
 }
 
 auto Net::send_Insert(int sock, Cmd::Insert *x) -> char* {
-	u64 i /* idx */, L = (u64)x->cols.len /* length of the cols vec */;
-	u8 head[Insert_headZ], *body, *ptr; /* buffers */
+	u64 L = (u64)x->cols.size() /* length of the cols vec */;
+	u8 head[Insert_headZ], *ptr; /* buffers */
 	int sent;
 	char *err;
-	Q::Q *q;
 
 	/* setup the header */
 	ptr = head;
@@ -88,18 +87,13 @@ auto Net::send_Insert(int sock, Cmd::Insert *x) -> char* {
 	dbg(std::cout << "ok " << sent << std::endl);
 
 	/* send each Q in the cols */
-	if (!x->cols.ptr) [[unlikely]] goto end;
-	else {
-		for (i = 0; i < L; i++) {
-			/* find q */
-			q = x->cols.ptr+i;
-			/* send */
-			if ((err = send_Q(sock, q))) {
-				return A_err(
-					"failed to send Cmd column {}: {}",
-					Fmt::Fmt(q), err
-				);
-			}
+	for (auto &q : x->cols) {
+		/* send */
+		if ((err = send_Q(sock, &q))) {
+			return A_err(
+				"failed to send Cmd column {}: {}",
+				Fmt::Fmt(&q), err
+			);
 		}
 	}
 
@@ -117,8 +111,8 @@ auto Net::recv_Insert(int sock, Cmd::Insert *x) -> char* {
 	int got;
 	u8 head[Insert_headZ], *ptr;
 	u64 i, L, row = 0;
-	Q::Q *q;
 	char *err;
+	Q::Q q;
 
 	/* do the first recv */
 	dbg(std::cout << "recv'ing Cmd header...");
@@ -135,18 +129,18 @@ auto Net::recv_Insert(int sock, Cmd::Insert *x) -> char* {
 	ptr += get_header_field<u64>(ptr, &row); x->row = (S)row;
 	ptr += get_header_field<u64>(ptr, &L);
 	
-	/* setup Q x */
-	x->cols = A::A<Q::Q>(L);
+	/* setup Q vector in x */
+	x->cols = std::vector<Q::Q>();
 
 	/* recv each Q in the columns */
-	for (i = 0; i < L; i++) {
-		q = x->cols.ptr+i;
-		if ((err = recv_Q(sock, q))) {
+	for (S i = 0; i < L; i++) {
+		if ((err = recv_Q(sock, &q))) {
 			return A_err(
 				"failed to recv Cmd column {}: {}",
 				i, err
 			);
 		}
+		x->cols.push_back(q);
 	}
 
 	return nullptr;
@@ -155,10 +149,11 @@ auto Net::recv_Insert(int sock, Cmd::Insert *x) -> char* {
 constexpr S Create_headZ = Z(var_t) + Z(Db::EntTy);
 
 auto Net::send_Create(int sock, Cmd::Create *x) -> char* {
+	S i;
 	auto tcp = TcpS(sock);
 
 	u8 e = (u8)x->ty;
-	auto has_cols = x->cols.has_value() && x->cols->len != 0;
+	auto has_cols = x->cols.has_value() && x->cols->size() != 0;
 
 	try {
 		tcp << e << x->name << has_cols;
@@ -166,13 +161,13 @@ auto Net::send_Create(int sock, Cmd::Create *x) -> char* {
 		if (has_cols) {
 			auto cols = *x->cols;
 			/* make the name and type column buffers */
-			auto L = cols.len;
+			auto L = cols.size();
 			auto names = new var_t[L];
 			auto types = new T::TColTy[L];
-			for (S i = 0; i < L; i++) {
-				auto &[n, t] = cols[i];
-				names[i] = n, types[i] = t;
-			}
+
+			/* fill the buffers */
+			i = 0;
+			for (auto &[n, t] : cols) names[i] = n, types[i++] = t;
 
 			/* send everything */
 			tcp
@@ -203,10 +198,10 @@ auto Net::recv_Create(int sock, Cmd::Create *x) -> char* {
 			auto types = (T::TColTy*)std::get<0>(tup);
 			auto L = std::get<1>(tup);
 
-			x->cols = A::A<Cmd::Col>(L);
+			x->cols = std::vector<Cmd::Col>();
 
 			for (S i = 0; i < L; i++) {
-				x->cols->at(i) = std::tuple{names[i], types[i]};
+				x->cols->push_back(std::tuple{names[i], types[i]});
 			}
 		} else {
 			x->cols = {};

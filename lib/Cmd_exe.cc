@@ -11,12 +11,12 @@ inl auto insert_exe(Cmd::Insert *x, T::T *t) -> R<void> {
 
 	/* safety */
 	[[unlikely]]
-	if (t->coln != x->cols.len) {
+	if (t->coln != x->cols.size()) {
 		auto n = var_to_str(x->name);
 		auto r = err_fmt(
 			"attempting to insert {} columns into table with"
 			"{} columns.",
-			x->cols.len, t->coln
+			x->cols.size(), t->coln
 		);
 		delete[] n;
 		return r;
@@ -25,7 +25,7 @@ inl auto insert_exe(Cmd::Insert *x, T::T *t) -> R<void> {
 	/* set each column */
 	for (
 		col = 0, q = &x->cols[col];
-		col < x->cols.len;
+		col < x->cols.size();
 		col++, q = &x->cols[col]
 	) {
 		switch (q->ty) {
@@ -54,18 +54,22 @@ inl auto insert_exe(Cmd::Insert *x, T::T *t) -> R<void> {
 	return {};
 }
 
-inl auto create_table(var_t name, std::optional<A::A<Cmd::Col>> &c)->Db::Ent* {
+inl auto create_table(
+	var_t name,
+	std::optional<std::vector<Cmd::Col>> &c
+) -> Db::Ent* {
 	if (c) {
 		auto cols = *c;
-		auto [names, types] = A::unzip<var_t, T::TColTy>(cols);
-		auto t = T::T(names, types);
-		return Db::add(name, t);
+		auto [names, types] = U::unzip<var_t, T::TColTy>(cols);
+		auto n = A::from_vec(names);
+		auto t = A::from_vec(types);
+		return Db::add(name, T::T(n, t));
 	} else {
 		return Db::add(name, T::empty());
 	}
 }
 
-inl auto set_ent(Db::Ent *ent, Q::Q val) -> R<Db::Ent*> {
+inl auto set_ent(Db::Ent *ent, Q::Q val) -> R<MaybePtr<Db::Ent>> {
 	switch (val.ty) {
 	CASE(Q::QInt, ent->ty = Db::Int, ent->i = val.i)
 	CASE(Q::QDbl, ent->ty = Db::Dbl, ent->d = val.d)
@@ -74,11 +78,74 @@ inl auto set_ent(Db::Ent *ent, Q::Q val) -> R<Db::Ent*> {
 	CASE(Q::QDBL, ent->ty = Db::DBL, ent->dA = val.dA)
 	CASE(Q::QCHR, ent->ty = Db::CHR, ent->cA = val.cA)
 	}
-	return ent;
+	return MaybePtr(ent);
 }
 
-auto Cmd::Cmd::exe() -> R<Db::Ent*> {
+inl auto find_col(T::T *t, var_t n) -> S {
+	for (S i = 0; i < t->coln; i++)
+		if (vareq(n, t->col_names[i])) return i;
+
+	/* not found */
+	auto s = var_to_str(n);
+	auto err = str_fmt("column {} not found.", s);
+	delete[] s;
+	throw err;
+}
+
+auto sel(Db::Ent *e, T::T *t, Cmd::Select *s) -> R<MaybePtr<Db::Ent>> {
+	auto names = &s->cols;
+	auto coln = names->len;
+	auto cols = mk<u8*>(coln);
+	auto tys = A::A<T::TColTy>(coln);
+
+	/* make the columns matrix */
+	try {
+		for (S i = 0; i < coln; i++) {
+			/* find the column */
+			auto x = find_col(t, names->at(i));
+			/* populate the type vector */
+			tys[i] = t->col_tys[x];
+			/* calculate the col size */
+			S z = T::TColTy_Z[tys[i]] * t->row_cap;
+			/* allocate */
+			cols[i] = mk<u8>(z);
+			/* copy */
+			memmove(cols[i], t->cols[x], z);
+		}
+	} catch (std::string &e) {
+		return std::unexpected(e);
+	}
+
+	/* make a table out of all the stuff we just did */
+	auto r = T::T(*names, tys, cols, t->row_cap, t->init);
+	auto ent = Db::Ent(e->name, r);
+	return MaybePtr(ent);
+}
+
+auto Cmd::Cmd::exe() -> R<MaybePtr<Db::Ent>> {
 	switch (ty) {
+	case SELECT: {
+		auto o = Db::get(select.name);
+		if (!o) {
+			auto n = var_to_str(select.name);
+			auto r = err_fmt("table {} not found.", n);
+			delete[] n;
+			return r;
+		}
+
+		auto e = *o;
+		if (e->ty != Db::Tab) {
+			auto n = var_to_str(select.name);
+			auto r = err_fmt("entry {} is not a table.", n);
+			delete[] n;
+			return r;
+		}
+
+		auto t = e->as_T();
+
+		return sel(e, t, &select);
+	}
+
 	case INSERT: {
 		auto o = Db::get(insert.name);
 		if (!o) {
@@ -104,29 +171,31 @@ auto Cmd::Cmd::exe() -> R<Db::Ent*> {
 		auto r = insert_exe(&insert, t);
 		if (!r) return std::unexpected(r.error());
 
-		return e;
+		return MaybePtr(e);
 	}
 
 	case CREATE: {
+		Db::Ent *r;
 		auto n = create.name;
 		auto o = Db::get(n);
-		if (o) return *o;
+		if (o) r = *o;
 		else switch (create.ty) {
-		CASE(Db::Int, return Db::add(n, 0))
-		CASE(Db::Dbl, return Db::add(n, 0.0))
-		CASE(Db::Ch,  return Db::add(n, '\0'))
-		CASE(Db::INT, return Db::add(n, A::A<i32>(0)))
-		CASE(Db::DBL, return Db::add(n, A::A<f64>(0)))
-		CASE(Db::CHR, return Db::add(n, A::A<Chr>(0)))
+		CASE(Db::Int, r = Db::add(n, 0))
+		CASE(Db::Dbl, r = Db::add(n, 0.0))
+		CASE(Db::Ch,  r = Db::add(n, '\0'))
+		CASE(Db::INT, r = Db::add(n, A::A<i32>(0)))
+		CASE(Db::DBL, r = Db::add(n, A::A<f64>(0)))
+		CASE(Db::CHR, r = Db::add(n, A::A<Chr>(0)))
 		[[likely]]
-		CASE(Db::Tab, return create_table(n, create.cols))
+		CASE(Db::Tab, r = create_table(n, create.cols))
 		}
+		return MaybePtr(r);
 	}
 
 	case GET: {
 		auto n = get.name;
 		auto o = Db::get(n);
-		if (o) [[likely]] return *o;
+		if (o) [[likely]] return MaybePtr(*o);
 		else return err_fmt("entry {} not found", var_to_str(n));
 	}
 
@@ -138,6 +207,6 @@ auto Cmd::Cmd::exe() -> R<Db::Ent*> {
 		else return err_fmt("entry {} not found", var_to_str(n));
 	}
 
-	default: return err_fmt("cannot exe Cmd of type {}", (u8)ty);
+	default: return err_fmt("cannot exe Cmd of type {}", type_name());
 	}
 }

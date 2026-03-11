@@ -42,6 +42,29 @@ T::T::T(A::A<var_t> n, A::A<TColTy> a)
 	for (S i = 0; i < coln; i++) cols[i] = mk<u8>(colZof(i));
 }
 
+T::T::T(
+	A::A<var_t> &names,
+	A::A<TColTy> &tys,
+	u8 **cols,
+	u32 row_cap,
+	bool *in
+) 
+	: coln{static_cast<u32>(names.len)}
+	, row_cap{row_cap}
+	, col_tys{mk<TColTy>(coln)}
+	, col_names{mk<var_t>(coln)}
+	, cols{cols}
+	, init{mk<bool>(row_cap)}
+	, refs{new i64}
+{
+	*refs = 1;
+
+	/* copy the vecs */
+	if (names.ptr) memcpy(col_names, names.ptr, Z(var_t)*coln);
+	if (tys.ptr) memcpy(col_tys, tys.ptr, Z(TColTy)*coln);
+	memcpy(init, in, Z(bool)*row_cap);
+}
+
 auto T::T::free_vec_cell(S x, S y) -> void {
 	auto ptr = get_cell<u8>(x, y);
 	ptr->~A();

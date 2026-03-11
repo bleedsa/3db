@@ -8,6 +8,8 @@
 #include <iostream>
 #include <expected>
 
+#include <var.h>
+
 #define Z(x) (sizeof(x))
 #define inl __attribute__((always_inline)) inline
 #define CASE(h,b...) case h: { b; break; }
@@ -81,6 +83,21 @@ namespace U {
 
 	[[noreturn]]
 	void exit(int q);
+
+	template<typename X, typename Y>
+	auto unzip(
+		std::vector<std::tuple<X, Y>> &q
+	) -> std::tuple<std::vector<X>, std::vector<Y>> {
+		auto x = std::vector<X>();
+		auto y = std::vector<Y>();
+
+		for (auto &[i, j] : q) {
+			x.push_back(i);
+			y.push_back(j);
+		}
+
+		return std::tuple{x, y};
+	}
 }
 
 #endif
