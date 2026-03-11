@@ -13,10 +13,11 @@ struct MaybePtr {
 	inl MaybePtr(X *P) : is_owned{false}, ptr{P} {}
 
 	~MaybePtr() {
-//		if (is_owned) own.~X();
+		if (is_owned) own.~X();
 	}
 
 	inl auto cpy(const MaybePtr &x) -> void {
+		is_owned = x.is_owned;
 		if (is_owned) own = x.own;
 		else ptr = x.ptr;
 	}

@@ -27,8 +27,9 @@ int main() {
 		auto res = cmd.exe();
 		if (!res) throw res.error();
 		auto x = *res;
+		auto y = **x;
 
-		std::cout << Fmt::Fmt(*x) << std::endl;
+		std::cout << Fmt::Fmt(&y) << std::endl;
 	} catch (std::string e) {
 		std::cerr << e << std::endl;
 	}
