@@ -118,8 +118,7 @@ auto sel(Db::Ent *e, T::T *t, Cmd::Select *s) -> R<MaybePtr<Db::Ent>> {
 
 	/* make a table out of all the stuff we just did */
 	auto r = T::T(*names, tys, cols, t->row_cap, t->init);
-	auto ent = Db::Ent(e->name, r);
-	return MaybePtr(ent);
+	return MaybePtr(Db::Ent(e->name, r));
 }
 
 auto Cmd::Cmd::exe() -> R<MaybePtr<Db::Ent>> {
