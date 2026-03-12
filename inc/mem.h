@@ -26,4 +26,9 @@ inl auto remk(X *P, S L) -> X* {
 	return P;
 }
 
+template<typename X>
+inl auto memeq(X *x, X *y, S n) -> bool {
+	return memcmp(x, y, n*Z(X)) == 0;
+}
+
 #endif

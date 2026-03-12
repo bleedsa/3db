@@ -174,6 +174,14 @@ namespace T {
 				memmove(ptr, &v, Z(X));
 			}
 		}
+
+		/*
+		 * predicates
+		 */
+		bool tys_eq(T &y);
+		bool names_eq(T &y);
+		bool init_eq(T &y);
+		bool cols_eq(T &y);
 	};
 
 	inl auto empty() -> T {
@@ -181,7 +189,7 @@ namespace T {
 	}
 }
 
-bool operator==(const T::T &x, const T::T &y);
+bool operator==(T::T &x, T::T &y);
 
 namespace Fmt {
 	std::string Fmt(T::T *t);

@@ -216,3 +216,42 @@ auto T::T::cln() -> void {
 	this->init=init,       this->refs=refs;
 }
 
+auto T::T::tys_eq(T &y) -> bool {
+	return memeq(col_tys, y.col_tys, coln);
+}
+
+auto T::T::names_eq(T &y) -> bool {
+	return memeq(col_names, y.col_names, coln);
+}
+
+auto T::T::init_eq(T &y) -> bool {
+	return memeq(init, y.init, row_cap);
+}
+
+template<typename X>
+inl auto col_eq(T::T &x, T::T &y, S c) {
+	for (S r = 0; r < x.row_cap; r++) if (x.init[r]) {
+		if (((X**)x.cols[c])[r] != ((X**)y.cols[c])[r]) return false;
+	}
+	return true;
+}
+
+auto T::T::cols_eq(T &y) -> bool {
+	for (S c = 0; c < coln; c++) {
+		switch (col_tys[c]) {
+		CASE(TInt, if (!col_eq<i32>(*this, y, c)) return false)
+		CASE(TDbl, if (!col_eq<f64>(*this, y, c)) return false)
+		CASE(TChr, if (!col_eq<Chr>(*this, y, c)) return false)
+		CASE(TINT, if (!col_eq<A::A<i32>>(*this, y, c)) return false)
+		CASE(TDBL, if (!col_eq<A::A<f64>>(*this, y, c)) return false)
+		CASE(TCHR, if (!col_eq<A::A<Chr>>(*this, y, c)) return false)
+		}
+	}
+	return true;
+}
+
+auto operator==(T::T &x, T::T &y) -> bool {
+	return x.coln == y.coln && x.row_cap == y.row_cap
+		&& x.tys_eq(y) && x.names_eq(y) && x.init_eq(y)
+		&& x.cols_eq(y);
+}
