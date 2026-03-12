@@ -13,9 +13,9 @@ int main() {
 	);
 	xmm_t dbl = {1.0, 2.0};
 	var_t str = str_to_var("0123456789abcdef");
-	t.insert(001, 1, &dbl, 2, &str, 16); dbl *= 0.66; str += 4;
-	t.insert(002, 2, &dbl, 2, &str, 16); dbl *= 0.66; str += 4;
-	t.insert(003, 3, &dbl, 2, &str, 16);
+	t.insert(001, 1, &dbl, 2, &str, 15); dbl *= 0.66;
+	t.insert(002, 2, &dbl, 2, &str, 15); dbl *= 0.66;
+	t.insert(003, 3, &dbl, 2, &str, 15);
 
 	/* add it to the database and print */
 	auto ent = Db::add("table1", t);
