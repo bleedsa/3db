@@ -113,7 +113,6 @@ auto T::T::operator=(const T &x) -> const T& {
 auto T::T::reZ(S row) -> void {
 	if (row >= row_cap) {
 		S prev_cap, i;
-
 		prev_cap = row_cap, row_cap = row * 2;
 
 		/* remk and set the init column */

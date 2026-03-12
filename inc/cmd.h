@@ -88,6 +88,30 @@ namespace Cmd {
 		inl Set &operator=(const Set &x) {cpy(x);return *this;}
 	};
 
+	enum WhereTy {
+		WEq,
+		WLt,
+		WGt,
+	};
+
+	struct Where {
+		WhereTy ty;
+		var_t col;
+		Q::Q val;
+
+		inl Where(WhereTy ty)
+			: ty{ty}, col{empty_var()}, val{Q::Q()}
+		{}
+		~Where() = default;
+
+		inl auto cpy(const Where &x) -> void {
+			ty = x.ty, col = x.col, val = x.val;
+		}
+
+		inl Where(const Where &x) : val{Q::Q()} {cpy(x);}
+		inl Where &operator=(const Where &x) {cpy(x);return *this;}
+	};
+
 	struct Select {
 		var_t name;
 		A::A<var_t> cols;

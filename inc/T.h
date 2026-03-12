@@ -181,6 +181,8 @@ namespace T {
 	}
 }
 
+bool operator==(const T::T &x, const T::T &y);
+
 namespace Fmt {
 	std::string Fmt(T::T *t);
 }

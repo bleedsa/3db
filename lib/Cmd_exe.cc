@@ -132,6 +132,7 @@ auto Cmd::Cmd::exe() -> R<MaybePtr<Db::Ent>> {
 			return r;
 		}
 
+		/* check if we got back a table */
 		auto e = *o;
 		if (e->ty != Db::Tab) {
 			auto n = var_to_str(select.name);
