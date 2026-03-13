@@ -31,7 +31,6 @@ else
 	CXXFLAGS += -mcosmo -mclang -mdbg
 endif
 
-all: $(O)/ $(O)/3db/3db.com $(O)/3i/3i.com $(BINCOM)
 
 # make object files from cc files
 NETO := $(patsubst lib/%.cc,$(O)/%.o,$(wildcard lib/net/*.cc))
@@ -43,6 +42,8 @@ TIO := $(patsubst %.cc,$(O)/%.o,$(wildcard 3i/*.cc))
 # make binaries from cc files
 BINCOM := $(patsubst %.cc,$(O)/%.com,$(wildcard bin/*.cc))
 RUNCOM := $(patsubst %.cc,$(O)/%.com,$(wildcard run/*.cc))
+
+all: $(O)/ $(O)/3db/3db.com $(O)/3i/3i.com $(BINCOM)
 
 $(O)/:
 	mkdir -p $(O)
@@ -73,8 +74,8 @@ $(O)/3db/3db.com: $(LIBO) $(TDBO)
 $(O)/3i/3i.com: $(LIBO) $(TIO)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LNKXXFLAGS)
 
-test: $(O)/ $(LIBO) $(RUNCOM)
-	@etc/test.sh
+test: $(O)/ $(LIBO) $(RUNCOM) $(BINCOM)
+	@o/bin/test.com
 
 clean:
 	rm -rf o

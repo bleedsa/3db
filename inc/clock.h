@@ -7,11 +7,11 @@ namespace Clk {
 	using Clk = std::chrono::high_resolution_clock;
 
 	template<typename F>
-	auto time(F f) -> S {
+	auto time(F f) {
 		auto x = Clk::now();
 		f();
 		auto y = Clk::now();
-		return x - y;
+		return y - x;
 	}
 };
 
