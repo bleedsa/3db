@@ -128,8 +128,7 @@ namespace T {
 		/* get a vector cell from the table */
 		template<typename X>
 		inl auto get_cell(S x, S y) -> A::A<X>* {
-			auto a = ((A::A<X>*)cols[x])+y;
-			return a;
+			return ((A::A<X>*)cols[x])+y;
 		}
 
 		/* make a new cell and add it to the table at (x,y) */
