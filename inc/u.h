@@ -1,6 +1,7 @@
 #ifndef __3DB_U_H__
 #define __3DB_U_H__
 
+#include <vector>
 #include <cctype>
 #include <cstdint>
 #include <string>

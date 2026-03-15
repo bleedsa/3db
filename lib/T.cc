@@ -65,6 +65,15 @@ T::T::T(
 	memcpy(init, in, Z(bool)*row_cap);
 }
 
+inl auto dump_cell(T::T *t, S x, S y) -> void {
+	std::string f;
+	switch (t->col_tys[x]) {
+	CASE(T::TINT, f = Fmt::Fmt(t->get_cell<i32>(x, y)))
+	CASE(T::TDBL, f = Fmt::Fmt(t->get_cell<f64>(x, y)))
+	CASE(T::TCHR, f = Fmt::Fmt(t->get_cell<Chr>(x, y)))
+	}
+}
+
 auto T::T::free_vec_cell(S x, S y) -> void {
 	auto ptr = get_cell<u8>(x, y);
 	ptr->~A();
@@ -81,8 +90,7 @@ auto T::T::free_cells() -> void {
 
 
 T::T::~T() {
-	*refs -= 1;
-	if (*refs == 0) {
+	if (--*refs == 0) {
 		free_cells();
 		free(cols);
 		free(col_tys);
@@ -172,7 +180,7 @@ inl auto cln_col(T::T *t, u8 *ptr, u8 **cols, S x) -> void {
 		auto L = a->len;
 		auto N = A::A<X>(L);
 		memmove(N.ptr, a->ptr, Z(X)*L);
-		((A::A<X>*)ptr)[y] = N;
+		*a = N;
 	}
 }
 

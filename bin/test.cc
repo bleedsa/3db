@@ -32,10 +32,10 @@ int main() {
 			std::string c;
 			auto t = Clk::time([&]() {
 				P = popen(p.c_str(), "r");
+				for (char i = fgetc(P); i != EOF; i = fgetc(P))
+					c.push_back(i);
+				pclose(P);
 			});
-			for (char i = fgetc(P); i != EOF; i = fgetc(P))
-				c.push_back(i);
-			pclose(P);
 
 			std::cout << f.c_str() << "...";
 			std::cout << (c==e ? success : failure);

@@ -1,3 +1,5 @@
+#include <utility>
+
 #include <cmd.h>
 
 template<typename X>
@@ -98,6 +100,15 @@ auto sel(Db::Ent *e, T::T *t, Cmd::Select *s) -> R<MaybePtr<Db::Ent>> {
 	auto cols = mk<u8*>(coln);
 	auto tys = A::A<T::TColTy>(coln);
 
+	/* copy a vector column into cols */
+	auto vec_col = [&]<typename X>(S x, S orig) {
+		for (S y = 0; y < t->row_cap; y++) if (t->init[y]) {
+			auto cell = t->get_cell<X>(orig, y);
+			auto new_cell = ((A::A<X>*)cols[x])+y;
+			*new_cell = *cell;
+		}
+	};
+
 	/* make the columns matrix */
 	try {
 		for (S i = 0; i < coln; i++) {
@@ -110,7 +121,11 @@ auto sel(Db::Ent *e, T::T *t, Cmd::Select *s) -> R<MaybePtr<Db::Ent>> {
 			/* allocate */
 			cols[i] = mk<u8>(z);
 			/* copy */
-			memmove(cols[i], t->cols[x], z);
+			if (t->col_is_vec(x)) switch (tys[i]) {
+			CASE(T::TINT, vec_col.template operator()<i32>(i, x))
+			CASE(T::TDBL, vec_col.template operator()<f64>(i, x))
+			CASE(T::TCHR, vec_col.template operator()<Chr>(i, x))
+			} else memmove(cols[i], t->cols[x], z);
 		}
 	} catch (std::string &e) {
 		return std::unexpected(e);

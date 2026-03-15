@@ -47,6 +47,8 @@ all: $(O)/ $(O)/3db/3db.com $(O)/3i/3i.com $(BINCOM)
 
 $(O)/:
 	mkdir -p $(O)
+	mkdir -p $(O)/fmt/
+	mkdir -p $(O)/net/
 
 $(LIBO): $(O)/%.o: lib/%.cc
 	$(CXX) -c $(CXXFLAGS) -o $@ $^

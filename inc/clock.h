@@ -11,7 +11,7 @@ namespace Clk {
 		auto x = Clk::now();
 		f();
 		auto y = Clk::now();
-		return y - x;
+		return std::chrono::duration_cast<std::chrono::milliseconds>(y - x);
 	}
 };
 
