@@ -115,15 +115,18 @@ namespace Cmd {
 	struct Select {
 		var_t name;
 		A::A<var_t> cols;
+		std::optional<Where> where;
 
-		inl Select() : cols{A::A<var_t>(0)} {}
+		inl Select() : cols{A::A<var_t>(0)}, where{std::nullopt} {}
 		~Select() = default;
 
 		inl auto cpy(const Select &x) -> void {
-			name = x.name, cols = x.cols;
+			name = x.name, cols = x.cols, where = x.where;
 		}
 
-		inl Select(const Select &x) : cols{A::A<var_t>(0)} {cpy(x);}
+		inl Select(const Select &x)
+			: cols{A::A<var_t>(0)}, where{std::nullopt}
+		{cpy(x);}
 		inl Select &operator=(const Select &x) {cpy(x);return *this;}
 	};
 
@@ -164,6 +167,7 @@ namespace Cmd {
 		Cmd &value(Q::Q val);
 		Cmd &type(Db::EntTy ty);
 		Cmd &row(S row);
+		Cmd &where(Where where);
 
 		/* exe executes the query on the backend. It modifies
 		 * the array on disk. for networked access, use send. */

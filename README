@@ -5,9 +5,15 @@
 
 BUILDING
 
-	% etc/cosmo.sh   # setup toolchain
-	% make -j6       # build
-	% make -j6 test  # run tests
+	% etc/cosmo.sh              # setup toolchain
+	% etc/ninja.k>build.ninja   # generate build system
+	% ninja -j6                 # build
+	% ninja -j6 test            # run tests
+
+BENCHMARKS
+
+	ec8dbb3 300,000 rows in 461ms.
+
 
 CODEBASE REFERENCE
 

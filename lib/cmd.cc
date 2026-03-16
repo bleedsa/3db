@@ -151,3 +151,13 @@ auto Cmd::Cmd::value(Q::Q val) -> Cmd& {
 	}
 	return *this;
 }
+
+auto Cmd::Cmd::where(Where where) -> Cmd& {
+	switch (ty) {
+	CASE(SELECT, select.where = where)
+	default: throw str_fmt(
+		"{} has no where field", type_name()
+	);
+	}
+	return *this;
+}

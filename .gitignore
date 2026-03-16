@@ -3,3 +3,5 @@
 /blink.log
 /3.db
 /perf.data*
+/.ninja_log
+/build.ninja
