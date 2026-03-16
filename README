@@ -12,7 +12,8 @@ BUILDING
 
 BENCHMARKS
 
-	ec8dbb3 300,000 rows in 461ms.
+	ec8dbb3 | select 300,000 rows, 16 columns in 400ms.
+	        | select 300,000 rows, 1 column in 300ms.
 
 
 CODEBASE REFERENCE

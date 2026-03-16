@@ -45,7 +45,7 @@ int main() {
 		/* make a select command */
 		auto cmd = Cmd::Cmd(Cmd::SELECT, 0)
 			.entry("table1")
-			.columns(A::A{"INTS3",});
+			.columns(A::A{"INTS3"});
 
 		auto res = cmd.exe();
 		if (!res) throw res.error();
