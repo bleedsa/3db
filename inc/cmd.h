@@ -89,9 +89,9 @@ namespace Cmd {
 	};
 
 	enum WhereTy {
-		WEq,
-		WLt,
-		WGt,
+		Eq,
+		Lt,
+		Gt,
 	};
 
 	struct Where {
@@ -110,6 +110,19 @@ namespace Cmd {
 
 		inl Where(const Where &x) : val{Q::Q()} {cpy(x);}
 		inl Where &operator=(const Where &x) {cpy(x);return *this;}
+
+		/* set the column name to compare */
+		Where &name(const char *n);
+
+		/* set the value to compare against */
+		Where &value(Q::Q q);
+
+		template<typename X>
+		inl auto value(X x) -> Where& {
+			return value(Q::Q(x));
+		}
+
+		bool operator()(T::T *t, S y);
 	};
 
 	struct Select {

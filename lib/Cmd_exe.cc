@@ -83,22 +83,14 @@ inl auto set_ent(Db::Ent *ent, Q::Q val) -> R<MaybePtr<Db::Ent>> {
 	return MaybePtr(ent);
 }
 
-inl auto find_col(T::T *t, var_t n) -> S {
-	for (S i = 0; i < t->coln; i++)
-		if (vareq(n, t->col_names[i])) return i;
-
-	/* not found */
-	auto s = var_to_str(n);
-	auto err = str_fmt("column {} not found.", s);
-	delete[] s;
-	throw err;
-}
-
+/* full selection of columns has a hot path that uses raw memcpy for atomic
+ * columns. for selections with a where clause, see sel_where above. */
 auto sel(Db::Ent *e, T::T *t, Cmd::Select *s) -> R<MaybePtr<Db::Ent>> {
 	auto names = &s->cols;
 	auto coln = names->len;
 	auto cols = mk<u8*>(coln);
 	auto tys = A::A<T::TColTy>(coln);
+	auto init = mk<bool>(t->row_cap);
 
 	/* copy a vector column into cols */
 	auto vec_col = [&]<typename X>(S x, S orig) {
@@ -113,7 +105,7 @@ auto sel(Db::Ent *e, T::T *t, Cmd::Select *s) -> R<MaybePtr<Db::Ent>> {
 	try {
 		for (S i = 0; i < coln; i++) {
 			/* find the column */
-			auto x = find_col(t, names->at(i));
+			auto x = t->find_col_idx(names->at(i));
 			/* populate the type vector */
 			tys[i] = t->col_tys[x];
 			/* calculate the col size */
@@ -122,17 +114,25 @@ auto sel(Db::Ent *e, T::T *t, Cmd::Select *s) -> R<MaybePtr<Db::Ent>> {
 			cols[i] = mk<u8>(z);
 			/* copy */
 			if (t->col_is_vec(x)) switch (tys[i]) {
-			CASE(T::TINT, vec_col.template operator()<i32>(i, x))
-			CASE(T::TDBL, vec_col.template operator()<f64>(i, x))
-			CASE(T::TCHR, vec_col.template operator()<Chr>(i, x))
+			CASE(T::TINT, CALL(vec_col, i32, i, x))
+			CASE(T::TDBL, CALL(vec_col, f64, i, x))
+			CASE(T::TCHR, CALL(vec_col, Chr, i, x))
 			} else memmove(cols[i], t->cols[x], z);
 		}
 	} catch (std::string &e) {
 		return std::unexpected(e);
 	}
 
+	if (s->where) {
+		auto w = *s->where;
+		for (S y = 0; y < t->row_cap; y++) 
+			init[y] = t->init[y] && w(t, y);
+	} else {
+		memmove(init, t->init, t->row_cap);
+	}
+
 	/* make a table out of all the stuff we just did */
-	auto r = T::T(*names, tys, cols, t->row_cap, t->init);
+	auto r = T::T(*names, tys, cols, t->row_cap, init);
 	return MaybePtr(Db::Ent(e->name, r));
 }
 

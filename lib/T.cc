@@ -263,3 +263,14 @@ auto operator==(T::T &x, T::T &y) -> bool {
 		&& x.tys_eq(y) && x.names_eq(y) && x.init_eq(y)
 		&& x.cols_eq(y);
 }
+
+auto T::T::find_col_idx(var_t n) -> S {
+	for (S i = 0; i < coln; i++)
+		if (vareq(n, col_names[i])) return i;
+
+	/* not found */
+	auto s = var_to_str(n);
+	auto err = str_fmt("column {} not found.", s);
+	delete[] s;
+	throw err;
+}

@@ -168,4 +168,10 @@ namespace Fmt {
 	}
 }
 
+template<typename X>
+inl auto operator==(A::A<X> x, A::A<X> y) -> bool {
+	if (x.len != y.len) return false;
+	return memeq(x.ptr, y.ptr, x.len);
+}
+
 #endif

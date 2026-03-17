@@ -181,6 +181,8 @@ namespace T {
 		bool names_eq(T &y);
 		bool init_eq(T &y);
 		bool cols_eq(T &y);
+
+		S find_col_idx(var_t n);
 	};
 
 	inl auto empty() -> T {

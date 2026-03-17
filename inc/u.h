@@ -14,6 +14,7 @@
 #define Z(x) (sizeof(x))
 #define inl __attribute__((always_inline)) inline
 #define CASE(h,b...) case h: { b; break; }
+#define CALL(f,T,a...) (f.template operator()<T>(a))
 
 #define LOCK(x) (std::lock_guard<std::mutex>(x))
 
