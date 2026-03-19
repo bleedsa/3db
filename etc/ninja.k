@@ -64,7 +64,7 @@ outd:!/,'(`dep;"$out.d")
 `0:rule["lnkxx";outd,(!).,'(`cmd;" "/("$cxx $cxxflags -MD -MF $out.d -o $out"
                                       "$in $lnkxxflags"))]
 `0:rule["ar";"ape/bin/ar.ape rcs $out $in"]
-`0:rule["zip";"zip -r $in"]
+`0:rule["zip";"cd run && zip -r ../$in cfg.ini"]
 
 / targets
 exe:exeof cfg`name
@@ -83,6 +83,6 @@ libout:libof cfg`name
 `0:lnk[int:exeof "3i";objs,objof'threei]
 `0:'{lnk[exeof stem x;objs,,x]}'runcpp;
 `0:'{lnk[exeof stem x;objs,,x]}'bincpp;
-`0:"build cfg: zip o/3db.com run/cfg.ini"
+`0:"build cfg: zip o/3db.com"
 `0:"build test: exe o/bin/test.com "," "/exeof'stem'runcpp
 `0:"default cfg "," "/(" "/objs;libout;exe;int;" "/exeof'stem'bincpp);

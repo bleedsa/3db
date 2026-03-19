@@ -19,6 +19,12 @@ namespace Net {
 
 	char *send_Set(int sock, Cmd::Set *x);
 	char *recv_Set(int sock, Cmd::Set *x);
+
+	char *send_Select(int sock, Cmd::Select *x);
+	char *recv_Select(int sock, Cmd::Select *x);
+
+	char *send_Where(int sock, Cmd::Where *x);
+	char *recv_Where(int sock, Cmd::Where *x);
 }
 
 #endif

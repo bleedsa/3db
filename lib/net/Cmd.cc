@@ -30,6 +30,7 @@ auto Net::send_Cmd(int sock, Cmd::Cmd *x) -> char* {
 	switch (x->ty) {
 	[[unlikely]]
 	CASE(Cmd::NIL, return "send() called on NIL")
+	CASE(Cmd::SELECT, return send_Select(sock, &x->select))
 	CASE(Cmd::INSERT, return send_Insert(sock, &x->insert))
 	CASE(Cmd::CREATE, return send_Create(sock, &x->create))
 	CASE(Cmd::GET, return send_Get(sock, &x->get))
@@ -49,6 +50,7 @@ auto Net::recv_Cmd(int sock, Cmd::Cmd *x) -> char* {
 	switch (x->ty) {
 	[[unlikely]]
 	CASE(Cmd::NIL, return "recv() called on NIL")
+	CASE(Cmd::SELECT, return recv_Select(sock, &x->select))
 	CASE(Cmd::INSERT, return recv_Insert(sock, &x->insert))
 	CASE(Cmd::CREATE, return recv_Create(sock, &x->create))
 	CASE(Cmd::GET, return recv_Get(sock, &x->get))
@@ -212,6 +214,86 @@ auto Net::recv_Create(int sock, Cmd::Create *x) -> char* {
 
 	/* decode */
 	x->ty = (Db::EntTy)e;
+
+	return nullptr;
+}
+
+auto Net::send_Select(int sock, Cmd::Select *x) -> char* {
+	char *err;
+	u64 L;
+	auto tcp = TcpS(sock);
+
+	try {
+		tcp << x->name;
+
+		/* send the cols */
+		L = x->cols.len;
+		tcp << L;
+		for (S i = 0; i < L; i++) tcp << x->cols[i];
+
+		/* send the where clause */
+		tcp << !!x->where;
+		if (x->where)
+			if ((err = send_Where(sock, &*x->where))) return err;
+	} catch (std::string &e) {
+		return A_err("failed to send Select: {}", e);
+	}
+
+	return nullptr;
+}
+
+auto Net::recv_Select(int sock, Cmd::Select *x) -> char* {
+	char *err;
+	u64 L;
+	bool is_where;
+	auto tcp = TcpS(sock);
+
+	try {
+		tcp >> x->name;
+
+		/* get the cols */
+		tcp >> L;
+		x->cols = A::A<var_t>(L);
+		for (S i = 0; i < L; i++) tcp >> x->cols[i];
+
+		/* recv the where clause */
+		tcp >> is_where;
+		if (is_where) {
+			Cmd::Where w(Cmd::Eq);
+			if ((err = recv_Where(sock, &w))) return err;
+			x->where = w;
+		}
+	} catch (std::string &e) {
+		return A_err("failed to recv Select: {}", e);
+	}
+
+	return nullptr;
+}
+
+auto Net::send_Where(int sock, Cmd::Where *x) -> char* {
+	auto tcp = TcpS(sock);
+
+	try {
+		u8 ty = x->ty;
+		tcp << ty << x->col << x->val;
+	} catch (std::string &e) {
+		return A_err("failed to send Where: {}", e);
+	}
+
+	return nullptr;
+}
+
+auto Net::recv_Where(int sock, Cmd::Where *x) -> char* {
+	u8 ty;
+	auto tcp = TcpS(sock);
+
+	try {
+		tcp >> ty >> x->col >> x->val;
+	} catch (std::string &e) {
+		return A_err("failed to recv Where: {}", e);
+	}
+
+	x->ty = (Cmd::WhereTy)ty;
 
 	return nullptr;
 }
