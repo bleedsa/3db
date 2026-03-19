@@ -23,8 +23,9 @@ int main(int argc, char **argv) {
 
 	try {
 		auto cmd = Cmd::Cmd(Cmd::SELECT, argv[1])
-			.entry("table0")
-			.columns(A::A{"int"});
+			.entry("table2")
+			.columns(A::A{"dbl vecs", "ints"})
+			.where(Cmd::Where(Cmd::Eq).name("ints").value(1));
 
 		auto res = cmd.send();
 		if (!res) std::cout << res.error() << std::endl;

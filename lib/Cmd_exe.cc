@@ -28,8 +28,9 @@ inl auto insert_exe(Cmd::Insert *x, T::T *t) -> R<void> {
 	for (
 		col = 0, q = &x->cols[col];
 		col < x->cols.size();
-		col++, q = &x->cols[col]
+		col++
 	) {
+		q = &x->cols[col];
 		switch (q->ty) {
 		[[unlikely]]
 		CASE(Q::QNil, {
