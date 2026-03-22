@@ -13,6 +13,7 @@ namespace Cmd {
 		CREATE,
 		GET,
 		SET,
+		DEL,
 	};
 
 	extern const char *CmdTy_names[6];
@@ -143,6 +144,21 @@ namespace Cmd {
 		inl Select &operator=(const Select &x) {cpy(x);return *this;}
 	};
 
+	struct Del {
+		var_t name;
+		Where where;
+
+		inl Del() : name{empty_var()}, where{Where(Eq)} {}
+		~Del() = default;
+
+		inl auto cpy(const Del &x) -> void {
+			name = x.name, where = x.where;
+		}
+
+		inl Del(const Del &x) : where{Where(Eq)} {cpy(x);}
+		inl Del &operator=(const Del &x) {cpy(x);return *this;}
+	};
+
 	struct Cmd {
 		CmdTy ty;
 		int sock;
@@ -152,6 +168,7 @@ namespace Cmd {
 			Insert insert;
 			Get get;
 			Set set;
+			Del del;
 		};
 
 		Cmd(int fd);

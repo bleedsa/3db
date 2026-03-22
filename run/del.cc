@@ -1,24 +1,48 @@
 #include <db.h>
-#include <Asm.h>
+#include <cmd.h>
 
 int main() {
 	Three::init();
 
-	auto v = str_to_var("x");
-	auto a = Asm::Asm();
-	a.push_bod(VM::Bod(0, 0));
-	a.push_in(3);
-	a.push_in(Bc::In(Bc::STORE, v));
-	a.push_in(Bc::In(Bc::DEL, v));
-	a.push_in(Bc::In(Bc::LOAD, v));
-	a.push_in(Bc::In());
+	try {
+		Cmd::Cmd cmds[] = {
+			Cmd::Cmd(Cmd::CREATE, 0)
+				.entry("0")
+				.type(Db::Tab)
+				.columns({
+					std::tuple{"int", T::TInt},
+					std::tuple{"dbl", T::TDbl}
+				}),
+			Cmd::Cmd(Cmd::INSERT, 0)
+				.entry("0")
+				.row(1)
+				.columns({Q::Q(1), Q::Q(2.345)}),
+			Cmd::Cmd(Cmd::INSERT, 0)
+				.entry("0")
+				.row(2)
+				.columns({Q::Q(6), Q::Q(7.890)}),
+			Cmd::Cmd(Cmd::INSERT, 0)
+				.entry("0")
+				.row(3)
+				.columns({Q::Q(10), Q::Q(10.5)}),
+			Cmd::Cmd(Cmd::DEL, 0)
+				.entry("0")
+				.where(
+					Cmd::Where(Cmd::Gt)
+						.name("int")
+						.value(1)
+				),
+		};
 
-	auto r = a.exe();
-	if (r) {
-		auto q = *r;
-		std::cout << Fmt::Fmt(&q) << std::endl;
-	} else {
-		std::cout << r.error() << std::endl;
+		for (auto &cmd : cmds) {
+			auto res = cmd.exe();
+			if (!res) throw res.error();
+			auto x = *res;
+			auto y = *x;
+			std::cout << Fmt::Fmt(y) << std::endl;
+		}
+	} catch (std::string &e) {
+		std::cerr << e << std::endl;
 	}
 
 	Three::deinit();

@@ -22,16 +22,23 @@ int main(int argc, char **argv) {
 	Three::init();
 
 	try {
-		auto cmd = Cmd::Cmd(Cmd::SELECT, argv[1])
-			.entry("table2")
-			.columns(A::A{"dbl vecs", "ints"})
-			.where(Cmd::Where(Cmd::Eq).name("ints").value(1));
+		Cmd::Cmd cmds[] = {
+			Cmd::Cmd(Cmd::DEL, argv[1])
+				.entry("debts")
+				.where(
+					Cmd::Where(Cmd::Gt)
+						.name("amount")
+						.value(30.0)
+				)
+		};
 
-		auto res = cmd.send();
-		if (!res) std::cout << res.error() << std::endl;
-		else {
-			auto e = *res;
-			std::cout << Fmt::Fmt(&e) << std::endl;
+		for (auto &cmd : cmds) {
+			auto res = cmd.send();
+			if (!res) std::cout << res.error() << std::endl;
+			else {
+				auto e = *res;
+				std::cout << Fmt::Fmt(&e) << std::endl;
+			}
 		}
 	} catch (std::string &e) {
 		std::cerr << "'exc: " << e << std::endl;

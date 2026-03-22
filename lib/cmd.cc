@@ -19,6 +19,7 @@ Cmd::Cmd::Cmd(CmdTy ty, int sock) : ty{ty}, sock{sock} {
 	CASE(INSERT, insert=Insert())
 	CASE(GET,    get=Get())
 	CASE(SET,    set=Set())
+	CASE(DEL,    del=Del())
 	}
 }
 
@@ -31,6 +32,7 @@ Cmd::Cmd::Cmd(CmdTy ty, const char *addr)
 	CASE(INSERT, insert=Insert())
 	CASE(GET,    get=Get())
 	CASE(SET,    set=Set())
+	CASE(DEL,    del=Del())
 	}
 }
 
@@ -41,6 +43,7 @@ Cmd::Cmd::~Cmd() {
 	CASE(INSERT, insert.~Insert())
 	CASE(GET,    get.~Get())
 	CASE(SET,    set.~Set())
+	CASE(DEL,    del.~Del())
 	}
 }
 
@@ -52,6 +55,7 @@ inl auto Cmd::Cmd::cpy(const Cmd &x) -> void {
 	CASE(INSERT, insert = x.insert)
 	CASE(GET,    get = x.get)
 	CASE(SET,    set = x.set)
+	CASE(DEL,    del = x.del)
 	}
 }
 
@@ -65,6 +69,7 @@ auto Cmd::Cmd::entry(var_t name) -> Cmd& {
 	CASE(INSERT, insert.name = name)
 	CASE(GET,    get.name = name)
 	CASE(SET,    set.name = name)
+	CASE(DEL,    del.name = name)
 	default: throw str_fmt(
 		"{} has no entry field", type_name()
 	);
@@ -155,6 +160,7 @@ auto Cmd::Cmd::value(Q::Q val) -> Cmd& {
 auto Cmd::Cmd::where(Where where) -> Cmd& {
 	switch (ty) {
 	CASE(SELECT, select.where = where)
+	CASE(DEL,    del.where = where)
 	default: throw str_fmt(
 		"{} has no where field", type_name()
 	);

@@ -94,7 +94,6 @@ int main(int argc, char **argv) {
 	if (ret == -1) fatal("listen(): {}", strerror(errno));
 
 	while (!main_exit) {
-		auto x = Asm::Asm();
 		auto G = LOCK(sock_mut);
 
 		/* get the connection */

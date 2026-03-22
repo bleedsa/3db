@@ -58,7 +58,8 @@ EXECUTING COMMANDS IN C++
 	programs.
 
 	A query is constructed through chains of methods. Note that these
-	methods may throw runtime exceptions.
+	methods may throw runtime exceptions or cause undefined behavior if
+	malformed.
 
 	=======================================================================
 	| CREATE

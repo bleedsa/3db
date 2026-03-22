@@ -223,6 +223,26 @@ auto Cmd::Cmd::exe() -> R<MaybePtr<Db::Ent>> {
 		else return err_fmt("entry {} not found", var_to_str(n));
 	}
 
+	case DEL: {
+		auto n = del.name;
+		auto &w = del.where;
+		auto o = Db::get(n);
+		if (!o) [[unlikely]] {
+			auto v = var_to_str(n);
+			auto r = err_fmt("entry {} not found", v);
+			delete[] v;
+			return r;
+		}
+
+		auto e = *o;
+		auto t = e->as_T();
+
+		/* TODO: can this be simd? */
+		for (S y = 0; y < t->row_cap; y++) t->init[y] = t->init[y] && !w(t, y);
+
+		return MaybePtr(e);
+	}
+
 	default: return err_fmt("cannot exe Cmd of type {}", type_name());
 	}
 }
